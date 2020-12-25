@@ -1,7 +1,6 @@
 #include "rpm_measure_hall.hpp"
 
-RpmMeasureHall::RpmMeasureHall(int temporal_resolution)
-	: RpmMeasureBase(temporal_resolution)
+RpmMeasureHall::RpmMeasureHall()
 {
 }
 
@@ -9,8 +8,9 @@ RpmMeasureHall::~RpmMeasureHall()
 {
 }
 
-void RpmMeasureHall::initialize()
+void RpmMeasureHall::initialize(int temporal_resolution)
 {
+	RpmMeasureBase::initialize(temporal_resolution);
 }
 
 RpmMeasureHall::RpmData RpmMeasureHall::getRpmData()

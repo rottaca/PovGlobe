@@ -5,10 +5,10 @@
 class RpmMeasureSim : public RpmMeasureBase
 {
 public:
-	RpmMeasureSim(int temporal_resolution);
+	RpmMeasureSim();
 	~RpmMeasureSim();
 
-	virtual void initialize();
+	virtual void initialize(int temporal_resolution);
 	virtual RpmData getRpmData();
 
 private:

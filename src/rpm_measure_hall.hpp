@@ -5,10 +5,10 @@
 class RpmMeasureHall : public RpmMeasureBase
 {
 public:
-	RpmMeasureHall(int temporal_resolution);
+	RpmMeasureHall();
 	~RpmMeasureHall();
 
-	virtual void initialize();
+	virtual void initialize(int temporal_resolution);
 	virtual RpmData getRpmData();
 
 private:

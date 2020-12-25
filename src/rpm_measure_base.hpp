@@ -9,16 +9,13 @@ public:
 		int curr_temporal_pos;
 	};
 
-	inline RpmMeasureBase(int temporal_resolution) {
-		this->temporal_resolution = temporal_resolution;
-	};
+	RpmMeasureBase();
+	virtual ~RpmMeasureBase();
 
-	inline virtual ~RpmMeasureBase() {};
-
-	virtual void initialize() = 0;
+	virtual void initialize(int temporal_resolution);
 	virtual RpmData getRpmData() = 0;
 
 protected:
-	int temporal_resolution;
+	int m_temporal_resolution;
 
 };
