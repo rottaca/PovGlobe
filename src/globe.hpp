@@ -10,8 +10,7 @@
 class Globe
 {
 public:
-	Globe(int height, int width, RendererBase& renderer,
-		  RpmMeasureBase& rpmMeasure);
+	Globe(int height, int width, RendererBase& renderer);
 	~Globe();
 
 	void runRendererAsync();
@@ -31,7 +30,6 @@ protected:
 	int m_height;
 	int m_width;
 	RendererBase& m_renderer;
-	RpmMeasureBase& m_rpmMeasure;
 
 	std::mutex m_double_buffer_mutex;
 	Framebuffer m_framebuffers[2];

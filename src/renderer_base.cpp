@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-RendererBase::RendererBase(RpmMeasureBase& rpm_measure_base)
-	: m_rpm_measure_base(rpm_measure_base)
+RendererBase::RendererBase(RpmMeasureBase& rpm_measure)
+	: m_rpmMeasure(rpm_measure)
 {
 }
 
@@ -18,6 +18,7 @@ void RendererBase::initialize(Globe& globe)
 {
 	stopAndJoinRenderThread();
 	m_renderThread_running = true;
+	m_rpmMeasure.initialize(globe);
 }
 
 void RendererBase::runAsync(Globe& globe)
@@ -28,12 +29,15 @@ void RendererBase::runAsync(Globe& globe)
 void RendererBase::run(Globe& globe)
 {
 	std::mutex& mutex = globe.getDoubleBufferMutex();
+	LoopTimer t("Render Thread");
 	while (m_renderThread_running)
 	{
 		std::lock_guard<std::mutex> guard(mutex);
 		const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
 
-		std::cout << "Render thread running" << std::endl;
+		//using namespace std::chrono_literals;
+		//std::this_thread::sleep_for(1000ms);
+		auto loop_time = t.loopDone();
 	}
 }
 

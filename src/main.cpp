@@ -28,7 +28,7 @@ int main() {
 
 	RpmMeasure rpm;
 	Renderer renderer(rpm);
-	Globe globe(HEIGHT, WIDTH, renderer, rpm);
+	Globe globe(HEIGHT, WIDTH, renderer);
 
 	ApplicationBase app;
 	ApplicationBase app2;
@@ -38,10 +38,11 @@ int main() {
 	globe.runRendererAsync();
 	globe.runApplicationAsync(app);
 
-	std::this_thread::sleep_for(2000ms);
+	std::this_thread::sleep_for(5000ms);
 
 	globe.runApplicationAsync(app2);
 
-	std::this_thread::sleep_for(2000ms);
+	std::this_thread::sleep_for(5000ms);
+
 	globe.shutdown();
 }

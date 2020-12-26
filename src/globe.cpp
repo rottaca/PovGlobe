@@ -3,12 +3,10 @@
 #include <iostream>
 
 Globe::Globe(int height, int width,
-	RendererBase& renderer,
-	RpmMeasureBase& rpmMeasure)
+	RendererBase& renderer)
 	: m_height(height)
 	, m_width(width)
 	, m_renderer(renderer)
-	, m_rpmMeasure(rpmMeasure)
 	, m_render_buffer_idx(1)
 	, m_app_buffer_idx(0)
 {
@@ -24,8 +22,6 @@ Globe::~Globe()
 void Globe::runRendererAsync()
 {
 	m_renderer.initialize(*this);
-	m_rpmMeasure.initialize(*this);
-
 	m_renderer.runAsync(*this);
 }
 
@@ -46,6 +42,7 @@ void Globe::runApplication(ApplicationBase& app)
 	app.initialize(*this);
 
 	auto start = std::chrono::high_resolution_clock::now();
+	LoopTimer t("Application Thread");
 	while (m_applicationThread_running) {
 		auto time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float, std::milli> delta = time - start;
@@ -54,7 +51,7 @@ void Globe::runApplication(ApplicationBase& app)
 		// Lock buffer swap
 		swapFramebuffers();
 
-		std::cout << "App thread running at time" << delta.count() << std::endl;
+		auto loop_time = t.loopDone();
 	}
 }
 

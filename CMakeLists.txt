@@ -10,7 +10,7 @@ set(SOURCE_FILES
 	src/application_base.cpp
 	src/rpm_measure_base.cpp
 	src/renderer_base.cpp
-	src/helper.hpp)
+	src/helper.cpp)
 
 set(PUBLIC_HEADER 
 	src/globe.hpp

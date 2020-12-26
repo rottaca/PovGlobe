@@ -11,7 +11,7 @@ class RendererBase
 {
 public:
 	RendererBase(
-		RpmMeasureBase& rpm_measure_base
+		RpmMeasureBase& rpm_measure
 	);
 	~RendererBase();
 
@@ -22,7 +22,7 @@ public:
 	void stopAndJoinRenderThread();
 
 protected:
-	RpmMeasureBase& m_rpm_measure_base;
+	RpmMeasureBase& m_rpmMeasure;
 	std::thread m_renderThread;
 	std::atomic_bool m_renderThread_running;
 };
