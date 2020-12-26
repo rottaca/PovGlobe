@@ -8,7 +8,7 @@ public:
 	RpmMeasureHall();
 	~RpmMeasureHall();
 
-	virtual void initialize(int temporal_resolution);
+	virtual void initialize(Globe& globe);
 	virtual RpmData getRpmData();
 
 private:

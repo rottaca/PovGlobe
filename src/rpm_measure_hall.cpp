@@ -8,9 +8,9 @@ RpmMeasureHall::~RpmMeasureHall()
 {
 }
 
-void RpmMeasureHall::initialize(int temporal_resolution)
+void RpmMeasureHall::initialize(Globe& globe)
 {
-	RpmMeasureBase::initialize(temporal_resolution);
+	RpmMeasureBase::initialize(globe);
 }
 
 RpmMeasureHall::RpmData RpmMeasureHall::getRpmData()

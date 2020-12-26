@@ -1,5 +1,7 @@
 #pragma once
 
+class Globe;
+
 class RpmMeasureBase
 {
 public:
@@ -12,7 +14,7 @@ public:
 	RpmMeasureBase();
 	virtual ~RpmMeasureBase();
 
-	virtual void initialize(int temporal_resolution);
+	virtual void initialize(Globe &globe);
 	virtual RpmData getRpmData() = 0;
 
 protected:

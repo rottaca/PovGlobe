@@ -13,9 +13,9 @@ RpmMeasureSim::~RpmMeasureSim()
 {
 }
 
-void RpmMeasureSim::initialize(int temporal_resolution)
+void RpmMeasureSim::initialize(Globe& globe)
 {
-	RpmMeasureBase::initialize(temporal_resolution);
+	RpmMeasureBase::initialize(globe);
 	m_curr_tick = 0;
 }
 

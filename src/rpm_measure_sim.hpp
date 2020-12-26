@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rpm_measure_base.hpp"
+#include "globe.hpp"
 
 class RpmMeasureSim : public RpmMeasureBase
 {
@@ -8,7 +9,7 @@ public:
 	RpmMeasureSim();
 	~RpmMeasureSim();
 
-	virtual void initialize(int temporal_resolution);
+	virtual void initialize(Globe& globe);
 	virtual RpmData getRpmData();
 
 private:
