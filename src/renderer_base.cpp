@@ -32,11 +32,10 @@ void RendererBase::run(Globe& globe)
 	LoopTimer t("Render Thread");
 	while (m_renderThread_running)
 	{
-		std::lock_guard<std::mutex> guard(mutex);
-		const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
-
-		//using namespace std::chrono_literals;
-		//std::this_thread::sleep_for(1000ms);
+		{
+			const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
+			render(framebuffer);
+		}
 		auto loop_time = t.loopDone();
 	}
 }

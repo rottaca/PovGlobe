@@ -11,21 +11,24 @@ public:
 	Framebuffer();
 	~Framebuffer();
 
-	void initialize(int height, int width, int channels = 3);
+	void initialize(uint32_t height, uint32_t width, uint32_t channels = 3);
 
-	uint8_t & operator() (int row, int col, int channel);
+	uint8_t & operator() (uint32_t row, uint32_t col, uint32_t channel);
 
 	std::mutex& getMutex() const;
+	const uint8_t* values() const;
+	uint8_t* values();
 
-	int getWidth() const;
-	int getHeight() const;
-	int getChannels() const;
+	uint32_t getSize() const;
+	uint32_t getWidth() const;
+	uint32_t getHeight() const;
+	uint32_t getChannels() const;
 
 private:
 	std::vector<uint8_t> m_values;
-	int m_width;
-	int m_height;
-	int m_channels;
+	uint32_t m_width;
+	uint32_t m_height;
+	uint32_t m_channels;
 
 	mutable std::mutex m_accessMutex;
 };

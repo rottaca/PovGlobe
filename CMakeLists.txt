@@ -18,7 +18,7 @@ set(PUBLIC_HEADER
 	src/application_base.hpp
 	src/renderer_base.hpp
 	src/helper.hpp
-)
+) 
 
 if (WIN32)
 	message(STATUS "Building sim framework for windows.")
@@ -36,10 +36,11 @@ add_library(${CMAKE_PROJECT_NAME}_lib
 	${SOURCE_FILES}
 )
 set_target_properties(${CMAKE_PROJECT_NAME}_lib PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
+target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
 
 
 if (WIN32)
-	target_link_libraries(${CMAKE_PROJECT_NAME}_lib)
+	target_link_libraries(${CMAKE_PROJECT_NAME}_lib GDI32 )
 elseif (UNIX)
 	target_link_libraries(${CMAKE_PROJECT_NAME}_lib ws2811)
 endif()

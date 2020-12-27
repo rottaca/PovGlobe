@@ -19,8 +19,8 @@
 #endif
 
 
-const int WIDTH = 120;
-const int HEIGHT = 57;
+const int width = 120;
+const int height = 57;
 
 using namespace std::chrono_literals;
 
@@ -28,21 +28,16 @@ int main() {
 
 	RpmMeasure rpm;
 	Renderer renderer(rpm);
-	Globe globe(HEIGHT, WIDTH, renderer);
+	Globe globe(height, width, renderer);
 
 	ApplicationBase app;
-	ApplicationBase app2;
 	
 	//cimg_library::CImg<unsigned char> img("test.jpg");
 
 	globe.runRendererAsync();
 	globe.runApplicationAsync(app);
 
-	std::this_thread::sleep_for(5000ms);
-
-	globe.runApplicationAsync(app2);
-
-	std::this_thread::sleep_for(5000ms);
+	std::this_thread::sleep_for(50000ms);
 
 	globe.shutdown();
 }

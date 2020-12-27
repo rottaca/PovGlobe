@@ -1,3 +1,4 @@
+#include "helper.hpp"
 #pragma once
 
 #include "helper.hpp"
@@ -57,26 +58,25 @@ Framebuffer::~Framebuffer()
 }
 
 
-void Framebuffer::initialize(int height, int width, int channels)
+void Framebuffer::initialize(uint32_t height, uint32_t width, uint32_t channels)
 {
-	if (width > 0 && height > 0 && channels > 0) {
-		m_width = width;
-		m_height = height;
-		m_channels = channels;
-		m_values.resize(m_width * m_height * m_channels);
-	}
-	else {
-		assert(false && "Invalid matrix dimension specified!");
-		m_width = 0;
-		m_height = 0;
-		m_channels = 0;
-	}
+	assert(width > 0);
+	assert(height > 0);
+	assert(channels > 0);
+	m_width = width;
+	m_height = height;
+	m_channels = channels;
+	m_values.resize(m_width * m_height * m_channels);
+	std::fill(m_values.begin(), m_values.end(), 0);
 }
 
 
-uint8_t& Framebuffer::operator()(int row, int col, int channel)
+uint8_t& Framebuffer::operator()(uint32_t row, uint32_t col, uint32_t channel)
 {
 	// TODO assert
+	assert(row < m_height);
+	assert(col < m_width);
+	assert(channel< m_channels);
 	uint32_t idx = row * (m_width * m_channels) + col * m_channels + channel;
 	return m_values[idx];
 }
@@ -86,20 +86,35 @@ std::mutex& Framebuffer::getMutex() const {
 	return m_accessMutex;
 }
 
+const uint8_t* Framebuffer::values() const
+{
+	return m_values.data();
+}
 
-int Framebuffer::getWidth() const
+uint8_t* Framebuffer::values()
+{
+	return m_values.data();
+}
+
+
+uint32_t Framebuffer::getWidth() const
 {
 	return m_width;
 }
 
+uint32_t Framebuffer::getSize() const
+{
+	return m_values.size();
+}
 
-int Framebuffer::getHeight() const
+
+uint32_t Framebuffer::getHeight() const
 {
 	return m_height;
 }
 
 
-int Framebuffer::getChannels() const
+uint32_t Framebuffer::getChannels() const
 {
 	return m_channels;
 }

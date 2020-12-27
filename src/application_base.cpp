@@ -1,12 +1,19 @@
 #include "application_base.hpp"
 #include "globe.hpp"
-
+#include <iostream>
 void ApplicationBase::initialize(Globe& globe)
 {
+	//m_last_pixel = 0;
 }
 
 void ApplicationBase::process(Framebuffer& framebuffer, float time)
-{
-	framebuffer(0, 0, 0) = static_cast<int>(time) % 255;
-	framebuffer(0, 0, 1) = 255;
+{	
+	for (int i = 0; i < framebuffer.getSize(); i++) {
+		framebuffer.values()[i] = int(i + time*10) % 255;
+	}
+}
+
+
+std::chrono::duration<float, std::milli> ApplicationBase::getTargetCycleTIme() const {
+	return 33ms;
 }

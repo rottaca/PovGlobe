@@ -9,6 +9,7 @@ public:
 		RpmMeasureBase& rpm_measure_base);
 	~RendererLedStrip();
 
-private:
+protected:
 
+	virtual void render(const Framebuffer&);
 };

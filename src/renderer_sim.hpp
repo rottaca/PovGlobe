@@ -1,4 +1,5 @@
 #pragma once	
+#include <CImg.h>
 
 #include "renderer_base.hpp"
 
@@ -9,6 +10,13 @@ public:
         RpmMeasureBase& rpm_measure_base);
     ~RendererSim();
 
-private:
+
+    virtual void initialize(Globe& globe);
+    
+protected:
+
+    cimg_library::CImgDisplay m_draw_display;
+
+    virtual void render(const Framebuffer&);
 
 };

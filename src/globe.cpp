@@ -7,11 +7,10 @@ Globe::Globe(int height, int width,
 	: m_height(height)
 	, m_width(width)
 	, m_renderer(renderer)
-	, m_render_buffer_idx(1)
-	, m_app_buffer_idx(0)
+	, m_buffer_indices({0, 1})
 {
-	m_framebuffers[m_app_buffer_idx].initialize(m_height, m_width );
-	m_framebuffers[m_render_buffer_idx].initialize(m_height, m_width);
+	m_framebuffers[0].initialize(m_height, m_width );
+	m_framebuffers[1].initialize(m_height, m_width);
 	//std::lock_guard<std::mutex> guard(m_framebuffer.getMutex());
 }
 
@@ -45,13 +44,17 @@ void Globe::runApplication(ApplicationBase& app)
 	LoopTimer t("Application Thread");
 	while (m_applicationThread_running) {
 		auto time = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<float, std::milli> delta = time - start;
+		std::chrono::duration<float, std::ratio<1,1>> delta = time - start;
 		app.process(getAppFrameBuffer(), delta.count());
 
 		// Lock buffer swap
 		swapFramebuffers();
 
 		auto loop_time = t.loopDone();
+		auto err = app.getTargetCycleTIme() - loop_time;
+		if (err.count() > 0) {
+			std::this_thread::sleep_for(err);
+		}
 	}
 }
 
@@ -76,12 +79,12 @@ int Globe::getWidth() const
 
 const Framebuffer& Globe::getRenderFrameBuffer() const
 {
-	return m_framebuffers[m_render_buffer_idx];
+	return m_framebuffers[m_buffer_indices.load().render_buffer_idx];
 }
 
 Framebuffer& Globe::getAppFrameBuffer()
 {
-	return m_framebuffers[m_app_buffer_idx];
+	return m_framebuffers[m_buffer_indices.load().app_buffer_idx];
 }
 
 std::mutex& Globe::getDoubleBufferMutex()
@@ -90,6 +93,6 @@ std::mutex& Globe::getDoubleBufferMutex()
 }
 
 void Globe::swapFramebuffers() {
-	std::lock_guard<std::mutex> guard(m_double_buffer_mutex);
-	std::swap(m_render_buffer_idx, m_app_buffer_idx);
+	auto tmp = m_buffer_indices.load();
+	m_buffer_indices.store({ tmp.app_buffer_idx , tmp.render_buffer_idx});
 }

@@ -33,8 +33,12 @@ protected:
 
 	std::mutex m_double_buffer_mutex;
 	Framebuffer m_framebuffers[2];
-	int m_render_buffer_idx;
-	int m_app_buffer_idx;
+	struct BufferIndices {
+		int render_buffer_idx;
+		int app_buffer_idx;
+	};
+
+	std::atomic<BufferIndices> m_buffer_indices;
 
 	std::thread m_applicationThread;
 	std::atomic_bool m_applicationThread_running;

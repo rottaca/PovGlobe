@@ -8,3 +8,10 @@ RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base)
 RendererLedStrip::~RendererLedStrip()
 {
 }
+
+
+
+void RendererLedStrip::render(const Framebuffer&)
+{
+	// TODO
+}
