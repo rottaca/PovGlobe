@@ -25,6 +25,8 @@ else()
 	message(STATUS "Building on linux.")
 endif()
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (${BUILD_TARGET} STREQUAL "SIM")
 	list(APPEND SOURCE_FILES ${SOURCE_FILES_SIM})
@@ -35,8 +37,9 @@ elseif(${BUILD_TARGET} STREQUAL "HW")
 		message(ERROR "Can't build hw software VERSION on non-unix platform.")
 	else()
 		list(APPEND SOURCE_FILES ${SOURCE_FILES_HW})
-		add_compile_definitions(BUILD_HW)
+		add_subdirectory(ext/rpi_ws281x)
 		message(STATUS "Building hw application.")
+		add_compile_definitions(BUILD_HW)
 	endif()
 endif()
 
@@ -47,13 +50,15 @@ add_library(${CMAKE_PROJECT_NAME}_lib
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
 
 
-if (WIN32)
-	#target_link_libraries(${CMAKE_PROJECT_NAME}_lib )
-elseif (UNIX)
-	add_subdirectory(ext/rpi_ws281x)
-	target_link_libraries(${CMAKE_PROJECT_NAME}_lib ws2811)
+if (${BUILD_TARGET} STREQUAL "SIM")
+  if (WIN32)
+  elseif (UNIX)
+    find_package(X11 REQUIRED)
+    target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ${X11_LIBRARIES})
+  endif()
+elseif(${BUILD_TARGET} STREQUAL "HW")
+  target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ws2811)
 endif()
-
 
 # Build executable
 add_executable(${CMAKE_PROJECT_NAME}

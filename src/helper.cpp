@@ -1,15 +1,12 @@
 #include "helper.hpp"
-#include "helper.hpp"
-#pragma once
 
-#include "helper.hpp"
 #include <iostream>
 
 
 LoopTimer::LoopTimer(std::string tag)
 	: m_avgLoopTime(-1)
-	, m_last_time_print(std::chrono::high_resolution_clock::now())
-	, m_last_time(std::chrono::high_resolution_clock::now())
+	, m_last_time_print(std::chrono::steady_clock::now())
+	, m_last_time(std::chrono::steady_clock::now())
 	, m_tag(tag)
 {
 }
@@ -20,7 +17,7 @@ LoopTimer::~LoopTimer()
 
 std::chrono::duration<float, std::milli> LoopTimer::loopDone()
 {
-	auto elapsed_time = std::chrono::high_resolution_clock::now();
+	auto elapsed_time = std::chrono::steady_clock::now();
 	std::chrono::duration<float, std::milli> delta = elapsed_time - m_last_time;
 	std::chrono::duration<float, std::milli> delta_print = elapsed_time - m_last_time_print;
 
@@ -47,7 +44,7 @@ float LoopTimer::getAvgDuration()
 
 void LoopTimer::resetLoopStartTime()
 {
-	m_last_time = std::chrono::high_resolution_clock::now();
+	m_last_time = std::chrono::steady_clock::now();
 }
 
 

@@ -2,7 +2,7 @@
 
 #include "renderer_base.hpp"
 #include <thread>
-
+#include <atomic>
 #include "rpm_measure_base.hpp"
 #include "application_base.hpp"
 #include "helper.hpp"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <atomic>
 
 #include "rpm_measure_base.hpp"
 #include "helper.hpp"
