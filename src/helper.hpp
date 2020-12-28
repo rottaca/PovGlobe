@@ -42,6 +42,7 @@ public:
 
 	std::chrono::duration<float, std::milli> loopDone();
 	float getAvgDuration();
+	void resetLoopStartTime();
 
 private:
 	std::chrono::time_point<std::chrono::steady_clock> m_last_time;

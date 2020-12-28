@@ -6,12 +6,12 @@
 #include "globe.hpp"
 #include "application_base.hpp"
 
-#ifdef _WIN32 
+#ifdef BUILD_SIM 
 	#include "rpm_measure_sim.hpp"
 	#include "renderer_sim.hpp"
 	using RpmMeasure = RpmMeasureSim;
 	using Renderer = RendererSim;
-#elif __linux__
+#elif BUILD_HW
 	#include "rpm_measure_hall.hpp"
 	#include "renderer_led_strip.hpp"
 	using RpmMeasure = RpmMeasureHall;

@@ -41,7 +41,7 @@ void Globe::runApplication(ApplicationBase& app)
 	app.initialize(*this);
 
 	auto start = std::chrono::high_resolution_clock::now();
-	LoopTimer t("Application Thread");
+	LoopTimer t("Application Processing"), t2("Application Total");
 	while (m_applicationThread_running) {
 		auto time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float, std::ratio<1,1>> delta = time - start;
@@ -50,11 +50,13 @@ void Globe::runApplication(ApplicationBase& app)
 		// Lock buffer swap
 		swapFramebuffers();
 
+		auto total_loop_time = t2.loopDone();
 		auto loop_time = t.loopDone();
-		auto err = app.getTargetCycleTIme() - loop_time;
+		auto err = app.getTargetCycleTime() - loop_time;
 		if (err.count() > 0) {
 			std::this_thread::sleep_for(err);
 		}
+		t.resetLoopStartTime();
 	}
 }
 

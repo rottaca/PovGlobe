@@ -9,11 +9,11 @@ void ApplicationBase::initialize(Globe& globe)
 void ApplicationBase::process(Framebuffer& framebuffer, float time)
 {	
 	for (int i = 0; i < framebuffer.getSize(); i++) {
-		framebuffer.values()[i] = int(i + time*10) % 255;
+		framebuffer.values()[i] = int(i + time*100) % 255;
 	}
 }
 
 
-std::chrono::duration<float, std::milli> ApplicationBase::getTargetCycleTIme() const {
+std::chrono::duration<float, std::milli> ApplicationBase::getTargetCycleTime() const {
 	return 33ms;
 }

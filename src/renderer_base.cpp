@@ -25,7 +25,7 @@ void RendererBase::runAsync(Globe& globe)
 {	
 	m_renderThread = std::thread(&RendererBase::run, this, std::ref(globe));
 }
-
+ 
 void RendererBase::run(Globe& globe)
 {
 	std::mutex& mutex = globe.getDoubleBufferMutex();
@@ -37,6 +37,7 @@ void RendererBase::run(Globe& globe)
 			render(framebuffer);
 		}
 		auto loop_time = t.loopDone();
+		std::this_thread::sleep_for(std::chrono::duration<float,std::micro>(1.0f));
 	}
 }
 

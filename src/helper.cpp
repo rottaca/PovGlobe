@@ -1,4 +1,5 @@
 #include "helper.hpp"
+#include "helper.hpp"
 #pragma once
 
 #include "helper.hpp"
@@ -42,6 +43,11 @@ std::chrono::duration<float, std::milli> LoopTimer::loopDone()
 float LoopTimer::getAvgDuration()
 {
 	return m_avgLoopTime;
+}
+
+void LoopTimer::resetLoopStartTime()
+{
+	m_last_time = std::chrono::high_resolution_clock::now();
 }
 
 
