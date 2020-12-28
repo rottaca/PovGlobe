@@ -2,7 +2,7 @@
 #include <cmath>
 
 RpmMeasureSim::RpmMeasureSim()
-	: m_cycle_time(1/10.f)
+	: m_cycle_time(50.f)
 	, m_curr_tick(0)
 	, m_max_tick(200)
 {

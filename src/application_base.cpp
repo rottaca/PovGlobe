@@ -1,6 +1,7 @@
 #include "application_base.hpp"
 #include "globe.hpp"
 #include <iostream>
+
 void ApplicationBase::initialize(Globe& globe)
 {
 	//m_last_pixel = 0;

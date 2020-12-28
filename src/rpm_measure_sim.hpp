@@ -14,7 +14,7 @@ public:
 
 private:
 
-	float m_cycle_time;
+	std::chrono::duration<float, std::milli> m_cycle_time;
 	int m_curr_tick;
 	int m_max_tick;
 };
