@@ -1,15 +1,27 @@
 #pragma once	
 
 #include "renderer_base.hpp"
+#include <ws2811.h>
+
+// defaults for cmdline options
+#define TARGET_FREQ             WS2811_TARGET_FREQ
+#define DMA                     10
+//#define STRIP_TYPE            WS2811_STRIP_RGB		// WS2812/SK6812RGB integrated chip+leds
+#define STRIP_TYPE              WS2811_STRIP_GBR		// WS2812/SK6812RGB integrated chip+leds
 
 class RendererLedStrip: public RendererBase
 {
 public:
 	RendererLedStrip(
-		RpmMeasureBase& rpm_measure_base);
+		RpmMeasureBase& rpm_measure_base, int led_strip_gpio_pin);
 	~RendererLedStrip();
 
+	void initialize(Globe& globe);
+
 protected:
+	int m_led_strip_gpio_pin;
+
+	ws2811_t m_ledstring;
 
 	virtual void render(const Framebuffer&);
 };

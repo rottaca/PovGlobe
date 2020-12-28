@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 class Globe;
 
 class RpmMeasureBase
@@ -7,7 +9,7 @@ class RpmMeasureBase
 public:
 
 	struct RpmData {
-		float cycle_time;
+		std::chrono::duration<float, std::milli> cycle_time;
 		int curr_temporal_pos;
 	};
 

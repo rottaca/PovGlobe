@@ -9,25 +9,28 @@
 #ifdef BUILD_SIM 
 	#include "rpm_measure_sim.hpp"
 	#include "renderer_sim.hpp"
-	using RpmMeasure = RpmMeasureSim;
-	using Renderer = RendererSim;
 #elif BUILD_HW
 	#include "rpm_measure_hall.hpp"
 	#include "renderer_led_strip.hpp"
-	using RpmMeasure = RpmMeasureHall;
-	using Renderer = RendererLedStrip;
 #endif
-
 
 const int width = 120;
 const int height = 57;
+
+const int HALL_SENSOR_GPIO_PIN = 25;
+const int LED_STRIP_GPIO_PIN = 18;
 
 using namespace std::chrono_literals;
 
 int main() {
 
-	RpmMeasure rpm;
-	Renderer renderer(rpm);
+#ifdef BUILD_SIM 
+	RpmMeasureSim rpm;
+	RendererSim renderer(rpm);
+#elif BUILD_HW
+	RpmMeasureHall rpm(HALL_SENSOR_GPIO_PIN);
+	RendererLedStrip renderer(rpm, LED_STRIP_GPIO_PIN);
+#endif
 	Globe globe(height, width, renderer);
 
 	ApplicationBase app;

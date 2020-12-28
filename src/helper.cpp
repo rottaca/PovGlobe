@@ -84,6 +84,16 @@ uint8_t& Framebuffer::operator()(uint32_t row, uint32_t col, uint32_t channel)
 	return m_values[idx];
 }
 
+uint8_t Framebuffer::operator()(uint32_t row, uint32_t col, uint32_t channel) const
+{
+	// TODO assert
+	assert(row < m_height);
+	assert(col < m_width);
+	assert(channel< m_channels);
+	uint32_t idx = row * (m_width * m_channels) + col * m_channels + channel;
+	return m_values[idx];
+}
+
 
 std::mutex& Framebuffer::getMutex() const {
 	return m_accessMutex;

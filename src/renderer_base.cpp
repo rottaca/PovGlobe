@@ -17,6 +17,7 @@ RendererBase::~RendererBase()
 void RendererBase::initialize(Globe& globe)
 {
 	stopAndJoinRenderThread();
+	std::cout << "Initialize Renderer..." << std::endl;
 	m_renderThread_running = true;
 	m_rpmMeasure.initialize(globe);
 }

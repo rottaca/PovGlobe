@@ -38,6 +38,7 @@ void Globe::runApplicationAsync(ApplicationBase& app)
 
 void Globe::runApplication(ApplicationBase& app)
 {
+	std::cout << "Initialize Application..." << std::endl;
 	app.initialize(*this);
 
 	auto start = std::chrono::high_resolution_clock::now();
