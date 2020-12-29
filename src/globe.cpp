@@ -2,10 +2,13 @@
 #include "globe.hpp"
 #include <iostream>
 
-Globe::Globe(int height, int width,
+Globe::Globe(int height, int width, float radius, float spacing_top, float spacing_bottom,
 	RendererBase& renderer)
 	: m_height(height)
 	, m_width(width)
+	, m_radius(radius)
+	, m_spacing_top(spacing_top)
+	, m_spacing_bottom(spacing_bottom)
 	, m_renderer(renderer)
 	, m_buffer_indices({0, 1})
 {
@@ -75,9 +78,24 @@ int Globe::getHeight() const
 	return m_height;
 }
 
+float Globe::getRadius() const
+{
+	return m_radius;
+}
+
 int Globe::getWidth() const
 {
 	return m_width;
+}
+
+float Globe::getSpacingTop() const
+{
+	return m_spacing_top;
+}
+
+float Globe::getSpacingBottom() const
+{
+	return m_spacing_bottom;
 }
 
 const Framebuffer& Globe::getRenderFrameBuffer() const

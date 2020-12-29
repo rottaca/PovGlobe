@@ -94,6 +94,12 @@ uint8_t Framebuffer::operator()(uint32_t row, uint32_t col, uint32_t channel) co
 	return m_values[idx];
 }
 
+uint8_t Framebuffer::operator[](uint32_t idx) const {
+	return m_values[idx];
+}
+uint8_t& Framebuffer::operator[](uint32_t idx){
+	return m_values[idx];
+}
 
 std::mutex& Framebuffer::getMutex() const {
 	return m_accessMutex;

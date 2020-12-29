@@ -16,6 +16,9 @@ public:
 	uint8_t & operator() (uint32_t row, uint32_t col, uint32_t channel);
 	uint8_t operator() (uint32_t row, uint32_t col, uint32_t channel) const;
 
+	uint8_t operator[](uint32_t idx) const;
+	uint8_t& operator[](uint32_t idx);
+
 	std::mutex& getMutex() const;
 	const uint8_t* values() const;
 	uint8_t* values();
