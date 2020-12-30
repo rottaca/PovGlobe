@@ -7,7 +7,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DBUILD_TARGET=SIM",
+      "cmakeCommandArgs": "-DBUILD_TARGET=SIM \"-DCMAKE_PREFIX_PATH=C:\\Program Files (x86)\\GnuWin32\\bin\"",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "variables": []

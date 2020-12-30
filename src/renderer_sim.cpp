@@ -78,22 +78,24 @@ cimg_library::CImg<float> buildSphere(cimg_library::CImgList<unsigned int> & pri
 void RendererSim::initialize(Globe& globe)
 {
 	RendererBase::initialize(globe);
-	m_draw_display.assign(3 * globe.getWidth(), 3 * globe.getHeight(), "Flat Visualization");
+	const float scale2d_visu = 4.0f;
+	m_draw_display.assign(scale2d_visu *globe.getWidth(), scale2d_visu * globe.getHeight(), "Flat Visualization");
 	m_draw_display.move(0, 0);
 
 	m_draw_display_3d.assign(512, 512, "3D Visualization");
-	m_draw_display_3d.move(3 * globe.getWidth(), 0);
+	m_draw_display_3d.move(m_draw_display.width(), 0);
 
+	const float scale3d_visu = 180.f;
 	m_sphere_pts = buildSphere(m_sphere_primitives, 
 							globe.getWidth(), globe.getHeight(), 
-							globe.getRadius(), 
-							globe.getSpacingTop(), globe.getSpacingBottom());
+							scale3d_visu, scale3d_visu *globe.getSpacingTop()/globe.getRadius(),
+							scale3d_visu *globe.getSpacingBottom() / globe.getRadius());
 	// Rotate to show user the right side of the globe
-	m_sphere_pts = CImg<>::rotation_matrix(0, 0, 1, -90) * CImg<>::rotation_matrix(0, 1, 0, 90) * m_sphere_pts;
+	m_sphere_pts = CImg<>::rotation_matrix(1, 0, 0, 30) * CImg<>::rotation_matrix(0, 0, 1, -90) * CImg<>::rotation_matrix(0, 1, 0, 90) * m_sphere_pts;
 	m_sphere_colors = CImgList<unsigned char>(m_sphere_primitives.size(), CImg<unsigned char>::vector(0, 0, 0));
 	m_sphere_opacs = CImg<float>(m_sphere_primitives.size(), 1, 1, 1, 0.7f);
 
-	m_visu_buffer3d = CImg<unsigned char>(3, m_draw_display_3d.height(), m_draw_display_3d.width(), 1).permute_axes("yzcx");
+	m_visu_buffer3d = CImg<unsigned char>(3, m_draw_display_3d.width(), m_draw_display_3d.height(),  1).permute_axes("yzcx");
 	m_visu_buffer = CImg<unsigned char>(globe.getWidth(), globe.getHeight(), 1, 3);
 }
 
@@ -102,15 +104,15 @@ void RendererSim::render(const Framebuffer& buffer)
 	if (!m_draw_display.is_closed()) {
 		for(size_t i = 0; i < buffer.getHeight(); i++)
 		{
-			for(size_t j = 0; j < buffer.getWidth(); j++)
+			for (size_t j = 0; j < buffer.getWidth(); j++)
 			{
-				for(size_t c = 0; c < buffer.getChannels(); c++)
+				for (size_t c = 0; c < buffer.getChannels(); c++)
 				{
 					m_visu_buffer(j, i, 0, c) = buffer(i, j, c);
 				}
 			}
 		}
-		m_draw_display.display(m_visu_buffer.get_resize_tripleXY());
+		m_draw_display.display(m_visu_buffer.get_resize_doubleXY().get_resize_doubleXY());
 	}
 
 	if (!m_draw_display_3d.is_closed()) {
@@ -123,17 +125,16 @@ void RendererSim::render(const Framebuffer& buffer)
 					buffer(i, j, 1),
 					buffer(i, j, 2));
 			}
-
-			m_visu_buffer3d.fill(255);
-			m_visu_buffer3d.draw_object3d(255, 255, 255,
-				m_sphere_pts * 20,
-				m_sphere_primitives,
-				m_sphere_colors,
-				m_sphere_opacs,
-				2, false, 300
-			);
-
-			m_draw_display_3d.display(m_visu_buffer3d);
 		}
+		m_visu_buffer3d.fill(255);
+		m_visu_buffer3d.draw_object3d(m_draw_display_3d.width()/2, m_draw_display_3d.height() / 2, 0,
+			m_sphere_pts,
+			m_sphere_primitives,
+			m_sphere_colors,
+			m_sphere_opacs,
+			2, false, 1000
+		);
+
+		m_draw_display_3d.display(m_visu_buffer3d);
 	}
 }

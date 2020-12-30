@@ -8,7 +8,8 @@ set(SOURCE_FILES
 	src/application_base.cpp
 	src/rpm_measure_base.cpp
 	src/renderer_base.cpp
-	src/helper.cpp)
+	src/helper.cpp
+	src/application_examples.cpp)
 
 set(SOURCE_FILES_SIM 
 	src/rpm_measure_sim.cpp  
@@ -32,6 +33,7 @@ if (${BUILD_TARGET} STREQUAL "SIM")
 	list(APPEND SOURCE_FILES ${SOURCE_FILES_SIM})
 	add_compile_definitions(BUILD_SIM)
 	message(STATUS "Building simulation framework.")
+
 elseif(${BUILD_TARGET} STREQUAL "HW")
 	if (NOT UNIX)
 		message(ERROR "Can't build hw software VERSION on non-unix platform.")
@@ -50,9 +52,21 @@ add_library(${CMAKE_PROJECT_NAME}_lib
 )
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
 
+#set(ZLIB_INCLUDE_DIR "C:\\Program Files (x86)\\GnuWin32\\include")
+#set(PNG_INCLUDE_DIR "C:\\Program Files (x86)\\GnuWin32\\include")
+#set(ZLIB_LIBRARY "C:\\Program Files (x86)\\GnuWin32\\lib\\zlib.lib")
+#set(PNG_LIBRARY "C:\\Program Files (x86)\\GnuWin32\\lib\\libpng.lib")
+
+find_package(ImageMagick REQUIRED COMPONENTS Magick++)
+target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES})
+target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/CImg-2.9.5_pre122220 ${ImageMagick_INCLUDE_DIRS})
+add_compile_definitions(cimg_use_magick)
+
 
 if (${BUILD_TARGET} STREQUAL "SIM")
+
   if (WIN32)
+    target_link_libraries(${CMAKE_PROJECT_NAME}_lib gdi32)
   elseif (UNIX)
     find_package(X11 REQUIRED)
     target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ${X11_LIBRARIES})

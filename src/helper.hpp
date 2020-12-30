@@ -14,9 +14,9 @@ public:
 	void initialize(uint32_t height, uint32_t width, uint32_t channels = 3);
 
 	uint8_t & operator() (uint32_t row, uint32_t col, uint32_t channel);
-	uint8_t operator() (uint32_t row, uint32_t col, uint32_t channel) const;
+	const uint8_t& operator() (uint32_t row, uint32_t col, uint32_t channel) const;
 
-	uint8_t operator[](uint32_t idx) const;
+	const uint8_t& operator[](uint32_t idx) const;
 	uint8_t& operator[](uint32_t idx);
 
 	std::mutex& getMutex() const;

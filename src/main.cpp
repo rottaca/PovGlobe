@@ -1,10 +1,11 @@
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 #include <CImg.h>
 
 #include "globe.hpp"
-#include "application_base.hpp"
+#include "application_examples.hpp"
 
 #ifdef BUILD_SIM 
 	#include "rpm_measure_sim.hpp"
@@ -36,7 +37,8 @@ int main() {
 #endif
 	Globe globe(height, width, radius, spacing_top, spacing_bottom, renderer);
 
-	ApplicationBase app;
+	const std::string path = R"(D:\Benutzer\Andreas\GitProjects\PovGlobe\res\2_no_clouds_8k.jpg)";
+	ApplicationImageViwewer app{ path };
 	
 	//cimg_library::CImg<unsigned char> img("test.jpg");
 
