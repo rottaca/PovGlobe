@@ -52,11 +52,6 @@ add_library(${CMAKE_PROJECT_NAME}_lib
 )
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
 
-#set(ZLIB_INCLUDE_DIR "C:\\Program Files (x86)\\GnuWin32\\include")
-#set(PNG_INCLUDE_DIR "C:\\Program Files (x86)\\GnuWin32\\include")
-#set(ZLIB_LIBRARY "C:\\Program Files (x86)\\GnuWin32\\lib\\zlib.lib")
-#set(PNG_LIBRARY "C:\\Program Files (x86)\\GnuWin32\\lib\\libpng.lib")
-
 find_package(ImageMagick REQUIRED COMPONENTS Magick++)
 target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES})
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/CImg-2.9.5_pre122220 ${ImageMagick_INCLUDE_DIRS})

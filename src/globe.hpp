@@ -22,6 +22,7 @@ public:
 	float getRadius() const;
 	float getSpacingTop() const;
 	float getSpacingBottom() const;
+	float getHalfCircumference() const;
 
 	const Framebuffer& getRenderFrameBuffer() const;
 	Framebuffer& getAppFrameBuffer();
@@ -34,6 +35,7 @@ protected:
 	float m_radius;
 	float m_spacing_top;
 	float m_spacing_bottom;
+	float m_half_circumference;
 
 	RendererBase& m_renderer;
 

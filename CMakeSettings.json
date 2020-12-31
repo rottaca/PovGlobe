@@ -7,9 +7,21 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DBUILD_TARGET=SIM \"-DCMAKE_PREFIX_PATH=C:\\Program Files (x86)\\GnuWin32\\bin\"",
+      "cmakeCommandArgs": "-DBUILD_TARGET=SIM ",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
+      "variables": []
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DBUILD_TARGET=SIM ",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": []
     }
   ]

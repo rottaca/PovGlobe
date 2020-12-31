@@ -14,8 +14,6 @@ RendererSim::~RendererSim()
 {
 }
 
-constexpr double pi = 3.14159265358979323846;
-
 cimg_library::CImg<float> buildSphere(cimg_library::CImgList<unsigned int> & primitives, 
 	int n_segments_xy, int n_segments_z, 
 	float radius = 1.0f, 
@@ -108,7 +106,7 @@ void RendererSim::render(const Framebuffer& buffer)
 			{
 				for (size_t c = 0; c < buffer.getChannels(); c++)
 				{
-					m_visu_buffer(j, i, 0, c) = buffer(i, j, c);
+					m_visu_buffer(j, i, 0, c) = buffer(j, i, c);
 				}
 			}
 		}
@@ -121,9 +119,9 @@ void RendererSim::render(const Framebuffer& buffer)
 			for(size_t i = 0; i < buffer.getHeight(); i++)
 			{
 				m_sphere_colors[j*buffer.getHeight() + i] = CImg<unsigned char>::vector(
-					buffer(i, j, 0),
-					buffer(i, j, 1),
-					buffer(i, j, 2));
+					buffer(j, i, 0),
+					buffer(j, i, 1),
+					buffer(j, i, 2));
 			}
 		}
 		m_visu_buffer3d.fill(255);

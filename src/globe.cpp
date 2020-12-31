@@ -1,5 +1,4 @@
 #include "globe.hpp"
-#include "globe.hpp"
 #include <iostream>
 
 Globe::Globe(int height, int width, float radius, float spacing_top, float spacing_bottom,
@@ -11,10 +10,10 @@ Globe::Globe(int height, int width, float radius, float spacing_top, float spaci
 	, m_spacing_bottom(spacing_bottom)
 	, m_renderer(renderer)
 	, m_buffer_indices({0, 1})
+	, m_half_circumference(pi* radius)
 {
 	m_framebuffers[0].initialize(m_height, m_width );
 	m_framebuffers[1].initialize(m_height, m_width);
-	//std::lock_guard<std::mutex> guard(m_framebuffer.getMutex());
 }
 
 Globe::~Globe()
@@ -44,19 +43,19 @@ void Globe::runApplication(ApplicationBase& app)
 	std::cout << "Initialize Application..." << std::endl;
 	app.initialize(*this);
 
-	auto start = std::chrono::high_resolution_clock::now();
+	const auto start = std::chrono::high_resolution_clock::now();
 	LoopTimer t("Application Processing"), t2("Application Total");
 	while (m_applicationThread_running) {
-		auto time = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<float, std::ratio<1,1>> delta = time - start;
+		const auto time = std::chrono::high_resolution_clock::now();
+		const std::chrono::duration<float, std::ratio<1,1>> delta = time - start;
 		app.process(getAppFrameBuffer(), delta.count());
 
 		// Lock buffer swap
 		swapFramebuffers();
 
-		auto total_loop_time = t2.loopDone();
-		auto loop_time = t.loopDone();
-		auto err = app.getTargetCycleTime() - loop_time;
+		const auto total_loop_time = t2.loopDone();
+		const auto loop_time = t.loopDone();
+		const auto err = app.getTargetCycleTime() - loop_time;
 		if (err.count() > 0) {
 			std::this_thread::sleep_for(err);
 		}
@@ -88,6 +87,10 @@ int Globe::getWidth() const
 	return m_width;
 }
 
+float Globe::getHalfCircumference() const {
+	return m_half_circumference;
+}
+
 float Globe::getSpacingTop() const
 {
 	return m_spacing_top;
@@ -114,6 +117,6 @@ std::mutex& Globe::getDoubleBufferMutex()
 }
 
 void Globe::swapFramebuffers() {
-	auto tmp = m_buffer_indices.load();
+	const auto tmp = m_buffer_indices.load();
 	m_buffer_indices.store({ tmp.app_buffer_idx , tmp.render_buffer_idx});
 }

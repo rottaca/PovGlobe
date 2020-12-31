@@ -45,9 +45,9 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
 	int framebuffer_x = rpmData.curr_temporal_pos;
 	assert(framebuffer.getChannels() == 3);
 	for (int i  = 0; i < framebuffer.getHeight(); i++){
-		int r = framebuffer(i, framebuffer_x, 0);
-		int g = framebuffer(i, framebuffer_x, 1);
-		int b = framebuffer(i, framebuffer_x, 2);
+		int r = framebuffer(framebuffer_x, i, 0);
+		int g = framebuffer(framebuffer_x, i, 1);
+		int b = framebuffer(framebuffer_x, i, 2);
 		m_ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | (b << 0);	
 	}
 	ws2811_return_t ret = ws2811_render(&m_ledstring);

@@ -4,6 +4,8 @@
 
 #include <CImg.h>
 
+#include <Magick++.h>
+
 #include "globe.hpp"
 #include "application_examples.hpp"
 
@@ -26,7 +28,43 @@ const int LED_STRIP_GPIO_PIN = 18;
 
 using namespace std::chrono_literals;
 
-int main() {
+
+std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
+	if (argc <= 1) {
+		std::cout << "No algo specified. Running default algo ApplicationTest1." << std::endl;
+		return std::make_unique<ApplicationTest1>();
+	}
+	else {
+		const std::string algo_name{ argv[1] };
+
+		if (algo_name.compare("ImageRotator") == 0) {
+			if (argc == 3) {
+				return std::make_unique<ApplicationImageRotator>(argv[2]);
+			}
+			else {
+				std::cerr << "Invalid arguments for ApplicationImageRotator." << std::endl;
+				return nullptr;
+			}
+		}
+		else if (algo_name.compare("ImageViewer") == 0) {
+			if (argc == 3) {
+				return std::make_unique<ApplicationImageViwewer>(argv[2]);
+			}
+			else {
+				std::cerr << "Invalid arguments for ApplicationImageViwewer." << std::endl;
+				return nullptr;
+			}
+		}
+		else {
+			std::cerr << "Invalid algo name " << algo_name << std::endl;
+			return nullptr;
+		}
+	}
+}
+
+
+
+int main(int argc, char* argv[]) {
 
 #ifdef BUILD_SIM 
 	RpmMeasureSim rpm;
@@ -37,15 +75,12 @@ int main() {
 #endif
 	Globe globe(height, width, radius, spacing_top, spacing_bottom, renderer);
 
-	const std::string path = R"(D:\Benutzer\Andreas\GitProjects\PovGlobe\res\2_no_clouds_8k.jpg)";
-	ApplicationImageViwewer app{ path };
-	
-	//cimg_library::CImg<unsigned char> img("test.jpg");
+	auto app_ptr = instantiateAlgorithms(argc, argv);
 
 	globe.runRendererAsync();
-	globe.runApplicationAsync(app);
+	globe.runApplicationAsync(*app_ptr);
 
-	std::this_thread::sleep_for(50000ms);
+	std::this_thread::sleep_for(60000ms);
 
 	globe.shutdown();
 }
