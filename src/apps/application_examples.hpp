@@ -1,7 +1,7 @@
 #pragma once
 
-#include "helper.hpp"
-#include "application_base.hpp"
+#include "core/helper.hpp"
+#include "core/application_base.hpp"
 #include <CImg.h>
 
 class ApplicationTest1 : public ApplicationBase {

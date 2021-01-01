@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rpm_measure_base.hpp"
-#include "globe.hpp"
+#include "core/rpm_measure_base.hpp"
+#include "core/globe.hpp"
 
 class RpmMeasureSim : public RpmMeasureBase
 {

@@ -1,7 +1,7 @@
 #pragma once	
 #include <CImg.h>
 
-#include "renderer_base.hpp"
+#include "core/renderer_base.hpp"
 
 class RendererSim: public RendererBase
 {

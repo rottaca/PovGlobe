@@ -1,5 +1,5 @@
 #include "application_examples.hpp"
-#include "globe.hpp"
+#include "core/globe.hpp"
 #include <iostream>
 #include <fstream>
 

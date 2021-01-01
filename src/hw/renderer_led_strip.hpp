@@ -1,6 +1,6 @@
 #pragma once	
 
-#include "renderer_base.hpp"
+#include "core/renderer_base.hpp"
 #include <ws2811.h>
 
 // defaults for cmdline options

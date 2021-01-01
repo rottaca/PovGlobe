@@ -1,6 +1,6 @@
 #include "renderer_led_strip.hpp"
 
-#include "globe.hpp"
+#include "core/globe.hpp"
 
 RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base, int led_strip_gpio_pin)
 	:RendererBase(rpm_measure_base)

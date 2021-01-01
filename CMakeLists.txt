@@ -4,20 +4,20 @@ project(PovGlobe)
 option(BUILD_TARGET "Build simulation (SIM) or hw (HW)." "SIM")
 
 set(SOURCE_FILES
-	src/globe.cpp
-	src/application_base.cpp
-	src/rpm_measure_base.cpp
-	src/renderer_base.cpp
-	src/helper.cpp
-	src/application_examples.cpp)
+	"src/core/globe.cpp"
+	"src/core/application_base.cpp"
+	"src/core/rpm_measure_base.cpp"
+	"src/core/renderer_base.cpp"
+	"src/core/helper.cpp"
+	"src/apps/application_examples.cpp")
 
 set(SOURCE_FILES_SIM 
-	src/rpm_measure_sim.cpp  
-	src/renderer_sim.cpp)
+	src/sim/rpm_measure_sim.cpp  
+	src/sim/renderer_sim.cpp)
 
 set(SOURCE_FILES_HW
-	src/rpm_measure_hall.cpp 
-	src/renderer_led_strip.cpp)
+	src/hw/rpm_measure_hall.cpp 
+	src/hw/renderer_led_strip.cpp)
 	
 
 if (WIN32)
@@ -66,9 +66,10 @@ if (${BUILD_TARGET} STREQUAL "SIM")
     find_package(X11 REQUIRED)
     target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ${X11_LIBRARIES})
   endif()
+  target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC src)
 elseif(${BUILD_TARGET} STREQUAL "HW")
   target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ws2811 pigpio)
-  target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/pigpio ext/rpi_ws281x)
+  target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/pigpio ext/rpi_ws281x src)
 endif()
 
 # Build executable
@@ -77,3 +78,9 @@ add_executable(${CMAKE_PROJECT_NAME}
 )
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}_lib)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ext/CImg-2.9.5_pre122220)
+
+# Build executable
+add_executable(${CMAKE_PROJECT_NAME}_test_rpm
+	src/main_test_rpm.cpp
+)
+target_link_libraries(${CMAKE_PROJECT_NAME}_test_rpm ${CMAKE_PROJECT_NAME}_lib)

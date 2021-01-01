@@ -6,15 +6,15 @@
 
 #include <Magick++.h>
 
-#include "globe.hpp"
-#include "application_examples.hpp"
+#include "core/globe.hpp"
+#include "apps/application_examples.hpp"
 
 #ifdef BUILD_SIM 
-	#include "rpm_measure_sim.hpp"
-	#include "renderer_sim.hpp"
+	#include "sim/rpm_measure_sim.hpp"
+	#include "sim/renderer_sim.hpp"
 #elif BUILD_HW
-	#include "rpm_measure_hall.hpp"
-	#include "renderer_led_strip.hpp"
+	#include "hw/rpm_measure_hall.hpp"
+	#include "hw/renderer_led_strip.hpp"
 #endif
 
 const int width = 120;

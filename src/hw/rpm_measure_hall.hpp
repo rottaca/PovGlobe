@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rpm_measure_base.hpp"
+#include "core/rpm_measure_base.hpp"
 #include <stdint.h>
 #include <chrono>
 #include <deque>

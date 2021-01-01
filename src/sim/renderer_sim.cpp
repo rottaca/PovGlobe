@@ -1,5 +1,5 @@
 #include "renderer_sim.hpp"
-#include "globe.hpp"
+#include "core/globe.hpp"
 #include <iostream>
 
 using namespace cimg_library;
