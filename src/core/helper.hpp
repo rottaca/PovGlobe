@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 #include <functional>
-
+#include <math.h>
 #include <mutex>
 #include <assert.h>
 #include <chrono>

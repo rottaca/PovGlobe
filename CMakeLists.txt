@@ -44,6 +44,8 @@ elseif(${BUILD_TARGET} STREQUAL "HW")
 		message(STATUS "Building hw application.")
 		add_compile_definitions(BUILD_HW)
 	endif()
+else()
+message(FATAL_ERROR "Invalid build target specified.")
 endif()
 
 # Build library
@@ -52,10 +54,15 @@ add_library(${CMAKE_PROJECT_NAME}_lib
 )
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
 
-find_package(ImageMagick REQUIRED COMPONENTS Magick++)
+find_package(ImageMagick 6 EXACT REQUIRED COMPONENTS Magick++)
+
+add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
+add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
+
 target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES})
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/CImg-2.9.5_pre122220 ${ImageMagick_INCLUDE_DIRS})
-add_compile_definitions(cimg_use_magick)
+target_compile_options(${CMAKE_PROJECT_NAME}_lib PUBLIC -fPIC)
+target_compile_definitions(${CMAKE_PROJECT_NAME}_lib PUBLIC cimg_use_magick)
 
 
 if (${BUILD_TARGET} STREQUAL "SIM")
