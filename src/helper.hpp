@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <utility>
+#include <functional>
+
 #include <mutex>
 #include <assert.h>
 #include <chrono>
@@ -131,3 +134,27 @@ uint32_t Framebuffer::getChannels() const
 }
 
 
+// https://en.wikipedia.org/wiki/Miller_cylindrical_projection
+// lat = 0 at equator
+inline void invCylindricalProjection(float lon, float lat, float& x, float& y) {
+
+	x = lon;
+	y = 5.0f / 4.0f * asinh(tan(4.0f * lat / 5.0f));
+}
+
+inline void cylindricalProjection(float x, float y, float& lon, float& lat) {
+	lon = x;
+	lat = 5.0f / 4.0f * atan(sinh(4.0f * y / 5.0f));
+}
+
+
+inline std::vector<std::pair<float, float>> project(std::vector<std::pair<float, float>> coordinates,
+	const std::function<void(float, float, float&, float&)>& projection) {
+	std::vector<std::pair<float, float>> res(coordinates.size());
+
+	for (size_t i = 0; i < coordinates.size(); i++)
+	{
+		projection(coordinates[i].first, coordinates[i].second, res[i].first, res[i].second);
+	}
+	return res;
+}

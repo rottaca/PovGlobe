@@ -30,6 +30,11 @@ using namespace std::chrono_literals;
 
 
 std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
+
+	for (size_t i = 0; i < argc; i++)
+	{
+		std::cout << argv[i] << std::endl;
+	}
 	if (argc <= 1) {
 		std::cout << "No algo specified. Running default algo ApplicationTest1." << std::endl;
 		return std::make_unique<ApplicationTest1>();

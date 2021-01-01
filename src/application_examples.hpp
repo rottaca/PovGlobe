@@ -17,13 +17,13 @@ private:
 class ApplicationImageViwewer : public ApplicationBase {
 
 public:
-	ApplicationImageViwewer(const std::string& path);
+	ApplicationImageViwewer(const char* path);
 
 	virtual void initialize(Globe& globe);
 	virtual void process(Framebuffer& framebuffer, float time);
 
 protected:
-	const std::string& m_path;
+	std::string m_path;
 	cimg_library::CImg<unsigned char> m_img;
 
 	size_t m_top_pixel_skip;
@@ -34,7 +34,7 @@ protected:
 class ApplicationImageRotator : public ApplicationImageViwewer {
 
 public:
-	ApplicationImageRotator(const std::string& path);
+	ApplicationImageRotator(const char* path);
 
 	void initialize(Globe& globe);
 	void process(Framebuffer& framebuffer, float time);
