@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	RendererLedStrip renderer(rpm, LED_STRIP_GPIO_PIN);
 #endif
 
-	Globe globe(height, width, radius, spacing_top, spacing_bottom, renderer);
+	Globe globe(height, width, radius, spacing_top, spacing_bottom, false, renderer);
 
 	rpm.initialize(globe);
 
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 			last_time_print = std::chrono::steady_clock::now();
 
 			const auto rpmData = rpm.getRpmData();
-			std::cout << rpmData.cycle_time.count() << " ms, position " << rpmData.curr_temporal_pos << std::endl;
+			std::cout << rpmData.cycle_time.count() << " ms, "<< 1000.0f/rpmData.cycle_time.count() << " Hz, position " << rpmData.curr_temporal_pos << std::endl;
 		}
 	}
 

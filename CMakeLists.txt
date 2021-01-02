@@ -3,6 +3,14 @@ project(PovGlobe)
 
 option(BUILD_TARGET "Build simulation (SIM) or hw (HW)." "SIM")
 
+if(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 set(SOURCE_FILES
 	"src/core/globe.cpp"
 	"src/core/application_base.cpp"
@@ -59,7 +67,7 @@ find_package(ImageMagick 6 EXACT REQUIRED COMPONENTS Magick++)
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
 add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES})
+target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES} atomic)
 target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/CImg-2.9.5_pre122220 ${ImageMagick_INCLUDE_DIRS})
 target_compile_options(${CMAKE_PROJECT_NAME}_lib PUBLIC -fPIC)
 target_compile_definitions(${CMAKE_PROJECT_NAME}_lib PUBLIC cimg_use_magick)

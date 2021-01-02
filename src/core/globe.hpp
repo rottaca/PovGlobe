@@ -10,7 +10,7 @@
 class Globe
 {
 public:
-	Globe(int height, int width, float radius, float spacing_top, float spacing_bottom, RendererBase& renderer);
+	Globe(int height, int width, float radius, float spacing_top, float spacing_bottom, bool doublesidedRendering, RendererBase& renderer);
 	~Globe();
 
 	void runRendererAsync();
@@ -21,8 +21,9 @@ public:
 	int getWidth() const;
 	float getRadius() const;
 	float getSpacingTop() const;
-	float getSpacingBottom() const;
+	float getSpacingBottom() const; 
 	float getHalfCircumference() const;
+	bool getDoubleSidedRendering() const;
 
 	const Framebuffer& getRenderFrameBuffer() const;
 	Framebuffer& getAppFrameBuffer();
@@ -36,6 +37,7 @@ protected:
 	float m_spacing_top;
 	float m_spacing_bottom;
 	float m_half_circumference;
+  bool m_doublesidedRendering;
 
 	RendererBase& m_renderer;
 

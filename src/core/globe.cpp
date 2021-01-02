@@ -1,7 +1,7 @@
 #include "globe.hpp"
 #include <iostream>
 
-Globe::Globe(int height, int width, float radius, float spacing_top, float spacing_bottom,
+Globe::Globe(int height, int width, float radius, float spacing_top, float spacing_bottom, bool doublesidedRendering,
 	RendererBase& renderer)
 	: m_height(height)
 	, m_width(width)
@@ -11,6 +11,7 @@ Globe::Globe(int height, int width, float radius, float spacing_top, float spaci
 	, m_renderer(renderer)
 	, m_buffer_indices({0, 1})
 	, m_half_circumference(pi* radius)
+  , m_doublesidedRendering(doublesidedRendering)
 {
 	m_framebuffers[0].initialize(m_height, m_width );
 	m_framebuffers[1].initialize(m_height, m_width);
@@ -96,10 +97,15 @@ float Globe::getSpacingTop() const
 	return m_spacing_top;
 }
 
-float Globe::getSpacingBottom() const
+float Globe::getSpacingBottom() const 
 {
 	return m_spacing_bottom;
 }
+
+
+bool Globe::getDoubleSidedRendering() const{
+return m_doublesidedRendering;
+} 
 
 const Framebuffer& Globe::getRenderFrameBuffer() const
 {

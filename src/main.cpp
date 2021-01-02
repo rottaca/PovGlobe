@@ -18,7 +18,7 @@
 #endif
 
 const int width = 120;
-const int height = 57;
+const int height = 55;
 const float radius = 13.25;
 const float spacing_top = 1.0;
 const float spacing_bottom = 2.0;
@@ -67,8 +67,6 @@ std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
 	}
 }
 
-
-
 int main(int argc, char* argv[]) {
 
 #ifdef BUILD_SIM 
@@ -78,7 +76,7 @@ int main(int argc, char* argv[]) {
 	RpmMeasureHall rpm(HALL_SENSOR_GPIO_PIN);
 	RendererLedStrip renderer(rpm, LED_STRIP_GPIO_PIN);
 #endif
-	Globe globe(height, width, radius, spacing_top, spacing_bottom, renderer);
+	Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
 
 	auto app_ptr = instantiateAlgorithms(argc, argv);
 

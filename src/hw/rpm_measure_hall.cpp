@@ -29,7 +29,7 @@ void RpmMeasureHall::edgeDetected()
 	auto new_delta = curr_time - m_last_event_time;
 	
 	m_delta_time_deque.push_back(new_delta);
-	if (m_delta_time_deque.size() > 5){
+	if (m_delta_time_deque.size() > 1){
 		m_delta_time_deque.pop_front();
 	}
 	m_last_event_time = curr_time;
@@ -71,6 +71,9 @@ RpmMeasureHall::RpmData RpmMeasureHall::getRpmData()
 	auto curr_time = std::chrono::steady_clock::now();
 	auto dt_since_last_event = curr_time  - m_last_event_time;
 	data.curr_temporal_pos = static_cast<int>(std::round(m_temporal_resolution*dt_since_last_event/data.cycle_time));
-
+  data.curr_temporal_pos = data.curr_temporal_pos % m_temporal_resolution;
+  
+  data.valid = m_delta_time_deque.size() == 1;
+  
 	return data;
 }

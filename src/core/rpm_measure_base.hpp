@@ -11,6 +11,7 @@ public:
 	struct RpmData {
 		std::chrono::duration<float, std::milli> cycle_time;
 		int curr_temporal_pos;
+    bool valid;
 	};
 
 	RpmMeasureBase();
