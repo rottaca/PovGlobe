@@ -4,98 +4,72 @@ project(PovGlobe)
 option(BUILD_TARGET "Build simulation (SIM) or hw (HW)." "SIM")
 
 if(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-set(SOURCE_FILES
-	"src/core/globe.cpp"
-	"src/core/application_base.cpp"
-	"src/core/rpm_measure_base.cpp"
-	"src/core/renderer_base.cpp"
-	"src/core/helper.cpp"
-	"src/apps/application_examples.cpp")
-
-set(SOURCE_FILES_SIM 
-	src/sim/rpm_measure_sim.cpp  
-	src/sim/renderer_sim.cpp)
-
-set(SOURCE_FILES_HW
-	src/hw/rpm_measure_hall.cpp 
-	src/hw/renderer_led_strip.cpp)
-	
-
-if (WIN32)
-	message(STATUS "Building on windows.")
-else()
-	message(STATUS "Building on linux.")
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CORE_LIB_NAME ${CMAKE_PROJECT_NAME}_core_lib)
+set(HW_LIB_EXT_NAME ${CMAKE_PROJECT_NAME}_hw_lib_ext)
+set(SIM_LIB_EXT_NAME ${CMAKE_PROJECT_NAME}_sim_lib_ext)
+set(APPS_LIB_NAME ${CMAKE_PROJECT_NAME}_apps_lib)
+
+set(EXEC_MAIN_NAME ${CMAKE_PROJECT_NAME})
+
+# Create interface library for cimg header only lib
+add_library(cimg INTERFACE)
+target_include_directories(cimg INTERFACE ext/CImg-2.9.5_pre122220)
+
+if (WIN32)
+	message(STATUS "Building on windows.")
+	if(${BUILD_TARGET} STREQUAL "HW")
+		message(ERROR "Can't build hw software version on non-unix platform.")
+	endif()
+
+elseif(UNIX)
+	message(STATUS "Building on linux.")
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+	set(CMAKE_CXX_FLAGS_DEBUG "-g")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+else()
+  message(FATAL_ERROR "Unknown platform.")
+endif()
+
+
 if (${BUILD_TARGET} STREQUAL "SIM")
-	list(APPEND SOURCE_FILES ${SOURCE_FILES_SIM})
 	add_compile_definitions(BUILD_SIM)
 	message(STATUS "Building simulation framework.")
-
 elseif(${BUILD_TARGET} STREQUAL "HW")
-	if (NOT UNIX)
-		message(ERROR "Can't build hw software VERSION on non-unix platform.")
-	else()
-		list(APPEND SOURCE_FILES ${SOURCE_FILES_HW})
-		add_subdirectory(ext/rpi_ws281x)
-		add_subdirectory(ext/pigpio)
-		message(STATUS "Building hw application.")
-		add_compile_definitions(BUILD_HW)
-	endif()
+	add_compile_definitions(BUILD_HW)
+	message(STATUS "Building hw application.")
+	add_subdirectory(ext/rpi_ws281x)
+	add_subdirectory(ext/pigpio)
 else()
-message(FATAL_ERROR "Invalid build target specified.")
+  message(FATAL_ERROR "Invalid build target specified.")
 endif()
 
-# Build library
-add_library(${CMAKE_PROJECT_NAME}_lib
-	${SOURCE_FILES}
-)
-target_include_directories(${CMAKE_PROJECT_NAME}_lib PRIVATE ext/CImg-2.9.5_pre122220)
-
-find_package(ImageMagick 6 EXACT REQUIRED COMPONENTS Magick++)
-
-add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
-add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
-
-target_link_libraries(${CMAKE_PROJECT_NAME}_lib ${ImageMagick_LIBRARIES} atomic)
-target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/CImg-2.9.5_pre122220 ${ImageMagick_INCLUDE_DIRS})
-target_compile_options(${CMAKE_PROJECT_NAME}_lib PUBLIC -fPIC)
-target_compile_definitions(${CMAKE_PROJECT_NAME}_lib PUBLIC cimg_use_magick)
-
+add_subdirectory(src/core)
 
 if (${BUILD_TARGET} STREQUAL "SIM")
-
-  if (WIN32)
-    target_link_libraries(${CMAKE_PROJECT_NAME}_lib gdi32)
-  elseif (UNIX)
-    find_package(X11 REQUIRED)
-    target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ${X11_LIBRARIES})
-  endif()
-  target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC src)
+  add_subdirectory(src/sim)
+  set(ENV_LIB_TARGET_NAME ${SIM_LIB_EXT_NAME})
 elseif(${BUILD_TARGET} STREQUAL "HW")
-  target_link_libraries(${CMAKE_PROJECT_NAME}_lib pthread ws2811 pigpio)
-  target_include_directories(${CMAKE_PROJECT_NAME}_lib PUBLIC ext/pigpio ext/rpi_ws281x src)
+  add_subdirectory(src/hw)
+  set(ENV_LIB_TARGET_NAME ${HW_LIB_EXT_NAME})
 endif()
 
-# Build executable
-add_executable(${CMAKE_PROJECT_NAME}
+
+add_subdirectory(src/apps)
+
+# executable
+add_executable(${EXEC_MAIN_NAME}
 	src/main.cpp
 )
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}_lib)
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ext/CImg-2.9.5_pre122220)
+target_link_libraries(${EXEC_MAIN_NAME} ${APPS_LIB_NAME} ${ENV_LIB_TARGET_NAME} ${CORE_LIB_NAME})
 
-# Build executable
-add_executable(${CMAKE_PROJECT_NAME}_test_rpm
+# executable
+add_executable(${EXEC_MAIN_NAME}_test_rpm
 	src/main_test_rpm.cpp
 )
-target_link_libraries(${CMAKE_PROJECT_NAME}_test_rpm ${CMAKE_PROJECT_NAME}_lib)
+target_link_libraries(${EXEC_MAIN_NAME}_test_rpm ${APPS_LIB_NAME} ${ENV_LIB_TARGET_NAME} ${CORE_LIB_NAME})
