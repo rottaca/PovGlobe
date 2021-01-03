@@ -6,7 +6,7 @@
 #include <iostream>
 
 RpmMeasureBase::RpmMeasureBase() {
-	m_temporal_resolution = -1;
+    m_temporal_resolution = -1;
 }
 
 RpmMeasureBase::~RpmMeasureBase() {
@@ -14,6 +14,6 @@ RpmMeasureBase::~RpmMeasureBase() {
 
 }
 void RpmMeasureBase::initialize(Globe& globe) {
-	std::cout << "Initialize RpmMeasurment..." << std::endl;
-	m_temporal_resolution = globe.getWidth();
+    std::cout << "Initialize RpmMeasurment..." << std::endl;
+    m_temporal_resolution = globe.getWidth();
 }

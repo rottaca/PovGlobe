@@ -3,7 +3,7 @@
 
 #include "core/renderer_base.hpp"
 
-class RendererSim: public RendererBase
+class RendererSim : public RendererBase
 {
 public:
     RendererSim(
@@ -12,7 +12,7 @@ public:
 
 
     virtual void initialize(Globe& globe);
-    
+
 protected:
 
     cimg_library::CImgDisplay m_draw_display;
