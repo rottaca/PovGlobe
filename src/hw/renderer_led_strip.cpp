@@ -62,6 +62,7 @@ void RendererLedStrip::initialize(Globe& globe)
 
 void RendererLedStrip::render(const Framebuffer& framebuffer)
 {
+    int width = framebuffer.getWidth();
     auto rpmData = m_rpmMeasure.getRpmData();
     if (!rpmData.valid || rpmData.curr_temporal_pos == m_last_curr_temporal_pos) {
         return;
@@ -78,14 +79,14 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     }
 
     if (m_doublesided) {
-        framebuffer_x = (framebuffer_x + framebuffer.getWidth() / 2) % framebuffer.getWidth();
+        framebuffer_x = (framebuffer_x + width / 2) % width;
         for (int i = 0; i < framebuffer.getHeight(); i++) {
             int r = framebuffer(framebuffer_x, i, 0);
             int g = framebuffer(framebuffer_x, i, 1);
             int b = framebuffer(framebuffer_x, i, 2);
+            // Fill second half from bottom to top (inverted)
             m_ledstring.channel[0].leds[2 * framebuffer.getHeight() - i] = (r << 16) | (g << 8) | (b << 0);
         }
     }
-    //m_ledstring.render_wait_time = 0;
     ws2811_render(&m_ledstring);
 }
