@@ -13,8 +13,10 @@ Globe::Globe(int height, int width, float radius, float spacing_top, float spaci
     , m_half_circumference(pi* radius)
     , m_doublesidedRendering(doublesidedRendering)
 {
+    assert(m_width % 2 == 0); // We always need an equal number of cols
     m_framebuffers[0].initialize(m_height, m_width);
     m_framebuffers[1].initialize(m_height, m_width);
+    
 }
 
 Globe::~Globe()
