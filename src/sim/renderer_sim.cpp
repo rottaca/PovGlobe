@@ -84,14 +84,15 @@ void RendererSim::initialize(Globe& globe)
     m_draw_display_3d.move(m_draw_display.width(), 0);
 
     const float scale3d_visu = 180.f;
+    const float nick_angle = 20.f;
     m_sphere_pts = buildSphere(m_sphere_primitives,
                             globe.getWidth(), globe.getHeight(),
                             scale3d_visu, scale3d_visu * globe.getSpacingTop() / globe.getRadius(),
                             scale3d_visu * globe.getSpacingBottom() / globe.getRadius());
     // Rotate to show user the right side of the globe
-    m_sphere_pts = CImg<>::rotation_matrix(1, 0, 0, 30) * CImg<>::rotation_matrix(0, 0, 1, -90) * CImg<>::rotation_matrix(0, 1, 0, 90) * m_sphere_pts;
+    m_sphere_pts = CImg<>::rotation_matrix(1, 0, 0, nick_angle) * CImg<>::rotation_matrix(0, 0, 1, -90) * CImg<>::rotation_matrix(0, 1, 0, 90) * m_sphere_pts;
     m_sphere_colors = CImgList<unsigned char>(m_sphere_primitives.size(), CImg<unsigned char>::vector(0, 0, 0));
-    m_sphere_opacs = CImg<float>(m_sphere_primitives.size(), 1, 1, 1, 0.7f);
+    m_sphere_opacs = CImg<float>(m_sphere_primitives.size(), 1, 1, 1, 1.0f);
 
     m_visu_buffer3d = CImg<unsigned char>(3, m_draw_display_3d.width(), m_draw_display_3d.height(), 1).permute_axes("yzcx");
     m_visu_buffer = CImg<unsigned char>(globe.getWidth(), globe.getHeight(), 1, 3);
@@ -129,8 +130,7 @@ void RendererSim::render(const Framebuffer& buffer)
             m_sphere_pts,
             m_sphere_primitives,
             m_sphere_colors,
-            m_sphere_opacs,
-            2, false, 1000
+            m_sphere_opacs
         );
 
         m_draw_display_3d.display(m_visu_buffer3d);
