@@ -1,6 +1,8 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <map>
+#include <functional>
 
 #include <CImg.h>
 
@@ -29,6 +31,14 @@ const int LED_STRIP_GPIO_PIN = 18;
 using namespace std::chrono_literals;
 
 
+using AlgoFactory = std::function<std::unique_ptr<ApplicationBase>(int, char* [])>;
+
+const std::map<std::string, AlgoFactory> algo_factory = {
+    {"Test1", [](int argc, char* argv[]) {return std::make_unique<ApplicationTest1>(); }},
+    {"ImageViewer", [](int argc, char* argv[]) {return std::make_unique<ApplicationImageViwewer>(argv[2], equirectangularProjection, interpolateNearestNeighbour); }},
+    {"ImageRotator", [](int argc, char* argv[]) {return std::make_unique<ApplicationImageRotator>(argv[2], equirectangularProjection, interpolateNearestNeighbour); }},
+};
+
 std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
 
     for (size_t i = 0; i < argc; i++)
@@ -41,24 +51,8 @@ std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
     }
     else {
         const std::string algo_name{ argv[1] };
-
-        if (algo_name.compare("ImageRotator") == 0) {
-            if (argc == 3) {
-                return std::make_unique<ApplicationImageRotator>(argv[2]);
-            }
-            else {
-                std::cerr << "Invalid arguments for ApplicationImageRotator." << std::endl;
-                return nullptr;
-            }
-        }
-        else if (algo_name.compare("ImageViewer") == 0) {
-            if (argc == 3) {
-                return std::make_unique<ApplicationImageViwewer>(argv[2]);
-            }
-            else {
-                std::cerr << "Invalid arguments for ApplicationImageViwewer." << std::endl;
-                return nullptr;
-            }
+        if (algo_factory.find(algo_name) != algo_factory.end()) {
+            return algo_factory.at(algo_name)(argc, argv);
         }
         else {
             std::cerr << "Invalid algo name " << algo_name << std::endl;
