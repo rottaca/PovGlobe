@@ -25,7 +25,7 @@ RendererLedStrip::~RendererLedStrip()
 void RendererLedStrip::initialize(Globe& globe)
 {
     RendererBase::initialize(globe);
-    std::cout << "Initialize led strip" << std::endl;
+    std::cout << "Initialize led strip..." << std::endl;
 
     int num_leds = globe.getHeight();
     m_last_curr_temporal_pos = -1;

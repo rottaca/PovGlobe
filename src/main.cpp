@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <functional>
+#include <algorithm>
 
 #include <CImg.h>
 
@@ -19,38 +20,54 @@
 #include "hw/renderer_led_strip.hpp"
 #endif
 
-const int width = 120;
-const int height = 55;
-const float radius = 13.25;
-const float spacing_top = 1.0;
-const float spacing_bottom = 2.0;
+const int default_width = 120;
+const int default_height = 55;
+const float default_radius = 13.25;
+const float default_spacing_top = 1.0;
+const float default_spacing_bottom = 2.0;
 
-const int HALL_SENSOR_GPIO_PIN = 25;
-const int LED_STRIP_GPIO_PIN = 18;
+const int default_hall_sensor_gpio_pin = 25;
+const int default_led_strip_gpio_pin = 18;
 
 using namespace std::chrono_literals;
 
-
 using AlgoFactory = std::function<std::unique_ptr<ApplicationBase>(int, char* [])>;
+
+char* getCmdOption(char** begin, char** end, const std::string option)
+{
+    char** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+bool cmdOptionExists(char** begin, char** end, const std::string option)
+{
+    return std::find(begin, end, option) != end;
+}
 
 const std::map<std::string, AlgoFactory> algo_factory = {
     {"Test1", [](int argc, char* argv[]) {return std::make_unique<ApplicationTest1>(); }},
-    {"ImageViewer", [](int argc, char* argv[]) {return std::make_unique<ApplicationImageViwewer>(argv[2], equirectangularProjection, interpolateNearestNeighbour); }},
-    {"ImageRotator", [](int argc, char* argv[]) {return std::make_unique<ApplicationImageRotator>(argv[2], equirectangularProjection, interpolateNearestNeighbour); }},
+    {"ImageViewer", [](int argc, char* argv[]) {
+        const char* file_name = getCmdOption(argv, argv + argc, "-f");
+        return std::make_unique<ApplicationImageViwewer>(file_name, equirectangularProjection, interpolateNearestNeighbour);
+    }},
+    {"ImageRotator", [](int argc, char* argv[]) {
+        const char* file_name = getCmdOption(argv, argv + argc, "-f");
+        return std::make_unique<ApplicationImageRotator>(file_name, equirectangularProjection, interpolateNearestNeighbour);
+    }},
 };
 
 std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
+    const char* algo_name = getCmdOption(argv, argv + argc, "-a");
 
-    for (size_t i = 0; i < argc; i++)
-    {
-        std::cout << argv[i] << std::endl;
-    }
-    if (argc <= 1) {
+    if (!algo_name) {
         std::cout << "No algo specified. Running default algo ApplicationTest1." << std::endl;
         return std::make_unique<ApplicationTest1>();
     }
     else {
-        const std::string algo_name{ argv[1] };
         if (algo_factory.find(algo_name) != algo_factory.end()) {
             return algo_factory.at(algo_name)(argc, argv);
         }
@@ -62,15 +79,34 @@ std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
+    const auto setterInt = [argc, argv](const char* opt, int default) {
+        const char* strVal = getCmdOption(argv, argv + argc, opt);
+        return strVal ? atoi(strVal) : default;
+    };
+    const auto setterFloat = [argc, argv](const char* opt, float default) {
+        const char* strVal = getCmdOption(argv, argv + argc, opt);
+        return strVal ? atof(strVal) : default;
+    };
+    // Parse commandline options
+    const int width = setterInt("-w", default_width);
+    const int height = setterInt("-h", default_height);
+    const float radius = setterFloat("-r", default_radius);
+    const float spacing_top = setterFloat("-t", default_spacing_top);
+    const float spacing_bottom = setterFloat("-b", default_spacing_bottom);
+    const int hall_sensor_gpio_pin = setterInt("-h", default_hall_sensor_gpio_pin);
+    const int led_strip_gpio_pin = setterInt("-l", default_led_strip_gpio_pin);
+
+    const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");
 
 #ifdef BUILD_SIM 
     RpmMeasureSim rpm;
     RendererSim renderer(rpm);
 #elif BUILD_HW
-    RpmMeasureHall rpm(HALL_SENSOR_GPIO_PIN);
-    RendererLedStrip renderer(rpm, LED_STRIP_GPIO_PIN);
+    RpmMeasureHall rpm(hall_sensor_gpio_pin);
+    RendererLedStrip renderer(rpm, led_strip_gpio_pin);
 #endif
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
+
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
 
     auto app_ptr = instantiateAlgorithms(argc, argv);
 
