@@ -76,6 +76,7 @@ cimg_library::CImg<float> buildSphere(cimg_library::CImgList<unsigned int>& prim
 void RendererSim::initialize(Globe& globe)
 {
     RendererBase::initialize(globe);
+    // Create render windows
     const float scale2d_visu = 4.0f;
     m_draw_display.assign(scale2d_visu * globe.getWidth(), scale2d_visu * globe.getHeight(), "Flat Visualization");
     m_draw_display.move(0, 0);
@@ -83,6 +84,7 @@ void RendererSim::initialize(Globe& globe)
     m_draw_display_3d.assign(512, 512, "3D Visualization");
     m_draw_display_3d.move(m_draw_display.width(), 0);
 
+    // Create sphere
     const float scale3d_visu = 180.f;
     const float nick_angle = 20.f;
     m_sphere_pts = buildSphere(m_sphere_primitives,
@@ -94,12 +96,14 @@ void RendererSim::initialize(Globe& globe)
     m_sphere_colors = CImgList<unsigned char>(m_sphere_primitives.size(), CImg<unsigned char>::vector(0, 0, 0));
     m_sphere_opacs = CImg<float>(m_sphere_primitives.size(), 1, 1, 1, 1.0f);
 
+    // Create render buffer
     m_visu_buffer3d = CImg<unsigned char>(3, m_draw_display_3d.width(), m_draw_display_3d.height(), 1).permute_axes("yzcx");
     m_visu_buffer = CImg<unsigned char>(globe.getWidth(), globe.getHeight(), 1, 3);
 }
 
 void RendererSim::render(const Framebuffer& buffer)
 {
+    // Render flat frambuffer
     if (!m_draw_display.is_closed()) {
         for (size_t i = 0; i < buffer.getHeight(); i++)
         {
@@ -114,6 +118,7 @@ void RendererSim::render(const Framebuffer& buffer)
         m_draw_display.display(m_visu_buffer.get_resize_doubleXY().get_resize_doubleXY());
     }
 
+    // Render 3D globe
     if (!m_draw_display_3d.is_closed()) {
         for (size_t j = 0; j < buffer.getWidth(); j++)
         {

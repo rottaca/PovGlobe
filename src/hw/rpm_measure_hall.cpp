@@ -27,7 +27,7 @@ void RpmMeasureHall::edgeDetected()
 {
     auto curr_time = std::chrono::steady_clock::now();
     auto new_delta = curr_time - m_last_event_time;
-
+    // Add delta time to the deque and limit its size
     m_delta_time_deque.push_back(new_delta);
     if (m_delta_time_deque.size() > m_history_size) {
         m_delta_time_deque.pop_front();
@@ -37,13 +37,9 @@ void RpmMeasureHall::edgeDetected()
 
 void RpmMeasureHall::_pulseEx(int gpio, int level, uint32_t tick, void* user)
 {
-    /*
-       Need a static callback to link with C.
-    */
-
+    // Forward the call to the member function
     RpmMeasureHall* mySelf = (RpmMeasureHall*)user;
-
-    mySelf->_pulse(gpio, level, tick); /* Call the instance callback. */
+    mySelf->_pulse(gpio, level, tick);
 }
 
 void RpmMeasureHall::initialize(Globe& globe)
@@ -56,22 +52,29 @@ void RpmMeasureHall::initialize(Globe& globe)
 
     gpioSetMode(m_gpio_pin, PI_INPUT);
     gpioSetPullUpDown(m_gpio_pin, PI_PUD_UP);
+    // Setup callback for rising and falling edges
     gpioSetAlertFuncEx(m_gpio_pin, _pulseEx, this);
 }
 
 RpmMeasureHall::RpmData RpmMeasureHall::getRpmData()
 {
-    RpmMeasureHall::RpmData data;
+    RpmMeasureHall::RpmData data{};
     data.cycle_time = std::chrono::duration<float, std::milli>(0);
+    // Calcualte average cycle time from history
     for (const auto& v : m_delta_time_deque) {
         data.cycle_time += v;
     }
     data.cycle_time /= m_delta_time_deque.size();
 
-    auto curr_time = std::chrono::steady_clock::now();
-    auto dt_since_last_event = curr_time - m_last_event_time;
+    const auto curr_time = std::chrono::steady_clock::now();
+    const auto dt_since_last_event = curr_time - m_last_event_time;
+    // Calculate position along the x axis (temporal dimension) based on the 
+    // elapsed time since the last rising edge.
     data.curr_temporal_pos = static_cast<int>(std::round(m_temporal_resolution * dt_since_last_event / data.cycle_time));
-    data.curr_temporal_pos = data.curr_temporal_pos % m_temporal_resolution;
-    data.valid = m_delta_time_deque.size() == m_history_size;
+    // If we didn't receive an update before we expect to complete the rotation, something is wrong.
+    // At least keep the value in a valid range
+    data.curr_temporal_pos = std::min(data.curr_temporal_pos, m_temporal_resolution - 1);
+    // The signal is valid as long as we have the expected number of samples in the history
+    data.valid = (m_delta_time_deque.size() == m_history_size);
     return data;
 }

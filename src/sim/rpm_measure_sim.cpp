@@ -21,6 +21,7 @@ void RpmMeasureSim::initialize(Globe& globe)
 
 RpmMeasureSim::RpmData RpmMeasureSim::getRpmData()
 {
+    // Dummy implementation with no real use. We don't need it for the simulation framework.
     m_curr_tick = (m_curr_tick + 1) % m_max_tick;
     int curr_pos = static_cast<int>(std::round(static_cast<float>(m_curr_tick) * m_temporal_resolution / (m_max_tick - 1)));
     return { m_cycle_time, curr_pos };

@@ -54,6 +54,7 @@ void Globe::runApplication(ApplicationBase& app)
         app.process(getAppFrameBuffer(), delta.count());
 
         // Lock buffer swap
+        // TODO: Still not completely correct, as only the indices are locked, not the buffers itself.
         swapFramebuffers();
 
         const auto total_loop_time = t2.loopDone();
