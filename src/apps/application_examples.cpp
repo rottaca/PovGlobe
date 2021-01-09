@@ -15,13 +15,45 @@ void ApplicationTest1::process(Framebuffer& framebuffer, float time)
         framebuffer(1, i, 1) = 255;
     }
 
-    framebuffer(framebuffer.getWidth() / 2, framebuffer.getHeight() / 2, 0) = 255;
+    framebuffer(framebuffer.getWidth() / 2, framebuffer.getHeight() / 2, 0) = 0;
     framebuffer(framebuffer.getWidth() / 2, framebuffer.getHeight() / 2, 1) = 255;
-    framebuffer(framebuffer.getWidth() / 2, framebuffer.getHeight() / 2, 2) = 255;
+    framebuffer(framebuffer.getWidth() / 2, framebuffer.getHeight() / 2, 2) = 0;
 
-    framebuffer(framebuffer.getWidth() / 2, 15, 0) = 255;
-    framebuffer(framebuffer.getWidth() / 2, 15, 1) = 255;
-    framebuffer(framebuffer.getWidth() / 2, 15, 2) = 255;
+    framebuffer(framebuffer.getWidth() / 2, 10, 0) = 0;
+    framebuffer(framebuffer.getWidth() / 2, 10, 1) = 0;
+    framebuffer(framebuffer.getWidth() / 2, 10, 2) = 128;
+    
+    framebuffer(framebuffer.getWidth() / 2, 15, 0) = 128;
+    framebuffer(framebuffer.getWidth() / 2, 15, 1) = 0;
+    framebuffer(framebuffer.getWidth() / 2, 15, 2) = 0;
+    
+    framebuffer(framebuffer.getWidth() / 2, 20, 0) = 0;
+    framebuffer(framebuffer.getWidth() / 2, 20, 1) = 128;
+    framebuffer(framebuffer.getWidth() / 2, 20, 2) = 0;
+    
+    const int h = framebuffer.getHeight();
+    
+    for (int i = 0; i < h; i++) {
+      // green to red
+      framebuffer(framebuffer.getWidth() / 2 + 5, i, 0) = i*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 5, i, 1) = (h-1-i)*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 5, i, 2) = 0; 
+      
+      // blue to green
+      framebuffer(framebuffer.getWidth() / 2 + 7, i, 0) = 0;
+      framebuffer(framebuffer.getWidth() / 2 + 7, i, 1) = i*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 7, i, 2) = (h-1-i)*255/(h-1);
+      
+      // red to blue  
+      framebuffer(framebuffer.getWidth() / 2 + 9, i, 0) = (h-1-i)*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 9, i, 1) = 0;
+      framebuffer(framebuffer.getWidth() / 2 + 9, i, 2) = i*255/(h-1);
+      
+      // white to black
+      framebuffer(framebuffer.getWidth() / 2 + 11, i, 0) = (h-1-i)*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 11, i, 1) = (h-1-i)*255/(h-1);
+      framebuffer(framebuffer.getWidth() / 2 + 11, i, 2) = (h-1-i)*255/(h-1);
+    }
 
 }
 

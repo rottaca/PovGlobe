@@ -113,7 +113,8 @@ int main(int argc, char* argv[]) {
     globe.runRendererAsync();
     globe.runApplicationAsync(*app_ptr);
 
-    std::this_thread::sleep_for(60000ms);
-
+    while(true) {
+      std::this_thread::sleep_for(1000ms);
+    }
     globe.shutdown();
 }
