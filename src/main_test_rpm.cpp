@@ -26,10 +26,10 @@ int main(int argc, char* argv[]) {
     RendererSim renderer(rpm);
 #elif BUILD_HW
     RpmMeasureHall rpm(HALL_SENSOR_GPIO_PIN);
-    RendererLedStrip renderer(rpm, LED_STRIP_GPIO_PIN);
+    RendererLedStrip renderer(rpm);
 #endif
 
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, false, renderer);
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
 
     rpm.initialize(globe);
 

@@ -4,11 +4,9 @@
 
 #include <bcm2835.h>
 
-RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base, int led_strip_gpio_pin)
+RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base)
     :RendererBase(rpm_measure_base)
-    , m_led_strip_gpio_pin(led_strip_gpio_pin)
     , m_last_curr_temporal_pos(-1)
-    , m_ledstring({})
 {
 
 }
@@ -77,13 +75,13 @@ void RendererLedStrip::initialize(Globe& globe)
     if (!bcm2835_init())
     {
         printf("bcm2835_init failed. Are you running as root??\n");
-        return 1;
+        exit(1);
     }
 
     if (!bcm2835_spi_begin())
     {
         printf("bcm2835_spi_begin failedg. Are you running as root??\n");
-        return 1;
+        exit(1);
     }
 
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
@@ -134,16 +132,16 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     int framebuffer_x = rpmData.curr_temporal_pos;
     m_last_curr_temporal_pos = framebuffer_x;
 
-    const auto led_idx = [](size_t i) {return 8 + i*4 };
+    const auto led_idx = [](size_t i) {return 4 + i*4; };
 
     // Render first half of globe from top to bottom
     for (int i = 0; i < height; i++) {
         int r = framebuffer(framebuffer_x, i, 0);
         int g = framebuffer(framebuffer_x, i, 1);
         int b = framebuffer(framebuffer_x, i, 2);
-        m_led_data[led_idx(i) + 1] = r;
+        m_led_data[led_idx(i)+1] = b;
         m_led_data[led_idx(i) + 2] = g;
-        m_led_data[led_idx(i) + 3] = b;
+        m_led_data[led_idx(i) + 3] = r;
     }
     // If double sided rendering is enabled (and if the globe as leds on the opposite side as well,
     // render the other side of the globe from bottom to top (with current wiring)
@@ -155,9 +153,9 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
             int g = framebuffer(framebuffer_x, i, 1);
             int b = framebuffer(framebuffer_x, i, 2);
             // Fill second half from bottom to top (inverted)
-            m_led_data[led_idx(i)+1] = r;
-            m_led_data[led_idx(i) + 2] = g;
-            m_led_data[led_idx(i) + 3] = b;
+            m_led_data[led_idx(2*height -1 - i)+1] = b;
+            m_led_data[led_idx(2*height -1 - i) + 2] = g;
+            m_led_data[led_idx(2*height -1 - i) + 3] = r;
         }
     }
 

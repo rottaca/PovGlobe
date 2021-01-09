@@ -79,13 +79,13 @@ std::unique_ptr<ApplicationBase> instantiateAlgorithms(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    const auto setterInt = [argc, argv](const char* opt, int default) {
+    const auto setterInt = [argc, argv](const char* opt, int fallback) {
         const char* strVal = getCmdOption(argv, argv + argc, opt);
-        return strVal ? atoi(strVal) : default;
+        return strVal ? atoi(strVal) : fallback;
     };
-    const auto setterFloat = [argc, argv](const char* opt, float default) {
+    const auto setterFloat = [argc, argv](const char* opt, float fallback) {
         const char* strVal = getCmdOption(argv, argv + argc, opt);
-        return strVal ? atof(strVal) : default;
+        return strVal ? atof(strVal) : fallback;
     };
     // Parse commandline options
     const int width = setterInt("-w", default_width);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
     RendererSim renderer(rpm);
 #elif BUILD_HW
     RpmMeasureHall rpm(hall_sensor_gpio_pin);
-    RendererLedStrip renderer(rpm, led_strip_gpio_pin);
+    RendererLedStrip renderer(rpm);
 #endif
 
     Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);

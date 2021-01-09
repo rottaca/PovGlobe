@@ -32,25 +32,7 @@ void RendererBase::runAsync(Globe& globe)
     m_renderThread = std::thread(&RendererBase::run, this, std::ref(globe));
     
 #if defined(__unix__) || defined(__unix) 
-    // Set thread priority to max for optimized rendering performance.
-    sched_param sch;
-    sch.sched_priority = 99;
-    if (pthread_setschedparam(m_renderThread.native_handle(), SCHED_FIFO, &sch)) {
-        std::cout << "setschedparam failed: " << std::strerror(errno) << std::endl;
-    }else{
-        std::cout << "Render thread policy changed to FIFO and priority increased."<< std::endl;
-    }
-    
-    int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(0, &cpuset);
 
-    if(pthread_setaffinity_np(m_renderThread.native_handle(), sizeof(cpu_set_t), &cpuset)){
-        std::cout << "pthread_setaffinity_np failed: " << std::strerror(errno) << std::endl;
-    }else{
-        std::cout << "CPU affinity of render thread changed to CPU0."<< std::endl;
-    }
 #endif
 }
 
