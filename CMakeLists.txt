@@ -15,6 +15,8 @@ set(HW_LIB_EXT_NAME ${CMAKE_PROJECT_NAME}_hw_lib_ext)
 set(SIM_LIB_EXT_NAME ${CMAKE_PROJECT_NAME}_sim_lib_ext)
 set(APPS_LIB_NAME ${CMAKE_PROJECT_NAME}_apps_lib)
 
+set(PY_WRAPPER_LIB_NAME ${CMAKE_PROJECT_NAME}_py_wrapper)
+
 set(EXEC_MAIN_NAME ${CMAKE_PROJECT_NAME})
 
 # Create interface library for cimg header only lib
@@ -36,19 +38,17 @@ else()
   message(FATAL_ERROR "Unknown platform.")
 endif()
 
+add_subdirectory(src/core)
 
 if (${BUILD_TARGET} STREQUAL "SIM")
-	add_compile_definitions(BUILD_SIM)
 	message(STATUS "Building simulation framework.")
 elseif(${BUILD_TARGET} STREQUAL "HW")
-	add_compile_definitions(BUILD_HW)
 	message(STATUS "Building hw application.")
 	add_subdirectory(ext/pigpio)
 else()
   message(FATAL_ERROR "Invalid build target specified.")
 endif()
 
-add_subdirectory(src/core)
 
 if (${BUILD_TARGET} STREQUAL "SIM")
   add_subdirectory(src/sim)
@@ -60,6 +60,7 @@ endif()
 
 
 add_subdirectory(src/apps)
+add_subdirectory(src/wrapper_python)
 
 # executable
 add_executable(${EXEC_MAIN_NAME}

@@ -6,6 +6,8 @@ set(SOURCE_FILES_SIM
 
 # sim library
 add_library(${SIM_LIB_EXT_NAME} ${SOURCE_FILES_SIM})
+target_compile_definitions(${SIM_LIB_EXT_NAME} PUBLIC BUILD_SIM)
+
 if (WIN32)
   target_link_libraries(${SIM_LIB_EXT_NAME} ${CORE_LIB_NAME} gdi32)
 elseif (UNIX)

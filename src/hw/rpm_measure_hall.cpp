@@ -56,7 +56,7 @@ void RpmMeasureHall::initialize(Globe& globe)
     gpioSetAlertFuncEx(m_gpio_pin, _pulseEx, this);
 }
 
-RpmMeasureHall::RpmData RpmMeasureHall::getRpmData()
+RpmData RpmMeasureHall::getRpmData()
 {
     RpmMeasureHall::RpmData data{};
     data.cycle_time = std::chrono::duration<float, std::milli>(0);

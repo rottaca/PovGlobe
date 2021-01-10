@@ -2,6 +2,8 @@
 #include "globe.hpp"
 #include <iostream>
 
+using namespace std::chrono_literals;
+
 void ApplicationBase::initialize(Globe& globe)
 {
 }

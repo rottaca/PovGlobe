@@ -3,7 +3,6 @@
 #include "helper.hpp"
 
 #include <chrono>
-using namespace std::chrono_literals;
 
 class Globe;
 

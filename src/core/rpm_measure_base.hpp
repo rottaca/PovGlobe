@@ -4,15 +4,16 @@
 
 class Globe;
 
+
+struct RpmData {
+    std::chrono::duration<float, std::milli> cycle_time;
+    int curr_temporal_pos;
+    bool valid;
+};
+
 class RpmMeasureBase
 {
 public:
-
-    struct RpmData {
-        std::chrono::duration<float, std::milli> cycle_time;
-        int curr_temporal_pos;
-        bool valid;
-    };
 
     RpmMeasureBase();
     virtual ~RpmMeasureBase();

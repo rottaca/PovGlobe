@@ -16,5 +16,7 @@ find_package(ImageMagick 6 EXACT REQUIRED COMPONENTS Magick++)
 target_link_libraries(${CORE_LIB_NAME} cimg ${ImageMagick_LIBRARIES})
 target_include_directories(${CORE_LIB_NAME} PUBLIC .. ${ImageMagick_INCLUDE_DIRS})
 
-target_compile_options(${CORE_LIB_NAME} PUBLIC -fPIC)
+if(UNIX)
+  target_compile_options(${CORE_LIB_NAME} PUBLIC -fPIC)
+endif()
 target_compile_definitions(${CORE_LIB_NAME} PUBLIC cimg_use_magick=1 MAGICKCORE_QUANTUM_DEPTH=16 MAGICKCORE_HDRI_ENABLE=0)

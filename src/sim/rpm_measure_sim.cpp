@@ -19,7 +19,7 @@ void RpmMeasureSim::initialize(Globe& globe)
     m_curr_tick = 0;
 }
 
-RpmMeasureSim::RpmData RpmMeasureSim::getRpmData()
+RpmData RpmMeasureSim::getRpmData()
 {
     // Dummy implementation with no real use. We don't need it for the simulation framework.
     m_curr_tick = (m_curr_tick + 1) % m_max_tick;
