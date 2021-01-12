@@ -18,11 +18,12 @@ renderer = PovGlobe.RendererSim(rpm)
 
 globe = PovGlobe.Globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer)
 
-#app = PovGlobe.ApplicationImageRotator(r"D:\Benutzer\Andreas\GitProjects\PovGlobe\res\img\1_earth_8k.jpg",
-#                                       PovGlobe.equirectangularProjection,
-#                                       PovGlobe.interpolateNearestNeighbour)
+proj = PovGlobe.EquirectangularProjection()
+interp = PovGlobe.NearestNeighbourPixelInterpolation()
+app = PovGlobe.ApplicationImageRotator(r"D:\Benutzer\Andreas\GitProjects\PovGlobe\res\img\1_earth_8k.jpg",
+                                       proj, interp)
 
-app = PovGlobe.ApplicationTest1()
+#app = PovGlobe.ApplicationTest1()
 
 globe.runRendererAsync()
 globe.runApplicationAsync(app)

@@ -59,8 +59,8 @@ void ApplicationTest1::process(Framebuffer& framebuffer, float time)
 
 
 ApplicationImageViwewer::ApplicationImageViwewer(const char* path,
-    const ProjectionFunction projection,
-    const InterpolationFunction pixelInterpolation
+    const ProjectionFunction& projection,
+    const InterpolationFunction& pixelInterpolation
 )
     : ApplicationBase()
     , m_path(path)
@@ -108,8 +108,8 @@ void ApplicationImageViwewer::process(Framebuffer& framebuffer, float time)
 
 
 ApplicationImageRotator::ApplicationImageRotator(const char* path,
-    const ProjectionFunction projection,
-    const InterpolationFunction pixelInterpolation)
+    const ProjectionFunction& projection,
+    const InterpolationFunction& pixelInterpolation)
     : ApplicationImageViwewer(path, projection, pixelInterpolation)
     , m_offset_x(0)
 {}

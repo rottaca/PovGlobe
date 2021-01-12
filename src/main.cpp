@@ -50,15 +50,18 @@ bool cmdOptionExists(char** begin, char** end, const std::string option)
     return std::find(begin, end, option) != end;
 }
 
+const EquirectangularProjection equrectProj;
+const NearestNeighbourPixelInterpolation nearestNeighbour;
+
 const std::map<std::string, AlgoFactory> algo_factory = {
     {"Test1", [](int argc, char* argv[]) {return std::make_unique<ApplicationTest1>(); }},
     {"ImageViewer", [](int argc, char* argv[]) {
         const char* file_name = getCmdOption(argv, argv + argc, "-f");
-        return std::make_unique<ApplicationImageViwewer>(file_name, equirectangularProjection, interpolateNearestNeighbour);
+        return std::make_unique<ApplicationImageViwewer>(file_name, equrectProj, nearestNeighbour);
     }},
     {"ImageRotator", [](int argc, char* argv[]) {
         const char* file_name = getCmdOption(argv, argv + argc, "-f");
-        return std::make_unique<ApplicationImageRotator>(file_name, equirectangularProjection, interpolateNearestNeighbour);
+        return std::make_unique<ApplicationImageRotator>(file_name, equrectProj, nearestNeighbour);
     }},
 };
 

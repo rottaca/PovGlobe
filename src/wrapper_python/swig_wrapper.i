@@ -28,6 +28,9 @@
 %include "core/helper.hpp"
 %include "core/globe.hpp"
 %include "core/application_base.hpp"
+%include "core/framebuffer.hpp"
+%include "core/interpolation.hpp"
+%include "core/projection.hpp"
 
 #ifdef HW_AVAILABLE
   %include "hw/renderer_led_strip.hpp"

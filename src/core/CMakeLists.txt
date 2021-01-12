@@ -4,6 +4,7 @@ set(SOURCE_FILES
 	"application_base.cpp"
 	"rpm_measure_base.cpp"
 	"renderer_base.cpp"
+	"framebuffer.cpp"
 	"helper.cpp"
 )
 
@@ -13,7 +14,7 @@ add_library(${CORE_LIB_NAME} ${SOURCE_FILES})
 # Link 
 find_package(ImageMagick 6 EXACT REQUIRED COMPONENTS Magick++)
 
-target_link_libraries(${CORE_LIB_NAME} cimg ${ImageMagick_LIBRARIES})
+target_link_libraries(${CORE_LIB_NAME} PUBLIC cimg ${ImageMagick_LIBRARIES})
 target_include_directories(${CORE_LIB_NAME} PUBLIC .. ${ImageMagick_INCLUDE_DIRS})
 
 if(UNIX)

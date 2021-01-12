@@ -4,7 +4,7 @@
 #include <atomic>
 
 #include "rpm_measure_base.hpp"
-#include "helper.hpp"
+#include "framebuffer.hpp"
 
 class Globe;
 

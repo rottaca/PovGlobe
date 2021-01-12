@@ -5,6 +5,7 @@
 #include "renderer_base.hpp"
 #include "rpm_measure_base.hpp"
 #include "application_base.hpp"
+#include "framebuffer.hpp"
 #include "helper.hpp"
 
 class Globe

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "helper.hpp"
+#include "framebuffer.hpp"
 
 #include <chrono>
 

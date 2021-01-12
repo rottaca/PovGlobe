@@ -36,28 +36,3 @@ std::chrono::duration<float, std::milli> LoopTimer::loopDone()
 
     return delta;
 }
-
-
-Framebuffer::Framebuffer()
-    : m_width(0)
-    , m_height(0)
-    , m_channels(0)
-{
-}
-
-
-Framebuffer::~Framebuffer()
-{
-}
-
-void Framebuffer::initialize(uint32_t height, uint32_t width, uint32_t channels)
-{
-    assert(width > 0);
-    assert(height > 0);
-    assert(channels > 0);
-    m_width = width;
-    m_height = height;
-    m_channels = channels;
-    m_values.resize(m_width * m_height * m_channels);
-    std::fill(m_values.begin(), m_values.end(), 0);
-}
