@@ -6,24 +6,37 @@ if(SWIG_FOUND)
   # Make swig generate standard target names
   cmake_policy(SET CMP0078 NEW)
 
-  INCLUDE(${SWIG_USE_FILE})
-  FIND_PACKAGE(PythonLibs)
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  
+  include(${SWIG_USE_FILE})
+  find_package(PythonLibs REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH})
+
   set(CMAKE_SWIG_FLAGS "")
+  set_property(SOURCE swig_wrapper.i PROPERTY CPLUSPLUS ON)
   
-  set_property(SOURCE swig_wrapper.i PROPERTY CPLUSPLUS ON) 
-  
-  set_property(TARGET ${CORE_LIB_NAME} PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES )
+  foreach(TGT ${POV_GLOBE_TARGETS})
+    set_property(TARGET ${TGT} PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES )
+  endforeach()
 
   swig_add_library (${PY_WRAPPER_LIB_NAME} TYPE SHARED LANGUAGE python SOURCES swig_wrapper.i ) 
-  swig_link_libraries (${PY_WRAPPER_LIB_NAME} PUBLIC ${PYTHON_LIBRARIES} ${CORE_LIB_NAME} ${ENV_LIB_TARGET_NAME} ${APPS_LIB_NAME})
+  swig_link_libraries (${PY_WRAPPER_LIB_NAME} PUBLIC ${PYTHON_LIBRARIES} ${POV_GLOBE_TARGETS})
   
-  get_target_property(_compile_defs ${ENV_LIB_TARGET_NAME} COMPILE_DEFINITIONS)
-  get_target_property(MY_INCLUDES ${CORE_LIB_NAME} INCLUDE_DIRECTORIES)
-
-  set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_INCLUDE_DIRECTORIES ${MY_INCLUDES})
-  set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_COMPILE_DEFINITIONS ${_compile_defs})
+  set(ALL_COMPILE_DEFS "")
+  set(ALL_INCLUDES "")
+  foreach(TGT ${POV_GLOBE_TARGETS})
+    get_target_property(COMPILE_DEFS ${TGT} COMPILE_DEFINITIONS)
+    get_target_property(INCLUDES ${TGT} INCLUDE_DIRECTORIES)
+    if (INCLUDES)
+      list(APPEND ALL_INCLUDES ${INCLUDES})
+    endif()
+    if (COMPILE_DEFS)
+      list(APPEND ALL_COMPILE_DEFS ${COMPILE_DEFS})
+    endif()
+  endforeach()
+  
+  message(STATUS "ALL_COMP: ${ALL_COMPILE_DEFS}")
+  message(STATUS "ALL_INC: ${ALL_INCLUDES}")
+  set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_INCLUDE_DIRECTORIES ${ALL_INCLUDES})
+  set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_COMPILE_DEFINITIONS ${ALL_COMPILE_DEFS})
 
 endif()
 

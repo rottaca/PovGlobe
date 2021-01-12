@@ -7,15 +7,15 @@
 #include "core/globe.hpp"
 #include "core/application_base.hpp"
 
-#ifdef BUILD_HW
+#ifdef HW_AVAILABLE
  #include "hw/renderer_led_strip.hpp"
  #include "hw/rpm_mreasure_hall.hpp"
 #endif
-#ifdef BUILD_SIM
+#ifdef SIM_AVAILABLE
  #include "sim/renderer_sim.hpp"
  #include "sim/rpm_measure_sim.hpp"
 #endif
-#if !defined(BUILD_HW) && !defined(BUILD_SIM)
+#if !defined(HW_AVAILABLE) && !defined(SIM_AVAILABLE)
   #error "No build target specified"
 #endif
 
@@ -29,15 +29,15 @@
 %include "core/globe.hpp"
 %include "core/application_base.hpp"
 
-#ifdef BUILD_HW
+#ifdef HW_AVAILABLE
   %include "hw/renderer_led_strip.hpp"
   %include "hw/rpm_mreasure_hall.hpp"
 #endif
-#ifdef BUILD_SIM
+#ifdef SIM_AVAILABLE
   %include "sim/renderer_sim.hpp"
   %include "sim/rpm_measure_sim.hpp"
 #endif
-#if !defined(BUILD_HW) && !defined(BUILD_SIM)
+#if !defined(HW_AVAILABLE) && !defined(SIM_AVAILABLE)
   #error "No build target specified"
 #endif
 

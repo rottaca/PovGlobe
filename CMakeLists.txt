@@ -1,14 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(PovGlobe)
 
-option(BUILD_TARGET "Build simulation (SIM) or hw (HW)." "SIM")
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CORE_LIB_NAME ${CMAKE_PROJECT_NAME}_core_lib)
 set(HW_LIB_EXT_NAME ${CMAKE_PROJECT_NAME}_hw_lib_ext)
@@ -18,6 +10,14 @@ set(APPS_LIB_NAME ${CMAKE_PROJECT_NAME}_apps_lib)
 set(PY_WRAPPER_LIB_NAME ${CMAKE_PROJECT_NAME}_py_wrapper)
 
 set(EXEC_MAIN_NAME ${CMAKE_PROJECT_NAME})
+
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Create interface library for cimg header only lib
 add_library(cimg INTERFACE)
@@ -39,37 +39,32 @@ else()
 endif()
 
 add_subdirectory(src/core)
-
-if (${BUILD_TARGET} STREQUAL "SIM")
-	message(STATUS "Building simulation framework.")
-elseif(${BUILD_TARGET} STREQUAL "HW")
-	message(STATUS "Building hw application.")
-	add_subdirectory(ext/pigpio)
-else()
-  message(FATAL_ERROR "Invalid build target specified.")
-endif()
-
-
-if (${BUILD_TARGET} STREQUAL "SIM")
-  add_subdirectory(src/sim)
-  set(ENV_LIB_TARGET_NAME ${SIM_LIB_EXT_NAME})
-elseif(${BUILD_TARGET} STREQUAL "HW")
-  add_subdirectory(src/hw)
-  set(ENV_LIB_TARGET_NAME ${HW_LIB_EXT_NAME})
-endif()
-
-
 add_subdirectory(src/apps)
+
+set(POV_GLOBE_TARGETS "")
+list(APPEND POV_GLOBE_TARGETS ${CORE_LIB_NAME})
+list(APPEND POV_GLOBE_TARGETS ${APPS_LIB_NAME})
+
+add_subdirectory(src/hw)
+if(TARGET ${HW_LIB_EXT_NAME})
+  list(APPEND POV_GLOBE_TARGETS ${HW_LIB_EXT_NAME})
+endif()
+
+add_subdirectory(src/sim)
+if(TARGET ${SIM_LIB_EXT_NAME})
+  list(APPEND POV_GLOBE_TARGETS ${SIM_LIB_EXT_NAME})
+endif()
+
 add_subdirectory(src/wrapper_python)
 
 # executable
 add_executable(${EXEC_MAIN_NAME}
 	src/main.cpp
 )
-target_link_libraries(${EXEC_MAIN_NAME} ${APPS_LIB_NAME} ${ENV_LIB_TARGET_NAME} ${CORE_LIB_NAME})
+target_link_libraries(${EXEC_MAIN_NAME} ${POV_GLOBE_TARGETS})
 
 # executable
 add_executable(${EXEC_MAIN_NAME}_test_rpm
 	src/main_test_rpm.cpp
 )
-target_link_libraries(${EXEC_MAIN_NAME}_test_rpm ${APPS_LIB_NAME} ${ENV_LIB_TARGET_NAME} ${CORE_LIB_NAME})
+target_link_libraries(${EXEC_MAIN_NAME}_test_rpm ${POV_GLOBE_TARGETS})

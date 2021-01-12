@@ -12,10 +12,12 @@
 #include "core/globe.hpp"
 #include "apps/application_examples.hpp"
 
-#ifdef BUILD_SIM 
+#ifdef SIM_AVAILABLE 
 #include "sim/rpm_measure_sim.hpp"
 #include "sim/renderer_sim.hpp"
-#elif BUILD_HW
+#endif
+
+#ifdef HW_AVAILABLE
 #include "hw/rpm_measure_hall.hpp"
 #include "hw/renderer_led_strip.hpp"
 #endif
@@ -98,15 +100,17 @@ int main(int argc, char* argv[]) {
 
     const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");
 
-#ifdef BUILD_SIM 
+#ifdef SIM_AVAILABLE 
     RpmMeasureSim rpm;
     RendererSim renderer(rpm);
-#elif BUILD_HW
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
+#endif
+#ifdef HW_AVAILABLE 
     RpmMeasureHall rpm(hall_sensor_gpio_pin);
     RendererLedStrip renderer(rpm);
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
 #endif
 
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
 
     auto app_ptr = instantiateAlgorithms(argc, argv);
 

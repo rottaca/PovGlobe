@@ -3,10 +3,12 @@
 
 #include "core/globe.hpp"
 
-#ifdef BUILD_SIM 
+#ifdef SIM_AVAILABLE 
 #include "sim/rpm_measure_sim.hpp"
 #include "sim/renderer_sim.hpp"
-#elif BUILD_HW
+#endif
+
+#ifdef HW_AVAILABLE
 #include "hw/rpm_measure_hall.hpp"
 #include "hw/renderer_led_strip.hpp"
 #endif
@@ -21,15 +23,16 @@ const int HALL_SENSOR_GPIO_PIN = 25;
 const int LED_STRIP_GPIO_PIN = 18;
 
 int main(int argc, char* argv[]) {
-#ifdef BUILD_SIM 
+#ifdef SIM_AVAILABLE 
     RpmMeasureSim rpm;
     RendererSim renderer(rpm);
-#elif BUILD_HW
-    RpmMeasureHall rpm(HALL_SENSOR_GPIO_PIN);
-    RendererLedStrip renderer(rpm);
-#endif
-
     Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
+#endif
+#ifdef HW_AVAILABLE 
+    RpmMeasureHall rpm(hall_sensor_gpio_pin);
+    RendererLedStrip renderer(rpm);
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
+#endif
 
     rpm.initialize(globe);
 
