@@ -8,6 +8,6 @@ void ApplicationBase::initialize(Globe& globe)
 {
 }
 
-std::chrono::duration<float, std::milli> ApplicationBase::getTargetCycleTime() const {
-    return 33ms;
+float ApplicationBase::getTargetCycleTimeMs() const {
+    return 33.f;
 }

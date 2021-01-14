@@ -1,5 +1,5 @@
 
-%module PovGlobe
+%module(directors="1", threads="1")  PovGlobe
 
 %include <stl.i>
 
@@ -23,7 +23,7 @@
 #include "apps/application_examples.hpp"
 %}
 
-
+%feature("director") ApplicationBase;
 
 %include "core/helper.hpp"
 %include "core/globe.hpp"

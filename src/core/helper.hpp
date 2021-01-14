@@ -14,6 +14,8 @@
 
 
 constexpr double pi = 3.14159265358979323846;
+constexpr double deg2rad = pi / 180.f;
+constexpr double rad2deg = 180.f / pi;
 
 class LoopTimer
 {

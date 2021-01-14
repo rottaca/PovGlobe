@@ -2,17 +2,14 @@
 
 #include "framebuffer.hpp"
 
-#include <chrono>
-
 class Globe;
 
 class ApplicationBase {
-
-
 public:
+    virtual ~ApplicationBase() = default;
+
     virtual void initialize(Globe& globe);
+    virtual float getTargetCycleTimeMs() const;
 
-    virtual void process(Framebuffer& framebuffer, float time) = 0;
-
-    virtual std::chrono::duration<float, std::milli> getTargetCycleTime() const;
+    virtual void process(Framebuffer& framebuffer, float timeS) = 0;
 };
