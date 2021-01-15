@@ -58,7 +58,7 @@ void RpmMeasureHall::initialize(Globe& globe)
 
 RpmData RpmMeasureHall::getRpmData()
 {
-    RpmMeasureHall::RpmData data{};
+    RpmData data{};
     data.cycle_time = std::chrono::duration<float, std::milli>(0);
     // Calcualte average cycle time from history
     for (const auto& v : m_delta_time_deque) {
