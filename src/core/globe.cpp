@@ -50,9 +50,7 @@ void Globe::runApplication(ApplicationBase& app)
     while (m_applicationThread_running) {
         const auto time = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<float, std::ratio<1, 1>> delta = time - start;
-        std::cout << "process" << std::endl;
         app.process(getAppFrameBuffer(), delta.count());
-        std::cout << "process done" << std::endl;
 
         // Lock buffer swap
         // TODO: Still not completely correct, as only the indices are locked, not the buffers itself.
