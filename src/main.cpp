@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <memory>
 
 #include <CImg.h>
 
@@ -22,14 +23,13 @@
 #include "hw/renderer_led_strip.hpp"
 #endif
 
-const int default_width = 120;
+const int default_width = 110;
 const int default_height = 55;
 const float default_radius = 13.25;
-const float default_spacing_top = 1.0;
+const float default_spacing_top = 1.5;
 const float default_spacing_bottom = 2.0;
 
 const int default_hall_sensor_gpio_pin = 25;
-const int default_led_strip_gpio_pin = 18;
 
 using namespace std::chrono_literals;
 
@@ -98,22 +98,34 @@ int main(int argc, char* argv[]) {
     const float radius = setterFloat("-r", default_radius);
     const float spacing_top = setterFloat("-t", default_spacing_top);
     const float spacing_bottom = setterFloat("-b", default_spacing_bottom);
-    const int hall_sensor_gpio_pin = setterInt("-h", default_hall_sensor_gpio_pin);
-    const int led_strip_gpio_pin = setterInt("-l", default_led_strip_gpio_pin);
+    const int hall_sensor_gpio_pin = setterInt("-s", default_hall_sensor_gpio_pin);
 
-    const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");
+    const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");    
+    const bool use_hw = cmdOptionExists(argv, argv + argc, "-k");
 
-#ifdef SIM_AVAILABLE 
-    RpmMeasureSim rpm;
-    RendererSim renderer(rpm);
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
-#endif
+
+    std::shared_ptr<RpmMeasureBase> rpmMeasure;
+    std::shared_ptr<RendererBase> renderer;
+
+    if (use_hw) {
 #ifdef HW_AVAILABLE 
-    RpmMeasureHall rpm(hall_sensor_gpio_pin);
-    RendererLedStrip renderer(rpm);
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer);
+    rpmMeasure = std::make_shared<RpmMeasureHall>(hall_sensor_gpio_pin);
+    renderer = std::make_shared<RendererLedStrip>(*rpmMeasure);
+#else
+    std::cerr << "Not build with HW support!" << std::endl;  
+    exit(1);
 #endif
-
+    } else{
+#ifdef SIM_AVAILABLE 
+    rpmMeasure = std::make_shared<RpmMeasureSim>();
+    renderer = std::make_shared<RendererSim>(*rpmMeasure);
+#else
+    std::cerr << "Not build with simulation support!" << std::endl;  
+    exit(1);
+#endif
+    }
+        
+    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, *renderer);
 
     auto app_ptr = instantiateAlgorithms(argc, argv);
 

@@ -30,10 +30,7 @@ void RendererBase::initialize(Globe& globe)
 void RendererBase::runAsync(Globe& globe)
 {
     m_renderThread = std::thread(&RendererBase::run, this, std::ref(globe));
-    
-#if defined(__unix__) || defined(__unix) 
 
-#endif
 }
 
 void RendererBase::run(Globe& globe)

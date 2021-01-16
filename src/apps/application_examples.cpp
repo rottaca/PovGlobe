@@ -77,6 +77,7 @@ void ApplicationImageViwewer::initialize(Globe& globe) {
     }
 
     m_img = cimg_library::CImg<unsigned char>(m_path.c_str());
+    std::cout << "Loaded image: "<< m_img.width() << "x" << m_img.height() << std::endl;
 
     const float top_pixel_skip_exact = globe.getSpacingTop() / globe.getHalfCircumference() * globe.getHeight();
     m_top_pixel_skip = static_cast<int>(round(top_pixel_skip_exact));
