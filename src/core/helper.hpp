@@ -29,8 +29,10 @@ public:
 
 private:
     std::chrono::time_point<std::chrono::steady_clock> m_last_time;
+    std::chrono::time_point<std::chrono::steady_clock> m_last_time_max;
     std::chrono::time_point<std::chrono::steady_clock> m_last_time_print;
     float m_avgLoopTime;
+    float m_maxLoopTime;
     std::string m_tag;
 };
 

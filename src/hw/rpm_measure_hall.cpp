@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cmath>
 
-RpmMeasureHall::RpmMeasureHall(int gpio_pin) : m_history_size(1)
+RpmMeasureHall::RpmMeasureHall(int gpio_pin) : m_history_size(5)
 {
     m_gpio_pin = gpio_pin;
 }
