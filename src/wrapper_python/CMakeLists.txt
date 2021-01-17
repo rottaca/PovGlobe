@@ -19,6 +19,7 @@ if(SWIG_FOUND)
 
   swig_add_library (${PY_WRAPPER_LIB_NAME} TYPE SHARED LANGUAGE python SOURCES swig_wrapper.i ) 
   swig_link_libraries (${PY_WRAPPER_LIB_NAME} PUBLIC ${PYTHON_LIBRARIES} ${POV_GLOBE_TARGETS})
+  set_target_properties(${PY_WRAPPER_LIB_NAME} PROPERTIES DEBUG_POSTFIX  "_d")
   
   set(ALL_COMPILE_DEFS "")
   set(ALL_INCLUDES "")
@@ -32,11 +33,15 @@ if(SWIG_FOUND)
       list(APPEND ALL_COMPILE_DEFS ${COMPILE_DEFS})
     endif()
   endforeach()
-  
-  message(STATUS "ALL_COMP: ${ALL_COMPILE_DEFS}")
-  message(STATUS "ALL_INC: ${ALL_INCLUDES}")
   set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_INCLUDE_DIRECTORIES ${ALL_INCLUDES})
   set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_COMPILE_DEFINITIONS ${ALL_COMPILE_DEFS})
+
+  set(PY_FILES
+    "tile_server_api.py"
+  )
+  foreach(PY_FILE ${PY_FILES})
+    configure_file(${PY_FILE} . COPYONLY)
+  endforeach()
 
 endif()
 

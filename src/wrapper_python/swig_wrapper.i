@@ -28,7 +28,18 @@
 %include "core/helper.hpp"
 %include "core/globe.hpp"
 %include "core/application_base.hpp"
+
 %include "core/framebuffer.hpp"
+%extend Framebuffer {
+    uint8_t& __getitem__(int row, int col, int channel) {
+        return $self->operator()(row, col, channel);
+    }
+
+    uint8_t& __getitem__(int i) {
+        return $self->operator[](i);
+    }
+}
+
 %include "core/interpolation.hpp"
 %include "core/projection.hpp"
 
@@ -45,3 +56,10 @@
 #endif
 
 %include "apps/application_examples.hpp"
+
+
+%pythoncode %{
+import tile_server_api
+
+
+%}

@@ -43,33 +43,32 @@ def get_concat_v(im1, im2):
     dst.paste(im2, (0, im1.height))
     return dst
 
-zoom = 0
-x_tiles = list(range(2**zoom))
-y_tiles = list(range(2**zoom))
 
-print(x_tiles)
-print(y_tiles)
+def get_world(zoom):
+    x_tiles = list(range(2**zoom))
+    y_tiles = list(range(2**zoom))
 
-#https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
-
-img_full = None
-for x in x_tiles:
-    img_col = None
-    for y in y_tiles:
-        img = getTileFromTileIdx(x,y, zoom)
-        if img_col:
-            img_col = get_concat_v(img_col, img)
+    img_full = None
+    for x in x_tiles:
+        img_col = None
+        for y in y_tiles:
+            img = getTileFromTileIdx(x,y, zoom)
+            if img_col:
+                img_col = get_concat_v(img_col, img)
+            else:
+                img_col = img
+        if img_full:
+            img_full = get_concat_h(img_full, img_col)
         else:
-            img_col = img
-    if img_full:
-        img_full = get_concat_h(img_full, img_col)
-    else:
-        img_full = img_col
+            img_full = img_col
 
+    return img_full
+
+# https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
         
-print("x = 0 -> -180 Deg Lon")
-print("x = 2**zoom - 1 -> +180 Deg Lon")
-print("y = 0 -> -85.0511 Deg Lat")
-print("y = 2**zoom - 1 -> +85.0511 Deg Lat")
+#print("x = 0 -> -180 Deg Lon")
+#print("x = 2**zoom - 1 -> +180 Deg Lon")
+#print("y = 0 -> -85.0511 Deg Lat")
+#print("y = 2**zoom - 1 -> +85.0511 Deg Lat")
 
-img_full.show()
+#img_full.show()
