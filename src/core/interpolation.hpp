@@ -2,14 +2,20 @@
 
 #include <math.h>
 #include <CImg.h>
+#include <vector>
 
 
 struct InterpolationFunction {
-    virtual void operator()(const cimg_library::CImg<unsigned char>&, const Coordinate&,
-    uint8_t& r, uint8_t& g, uint8_t& b)const = 0;
+    virtual void operator()(const cimg_library::CImg<unsigned char>& img, const Coordinate& xy,
+    uint8_t& r, uint8_t& g, uint8_t& b) const = 0;
+
+    virtual void operator()(const cimg_library::CImg<unsigned char>& img, const Coordinate& xy,
+    std::vector<uint8_t>& rgb) const {
+        this->operator()(img, xy, rgb[0], rgb[1], rgb[2]);
+    }
 };
 
-struct BilinearPixelInterpolaten:public InterpolationFunction {
+struct BilinearPixelInterpolaten: public InterpolationFunction {
     virtual void operator()(const cimg_library::CImg<unsigned char>& img, const Coordinate& xy,
         uint8_t& r, uint8_t& g, uint8_t& b) const override {
         const unsigned int x0 = static_cast<unsigned int>(std::floor(xy.first));
@@ -29,7 +35,7 @@ struct BilinearPixelInterpolaten:public InterpolationFunction {
     }
 };
 
-struct NearestNeighbourPixelInterpolation :public InterpolationFunction {
+struct NearestNeighbourPixelInterpolation : public InterpolationFunction {
     virtual void  operator()(const cimg_library::CImg<unsigned char>& img, const Coordinate& xy,
         uint8_t& r, uint8_t& g, uint8_t& b) const override {
         const unsigned int x0 = static_cast<unsigned int>(std::round(xy.first));

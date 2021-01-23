@@ -1,6 +1,7 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Debug (default)", "src", "wrapper_python"))
+#sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Debug (default)", "src", "wrapper_python"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Release", "src", "wrapper_python"))
 
 import time
 import PovGlobe
@@ -39,22 +40,23 @@ class MyApp(PovGlobe.ApplicationBase):
       top_pixel_skip = int(round(top_pixel_skip_exact))
       bottom_pixel_skip_exact = globe.getSpacingBottom() / globe.getHalfCircumference() * globe.getHeight()
       bottom_pixel_skip = int(round(bottom_pixel_skip_exact))
+      
+      self.m_xy_img_for_lonlat = buildImageProjectionLUT(self.proj,
+                                self.tile_img.height(), self.tile_img.width(), top_pixel_skip,
+                                globe.getHeight(), globe.getWidth())
 
-      self.tile_img.show()
+      #self.tile_img.show()
       #self.tile_img.resize(globe.getWidth(), globe.getHeight() + m_top_pixel_skip + m_bottom_pixel_skip, 1, 3);
 
 
   def process(self, framebuffer, time):
-      print(framebuffer[0, 0, 0])
-      #for i in range(framebuffer.getHeight()):
-      #  for j in range(framebuffer.getWidth()):
-      #      
-      #      const auto& xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j];
-      #
-      #       self.interp(m_img, xy,
-      #          framebuffer(j, i, 0),
-      #          framebuffer(j, i, 1),
-      #          framebuffer(j, i, 2));
+      for i in range(framebuffer.getHeight()):
+        for j in range(framebuffer.getWidth()):
+            #xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j];
+
+            framebuffer[i][j] = self.tile_img.getpixel((i*3, j*3))
+
+
 
 app = MyApp()
 
@@ -63,5 +65,5 @@ globe.runRendererAsync()
 globe.runApplicationAsync(app)
 
 
-time.sleep(10)
+time.sleep(100)
 globe.shutdown()

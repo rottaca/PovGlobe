@@ -1,4 +1,5 @@
 #include "framebuffer.hpp"
+#include <iostream>
 
 Framebuffer::Framebuffer()
     : m_width(0)

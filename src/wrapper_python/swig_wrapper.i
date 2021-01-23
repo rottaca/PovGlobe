@@ -25,18 +25,68 @@
 
 %feature("director") ApplicationBase;
 
+%include "stdint.i"
+
+%include "std_vector.i"
+namespace std {
+  %template(UInt8Vector) vector<uint8_t>;
+}
+
+
 %include "core/helper.hpp"
 %include "core/globe.hpp"
 %include "core/application_base.hpp"
 
-%include "core/framebuffer.hpp"
-%extend Framebuffer {
-    uint8_t& __getitem__(int row, int col, int channel) {
-        return $self->operator()(row, col, channel);
+%inline %{
+struct ColumnProxy;
+class Framebuffer;
+
+struct RowProxy {
+    ColumnProxy* colProxy;
+    int row;
+
+    uint8_t __getitem__(int i);
+    void __setitem__(int i, uint8_t value);
+};
+
+struct ColumnProxy {
+    Framebuffer* fb;
+    int col;
+
+    RowProxy __getitem__(int i) {
+        RowProxy row;
+        row.colProxy = this;
+        row.row = i;
+        return row;
     }
 
-    uint8_t& __getitem__(int i) {
-        return $self->operator[](i);
+    void __setitem__(int i, std::vector<uint8_t> values){
+        if(values.size() == 3){
+            fb->operator()(col, i, 0) = values[0];
+            fb->operator()(col, i, 1) = values[1];
+            fb->operator()(col, i, 2) = values[2];
+        }else {
+            printf("Invalid number of colours!\n");
+        }
+    }
+};  
+
+uint8_t RowProxy::__getitem__(int i) {
+    return colProxy->fb->operator()(colProxy->col, row, i);
+}
+
+void RowProxy::__setitem__(int i, uint8_t value) {
+    colProxy->fb->operator()(colProxy->col, row, i) = value;
+}
+%}
+
+%include "core/framebuffer.hpp"
+%extend Framebuffer {
+    ColumnProxy __getitem__(int i) {
+        ColumnProxy col;
+        col.fb = $self;
+        col.col = i;
+        return col;
     }
 }
 
