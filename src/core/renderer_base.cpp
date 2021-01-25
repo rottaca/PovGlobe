@@ -36,7 +36,7 @@ void RendererBase::runAsync(Globe& globe)
     int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(0, &cpuset);
+    CPU_SET(3, &cpuset);
 
     if(pthread_setaffinity_np(m_renderThread.native_handle(), sizeof(cpu_set_t), &cpuset)){
         std::cout << "pthread_setaffinity_np failed: " << std::strerror(errno) << std::endl;
@@ -46,14 +46,14 @@ void RendererBase::runAsync(Globe& globe)
     }
     
     sched_param sch;
-    sch.sched_priority = 1;
+    sch.sched_priority = 99;
     if (pthread_setschedparam(m_renderThread.native_handle(), SCHED_FIFO, &sch)) {
         std::cout << "setschedparam failed: " << std::strerror(errno) << std::endl;
         exit(1);
     }else{
         std::cout << "Render thread policy changed to FIFO and priority increased."<< std::endl;
     }
-    
+   
 #endif
 }
 
@@ -64,7 +64,7 @@ void RendererBase::run(Globe& globe)
     {
         const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
         render(framebuffer);
-        const auto loop_time = t.loopDone();
+        t.loopDone();
         // This is necessary if thread priority is set to realtime.
         //std::this_thread::sleep_for(std::chrono::duration<float, std::nano>(1.0f));
     }

@@ -8,10 +8,12 @@ LoopTimer::LoopTimer(std::string tag)
     : m_avgLoopTime(-1)
     , m_maxLoopTime(-1)
     , m_last_time_print(std::chrono::steady_clock::now())
-    , m_last_time_max(std::chrono::steady_clock::now())
-    , m_last_time(std::chrono::steady_clock::now())
     , m_tag(tag)
+    , m_curr_idx(0)
 {
+  for (int i = 0; i < history_size; i++){
+    m_last_times[i] = m_last_time_print;
+  }
 }
 
 LoopTimer::~LoopTimer()
@@ -20,32 +22,45 @@ LoopTimer::~LoopTimer()
 
 std::chrono::duration<float, std::milli> LoopTimer::loopDone()
 {
-    auto curr_time = std::chrono::steady_clock::now();
-    std::chrono::duration<float, std::milli> delta = curr_time - m_last_time;
+    const auto curr_time = std::chrono::steady_clock::now();
+    const int next_idx = (m_curr_idx + 1) % history_size;
+    
 
-    if (m_avgLoopTime < 0) {
-        m_avgLoopTime = delta.count();
-        m_maxLoopTime = delta.count();
-        m_last_time_max = curr_time;
-    }
-    else {
-        m_last_time = curr_time;
-        m_avgLoopTime = 0.9f * m_avgLoopTime + 0.1f * delta.count();
-        
-        if (delta.count() > m_maxLoopTime) {
-          m_maxLoopTime = delta.count();
-          m_last_time_max = curr_time;          
-        }else if((curr_time - m_last_time_max).count() > 3000.0f) {
-          m_maxLoopTime = delta.count();
-          m_last_time_max = curr_time;       
-        }
-    }
-
-    std::chrono::duration<float, std::milli> delta_print = curr_time - m_last_time_print;
+    const std::chrono::duration<float, std::milli> delta_print = curr_time - m_last_time_print;
     if (delta_print.count() > 1000) {
         m_last_time_print = curr_time;
-        std::cout << "[" << m_tag << "]: Loop Time is " << delta.count() << " ms (avg " << m_avgLoopTime << " ms, max " << m_maxLoopTime << " ms)." << std::endl;
+        std::cout << "[" << m_tag << "]: Loop Time is avg " << getAvgDuration() << " ms, max " << getMaxDuration() << " ms)." << std::endl;
     }
 
+    const std::chrono::duration<float, std::milli> delta = curr_time - m_last_times[m_curr_idx];
+    m_last_times[m_curr_idx] = curr_time;
+    m_curr_idx = next_idx;
     return delta;
+}
+
+float LoopTimer::getAvgDuration()
+{  
+  float avgTime = 0;
+    for (int i = 0; i < history_size - 1; i++){
+      const std::chrono::duration<float, std::milli> delta = m_last_times[(m_curr_idx + i + 1) % history_size] 
+                                                           - m_last_times[(m_curr_idx + i + 0) % history_size];
+                                                           
+      avgTime += delta.count();                                                           
+    }
+  
+    return avgTime/(history_size - 1);
+}
+
+float LoopTimer::getMaxDuration()
+{  
+  float maxTime = 0;
+    for (int i = 0; i < history_size - 1; i++){
+      const std::chrono::duration<float, std::milli> delta = m_last_times[(m_curr_idx + i + 1) % history_size] 
+                                                           - m_last_times[(m_curr_idx + i + 0) % history_size];
+      if (delta.count() > maxTime){
+        maxTime = delta.count();
+      }                                                  
+    }
+  
+    return maxTime;
 }

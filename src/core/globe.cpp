@@ -46,7 +46,7 @@ void Globe::runApplication(ApplicationBase& app)
     std::cout << "Initialize Application..." << std::endl;
     app.initialize(*this);
     const auto start = std::chrono::high_resolution_clock::now();
-    LoopTimer t("Application Processing"), t2("Application Total");
+    LoopTimer t("Application Processing");
     while (m_applicationThread_running) {
         const auto time = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<float, std::ratio<1, 1>> delta = time - start;
@@ -56,13 +56,11 @@ void Globe::runApplication(ApplicationBase& app)
         // TODO: Still not completely correct, as only the indices are locked, not the buffers itself.
         swapFramebuffers();
 
-        const auto total_loop_time = t2.loopDone();
         const auto loop_time = t.loopDone();
         const auto err = app.getTargetCycleTimeMs() - loop_time.count();
         if (err > 0) {
-            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(err));
+            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(5));
         }
-        t.resetLoopStartTime();
     }
 }
 

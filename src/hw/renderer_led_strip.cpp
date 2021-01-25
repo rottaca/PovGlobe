@@ -174,6 +174,7 @@ void RendererLedStrip::initialize(Globe& globe)
 
 void RendererLedStrip::render(const Framebuffer& framebuffer)
 {
+    auto start = std::chrono::high_resolution_clock::now();
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3);
     const int width = framebuffer.getWidth();
@@ -182,6 +183,9 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     auto rpmData = m_rpmMeasure.getRpmData();
     if (!rpmData.valid || rpmData.curr_temporal_pos == m_last_curr_temporal_pos) {
         return;
+    } else if ( (m_last_curr_temporal_pos < rpmData.curr_temporal_pos) && (rpmData.curr_temporal_pos - m_last_curr_temporal_pos > 1)){
+      std::cout << "Skipped " << rpmData.curr_temporal_pos - m_last_curr_temporal_pos - 1 << " steps!" << std::endl;
+      std::cout << "Last " << m_last_curr_temporal_pos << " curr " << rpmData.curr_temporal_pos << std::endl;
     }
     m_last_curr_temporal_pos = rpmData.curr_temporal_pos;
 
@@ -216,4 +220,8 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
 
     bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
     bcm2835_delayMicroseconds(100);
+    
+    auto finish = std::chrono::high_resolution_clock::now();
+    //std::chrono::duration<double> duration = finish - start;
+    //std::cout << "Time To process" << duration.count() << std::endl;
 }

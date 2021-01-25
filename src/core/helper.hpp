@@ -24,24 +24,20 @@ public:
     ~LoopTimer();
 
     std::chrono::duration<float, std::milli> loopDone();
-    inline float getAvgDuration();
-    inline void resetLoopStartTime();
+    float getAvgDuration();
+    float getMaxDuration();
 
 private:
-    std::chrono::time_point<std::chrono::steady_clock> m_last_time;
-    std::chrono::time_point<std::chrono::steady_clock> m_last_time_max;
-    std::chrono::time_point<std::chrono::steady_clock> m_last_time_print;
+    
+    using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+    
+    static const int history_size = 1000; 
+    
+    int m_curr_idx;
+    TimePoint m_last_times[history_size];
+    
+    TimePoint m_last_time_print;
     float m_avgLoopTime;
     float m_maxLoopTime;
     std::string m_tag;
 };
-
-float LoopTimer::getAvgDuration()
-{
-    return m_avgLoopTime;
-}
-
-void LoopTimer::resetLoopStartTime()
-{
-    m_last_time = std::chrono::steady_clock::now();
-}
