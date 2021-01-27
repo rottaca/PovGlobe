@@ -155,14 +155,14 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     
     std::chrono::duration<double> duration1 = finish1 - start;
     std::chrono::duration<double> duration2 = finish2 - start;
-    m_time1.push_back(duration1.count());
-    m_time2.push_back(duration2.count());
+    //m_time1.push_back(duration1.count());
+    //m_time2.push_back(duration2.count());
     
-    if (m_time1.size() > 10000){
-      for(int i = 0; i < m_time1.size(); i++){
-        myfile << m_time1[i]*1000 << ";"<< m_time2[i]*1000 << std::endl;
-      }
-      m_time1.clear();
-      m_time2.clear();      
-    }
+    //if (m_time1.size() > 10000){
+     // for(int i = 0; i < m_time1.size(); i++){
+      //  myfile << m_time1[i]*1000 << ";"<< m_time2[i]*1000 << std::endl;
+      //}
+     // m_time1.clear();
+     // m_time2.clear();      
+    //}
 }
