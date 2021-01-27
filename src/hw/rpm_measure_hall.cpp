@@ -8,14 +8,12 @@
 RpmMeasureHall::RpmMeasureHall(int gpio_pin) : m_history_size(50)
 {
     m_gpio_pin = gpio_pin;
-    //myfile.open ("example.txt");
 }
 
 RpmMeasureHall::~RpmMeasureHall()
 {
     gpioSetAlertFuncEx(m_gpio_pin, 0, this);
     gpioTerminate();
-    //myfile.close();
 }
 
 void RpmMeasureHall::_pulse(int gpio, int level, uint32_t tick)
@@ -32,7 +30,7 @@ void RpmMeasureHall::edgeDetected()
     auto new_delta = curr_time - m_last_event_time;
     
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::lock_guard<std::mutex> guard(m_mutex);
       // Add delta time to the deque and limit its size
       m_delta_time_deque.push_back(new_delta);
       if (m_delta_time_deque.size() > m_history_size) {
@@ -54,23 +52,25 @@ void RpmMeasureHall::initialize(Globe& globe)
     RpmMeasureBase::initialize(globe);
 
     m_delta_time_deque.clear();
+    m_last_event_time = std::chrono::steady_clock::now();
 
     if (gpioInitialise() < 0) return exit(1);
 
     gpioSetMode(m_gpio_pin, PI_INPUT);
     gpioSetPullUpDown(m_gpio_pin, PI_PUD_UP);
+
     // Setup callback for rising and falling edges
     gpioSetAlertFuncEx(m_gpio_pin, _pulseEx, this);
 }
 
 RpmData RpmMeasureHall::getRpmData()
 {
-    RpmData data;
+    RpmData data{};
+    data.cycle_time = std::chrono::duration<float, std::milli>(0);
     
     std::chrono::time_point<std::chrono::steady_clock> last_event_time_copy;
     {
-        std::lock_guard<std::mutex> guard(mutex);
-        data.cycle_time = std::chrono::duration<float, std::milli>(0);
+        std::lock_guard<std::mutex> guard(m_mutex);
         // Calcualte average cycle time from history
         for (const auto& v : m_delta_time_deque) {
             data.cycle_time += v;
@@ -90,6 +90,5 @@ RpmData RpmMeasureHall::getRpmData()
     // The signal is valid as long as we have the expected number of samples in the history
     data.valid = (m_delta_time_deque.size() == m_history_size);
     
-    //myfile << dt_since_last_event.count() << ";" << data.curr_temporal_pos << ";" << data.cycle_time.count() << std::endl;
     return data;
 }

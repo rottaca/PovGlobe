@@ -24,11 +24,9 @@ public:
 private:
     int m_gpio_pin;
     int m_history_size;
+    std::mutex m_mutex;
     std::chrono::time_point<std::chrono::steady_clock> m_last_event_time;
     std::deque<std::chrono::duration<float, std::milli>> m_delta_time_deque;
 
-    void edgeDetected();
-    //std::ofstream myfile;
-    std::mutex mutex;
-  
+    void edgeDetected();  
 };

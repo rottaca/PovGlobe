@@ -4,65 +4,6 @@
 
 #include <bcm2835.h>
 
-
-unsigned char led_lut_r[256] = {
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255
-};
-
-unsigned char led_lut_g[256] = {
-
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255
-};
-unsigned char led_lut_b[256] = {
-
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255
-};
-
 RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base)
     :RendererBase(rpm_measure_base)
     , m_last_curr_temporal_pos(-1)
@@ -83,7 +24,7 @@ void RendererLedStrip::initialize(Globe& globe)
     RendererBase::initialize(globe);
     std::cout << "Initialize led strip..." << std::endl;
 
-    int num_leds = globe.getHeight();
+    uint32_t num_leds = globe.getHeight();
     m_last_curr_temporal_pos = -1;
 
     // If we use double sided rendering, the led strip has twice the amount of leds.
@@ -172,57 +113,43 @@ void RendererLedStrip::initialize(Globe& globe)
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
 }
 
-
-const auto get_arr_idx_for_led_idx = [](size_t i) {return 4 + i*4; };
-    
 void RendererLedStrip::render(const Framebuffer& framebuffer)
 {
-    const auto start = std::chrono::high_resolution_clock::now();
     // Only RGB framebuffer supported
-    assert(framebuffer.getChannels() == 3);
-    const int width = framebuffer.getWidth();
-    const int height = framebuffer.getHeight();
+    assert(framebuffer.getChannels() == 3U);
 
-    auto rpmData = m_rpmMeasure.getRpmData();
+    const auto start = std::chrono::high_resolution_clock::now();
+    const uint32_t width = framebuffer.getWidth();
+    const uint32_t height = framebuffer.getHeight();
+
+    const auto rpmData = m_rpmMeasure.getRpmData();
     
     if (!rpmData.valid || rpmData.curr_temporal_pos == m_last_curr_temporal_pos) {
         return;
     } else if ( (m_last_curr_temporal_pos < rpmData.curr_temporal_pos) && (rpmData.curr_temporal_pos - m_last_curr_temporal_pos > 1)){
-      std::cout << "Skipped " << rpmData.curr_temporal_pos - m_last_curr_temporal_pos - 1 << " steps!" << std::endl;
+      std::cout << "Skipped " << rpmData.curr_temporal_pos - m_last_curr_temporal_pos - 1U << " steps!" << std::endl;
       std::cout << "Last " << m_last_curr_temporal_pos << " curr " << rpmData.curr_temporal_pos << std::endl;
     }
     m_last_curr_temporal_pos = rpmData.curr_temporal_pos;
 
-    const float max_brightness = 128.0f;
-    const float pixel_scaling = max_brightness/255.0f;
-
-    auto& led_data = m_led_data;
-    const auto set_pixel = [led_lut_b, led_lut_g, led_lut_r, &framebuffer, &led_data, pixel_scaling](int x, int i, int led_idx) {
-        const unsigned char r = framebuffer(x, i, 0)*pixel_scaling;
-        const unsigned char g = framebuffer(x, i, 1)*pixel_scaling;
-        const unsigned char b = framebuffer(x, i, 2)*pixel_scaling;
-        led_data[led_idx + 1] = led_lut_b[b];
-        led_data[led_idx + 2] = led_lut_g[g];
-        led_data[led_idx + 3] = led_lut_r[r];
-    };      
-
     // Render first half of globe from top to bottom
-    for (int i = 0; i < height; i++) {
-        set_pixel(rpmData.curr_temporal_pos, i, get_arr_idx_for_led_idx(i));
+    for (uint32_t pixel_index = 0U; pixel_index < height; pixel_index++) {
+        const uint32_t led_index = pixel_index;
+        setPixel(rpmData.curr_temporal_pos, pixel_index, led_index);
     }
     // If double sided rendering is enabled (and if the globe as leds on the opposite side as well,
     // render the other side of the globe from bottom to top (with current wiring)
     // This might need adaption if the wiring of leds changes.
     if (m_doublesided) {
-        const int framebuffer_x = (rpmData.curr_temporal_pos + width / 2) % width;
-        for (int i = 0; i < height; i++) {
-          set_pixel(framebuffer_x, i, get_arr_idx_for_led_idx(2*height -1 - i));
+        const uint32_t framebuffer_x = (rpmData.curr_temporal_pos + width / 2) % width;
+        uint32_t led_index = 2U * height - 1U;
+        for (uint32_t pixel_index = 0U; pixel_index < height; pixel_index++) {
+            setPixel(framebuffer_x, pixel_index, led_index--);
         }
     }
     const auto finish1 = std::chrono::high_resolution_clock::now();
 
     bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
-    //bcm2835_delayMicroseconds(100);
     
     const auto finish2 = std::chrono::high_resolution_clock::now();
     

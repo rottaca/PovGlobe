@@ -55,35 +55,3 @@ uint8_t& Framebuffer::operator[](uint32_t idx) {
 std::mutex& Framebuffer::getMutex() const {
     return m_accessMutex;
 }
-
-const uint8_t* Framebuffer::values() const
-{
-    return m_values.data();
-}
-
-uint8_t* Framebuffer::values()
-{
-    return m_values.data();
-}
-
-uint32_t Framebuffer::getWidth() const
-{
-    return m_width;
-}
-
-uint32_t Framebuffer::getSize() const
-{
-    return m_values.size();
-}
-
-
-uint32_t Framebuffer::getHeight() const
-{
-    return m_height;
-}
-
-
-uint32_t Framebuffer::getChannels() const
-{
-    return m_channels;
-}

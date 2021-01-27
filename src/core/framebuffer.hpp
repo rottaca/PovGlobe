@@ -45,3 +45,35 @@ private:
     mutable std::mutex m_accessMutex;
 };
 
+
+inline const uint8_t* Framebuffer::values() const
+{
+    return m_values.data();
+}
+
+inline uint8_t* Framebuffer::values()
+{
+    return m_values.data();
+}
+
+inline uint32_t Framebuffer::getWidth() const
+{
+    return m_width;
+}
+
+inline uint32_t Framebuffer::getSize() const
+{
+    return m_values.size();
+}
+
+
+inline uint32_t Framebuffer::getHeight() const
+{
+    return m_height;
+}
+
+
+inline uint32_t Framebuffer::getChannels() const
+{
+    return m_channels;
+}
