@@ -2,6 +2,7 @@
 
 #include "core/renderer_base.hpp"
 
+#include <fstream>
 #include <vector>
 
 class RendererLedStrip : public RendererBase
@@ -19,6 +20,7 @@ protected:
 
 
     std::vector<char> m_led_data;
+    std::ofstream myfile;
 
 
     virtual void render(const Framebuffer&);

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <chrono>
 #include <deque>
+#include <fstream>
+#include <mutex>
 
 class RpmMeasureHall : public RpmMeasureBase
 {
@@ -13,7 +15,6 @@ public:
 
     virtual void initialize(Globe& globe);
     virtual RpmData getRpmData();
-
 
     void _pulse(int gpio, int level, uint32_t tick);
 
@@ -27,4 +28,7 @@ private:
     std::deque<std::chrono::duration<float, std::milli>> m_delta_time_deque;
 
     void edgeDetected();
+    //std::ofstream myfile;
+    std::mutex mutex;
+  
 };

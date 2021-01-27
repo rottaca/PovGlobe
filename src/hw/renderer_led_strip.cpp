@@ -67,7 +67,7 @@ RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base)
     :RendererBase(rpm_measure_base)
     , m_last_curr_temporal_pos(-1)
 {
-
+    myfile.open ("example.txt");
 }
 
 RendererLedStrip::~RendererLedStrip()
@@ -75,6 +75,7 @@ RendererLedStrip::~RendererLedStrip()
     //close the spi bus
     bcm2835_spi_end();
     bcm2835_close();
+    myfile.close();
 }
 
 void RendererLedStrip::initialize(Globe& globe)
@@ -172,15 +173,18 @@ void RendererLedStrip::initialize(Globe& globe)
 }
 
 
+const auto get_arr_idx_for_led_idx = [](size_t i) {return 4 + i*4; };
+    
 void RendererLedStrip::render(const Framebuffer& framebuffer)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3);
     const int width = framebuffer.getWidth();
     const int height = framebuffer.getHeight();
 
     auto rpmData = m_rpmMeasure.getRpmData();
+    
     if (!rpmData.valid || rpmData.curr_temporal_pos == m_last_curr_temporal_pos) {
         return;
     } else if ( (m_last_curr_temporal_pos < rpmData.curr_temporal_pos) && (rpmData.curr_temporal_pos - m_last_curr_temporal_pos > 1)){
@@ -189,7 +193,6 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     }
     m_last_curr_temporal_pos = rpmData.curr_temporal_pos;
 
-    const auto led_idx = [](size_t i) {return 4 + i*4; };
     const float max_brightness = 128.0f;
     const float pixel_scaling = max_brightness/255.0f;
 
@@ -201,12 +204,11 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
         led_data[led_idx + 1] = led_lut_b[b];
         led_data[led_idx + 2] = led_lut_g[g];
         led_data[led_idx + 3] = led_lut_r[r];
-       // printf("%d, %d, %d\n", (int)(b*pixel_scaling),(int)(g*pixel_scaling),(int)(r*pixel_scaling));
     };      
 
     // Render first half of globe from top to bottom
     for (int i = 0; i < height; i++) {
-        set_pixel(rpmData.curr_temporal_pos, i, led_idx(i));
+        set_pixel(rpmData.curr_temporal_pos, i, get_arr_idx_for_led_idx(i));
     }
     // If double sided rendering is enabled (and if the globe as leds on the opposite side as well,
     // render the other side of the globe from bottom to top (with current wiring)
@@ -214,14 +216,17 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     if (m_doublesided) {
         const int framebuffer_x = (rpmData.curr_temporal_pos + width / 2) % width;
         for (int i = 0; i < height; i++) {
-          set_pixel(framebuffer_x, i, led_idx(2*height -1 - i));
+          set_pixel(framebuffer_x, i, get_arr_idx_for_led_idx(2*height -1 - i));
         }
     }
+    const auto finish1 = std::chrono::high_resolution_clock::now();
 
     bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
-    bcm2835_delayMicroseconds(100);
+    //bcm2835_delayMicroseconds(100);
     
-    auto finish = std::chrono::high_resolution_clock::now();
-    //std::chrono::duration<double> duration = finish - start;
-    //std::cout << "Time To process" << duration.count() << std::endl;
+    const auto finish2 = std::chrono::high_resolution_clock::now();
+    
+    std::chrono::duration<double> duration1 = finish1 - start;
+    std::chrono::duration<double> duration2 = finish2 - start;
+    myfile << duration1.count()*1000 << ";"<< duration2.count()*1000 << std::endl;
 }
