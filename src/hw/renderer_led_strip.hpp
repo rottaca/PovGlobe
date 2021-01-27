@@ -36,13 +36,14 @@ public:
 protected:
     int m_last_curr_temporal_pos;
     bool m_doublesided;
-    std::vector<unsigned char> m_led_data;
+    std::vector<char> m_led_data;
     std::ofstream myfile;
+    std::vector<float> m_time1, m_time2;
 
     virtual void render(const Framebuffer&);
 
-    void RendererLedStrip::setPixel(const Framebuffer& framebuffer, 
-                                    uint32_t x, uint32_t pixel_index, uint32_t led_index);
+    void setPixel(const Framebuffer& framebuffer, 
+                  uint32_t x, uint32_t pixel_index, uint32_t led_index);
 };
 
 
