@@ -21,7 +21,6 @@ RendererBase::~RendererBase()
 
 void RendererBase::initialize(Globe& globe)
 {
-    stopAndJoinRenderThread();
     std::cout << "Initialize Renderer..." << std::endl;
     m_renderThread_running = true;
     m_rpmMeasure.initialize(globe);
@@ -29,6 +28,8 @@ void RendererBase::initialize(Globe& globe)
 
 void RendererBase::runAsync(Globe& globe)
 { 
+    stopAndJoinRenderThread();
+    initialize(globe);
     m_renderThread = std::thread(&RendererBase::run, this, std::ref(globe));
     
 #if defined(__unix__) || defined(__unix) 
@@ -44,7 +45,7 @@ void RendererBase::runAsync(Globe& globe)
     }else{
         std::cout << "CPU affinity of render thread changed to CPU0."<< std::endl;
     }
-    
+          
     sched_param sch;
     sch.sched_priority = 99;
     if (pthread_setschedparam(m_renderThread.native_handle(), SCHED_FIFO, &sch)) {
@@ -58,15 +59,13 @@ void RendererBase::runAsync(Globe& globe)
 }
 
 void RendererBase::run(Globe& globe)
-{
+{    
     LoopTimer t("Render Thread");
     while (m_renderThread_running)
     {
         const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
         render(framebuffer);
         t.loopDone();
-        // This is necessary if thread priority is set to realtime.
-        //std::this_thread::sleep_for(std::chrono::duration<float, std::nano>(1.0f));
     }
 }
 

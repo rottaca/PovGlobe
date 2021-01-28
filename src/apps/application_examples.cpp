@@ -93,9 +93,9 @@ void ApplicationImageViwewer::initialize(Globe& globe) {
 
 void ApplicationImageViwewer::process(Framebuffer& framebuffer, float time)
 {
-    for (size_t i = 0; i < framebuffer.getHeight(); i++)
+    for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
-        for (size_t j = 0; j < framebuffer.getWidth(); j++)
+        for (size_t i = 0; i < framebuffer.getHeight(); i++)
         {
             const auto& xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j];
 
@@ -122,11 +122,11 @@ void ApplicationImageRotator::initialize(Globe& globe) {
 
 void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)
 {
-    for (size_t i = 0; i < framebuffer.getHeight(); i++)
+    for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
-        for (size_t j = 0; j < framebuffer.getWidth(); j++)
+        const size_t j_offsetted = (j + m_offset_x) % framebuffer.getWidth();  
+        for (size_t i = 0; i < framebuffer.getHeight(); i++)
         {
-            const size_t j_offsetted = (j + m_offset_x) % framebuffer.getWidth();
             const auto& xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j_offsetted];
 
             m_pixelInterpolation(m_img, xy,
@@ -135,6 +135,6 @@ void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)
                 framebuffer(j, i, 2));
         }
     }
-
-    m_offset_x++;
+    
+    m_offset_x = (m_offset_x + 1) % framebuffer.getWidth();
 }

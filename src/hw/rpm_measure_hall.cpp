@@ -4,8 +4,10 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <iostream>
 
-RpmMeasureHall::RpmMeasureHall(int gpio_pin) : m_history_size(50)
+
+RpmMeasureHall::RpmMeasureHall(int gpio_pin) : m_history_size(10)
 {
     m_gpio_pin = gpio_pin;
 }
@@ -52,12 +54,16 @@ void RpmMeasureHall::initialize(Globe& globe)
     RpmMeasureBase::initialize(globe);
 
     m_delta_time_deque.clear();
-    m_last_event_time = std::chrono::steady_clock::now();
 
-    if (gpioInitialise() < 0) return exit(1);
-
+    if (gpioInitialise() < 0){
+      std::cout << "Failed to init gpio" << std::endl;
+      exit(1);
+    }
+    
     gpioSetMode(m_gpio_pin, PI_INPUT);
     gpioSetPullUpDown(m_gpio_pin, PI_PUD_UP);
+    
+    m_last_event_time = std::chrono::steady_clock::now();
 
     // Setup callback for rising and falling edges
     gpioSetAlertFuncEx(m_gpio_pin, _pulseEx, this);

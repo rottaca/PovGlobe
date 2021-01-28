@@ -27,6 +27,10 @@ public:
     virtual void initialize(Globe& globe);
     virtual void process(Framebuffer& framebuffer, float time);
 
+    float getTargetCycleTimeMs() const {
+        return 100.f;
+    }
+
 protected:
     const ProjectionFunction& m_projection;
     const InterpolationFunction& m_pixelInterpolation;
@@ -50,6 +54,10 @@ public:
 
     void initialize(Globe& globe);
     void process(Framebuffer& framebuffer, float time);
+
+    float getTargetCycleTimeMs() const {
+        return 100.f;
+    }
 
 private:
     int m_offset_x;

@@ -16,7 +16,6 @@ public:
     );
     virtual ~RendererBase();
 
-    virtual void initialize(Globe& globe);
     virtual void runAsync(Globe& globe);
     virtual void run(Globe& globe);
 
@@ -28,6 +27,7 @@ protected:
     std::thread m_renderThread;
     std::atomic_bool m_renderThread_running;
 
+    virtual void initialize(Globe& globe);
     virtual void render(const Framebuffer&) = 0;
 
 };

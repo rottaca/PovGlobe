@@ -25,7 +25,6 @@ Globe::~Globe()
 
 void Globe::runRendererAsync()
 {
-    m_renderer.initialize(*this);
     m_renderer.runAsync(*this);
 }
 

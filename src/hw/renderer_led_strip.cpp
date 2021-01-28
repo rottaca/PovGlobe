@@ -6,7 +6,9 @@
 
 RendererLedStrip::RendererLedStrip(RpmMeasureBase& rpm_measure_base)
     :RendererBase(rpm_measure_base)
-    , m_last_curr_temporal_pos(-1)
+    , m_last_temporal_pos(-1)
+    , m_next_temporal_pos(-1)
+    , m_nextRowInitialized(false)
 {
     myfile.open ("example.txt");
 }
@@ -25,7 +27,7 @@ void RendererLedStrip::initialize(Globe& globe)
     std::cout << "Initialize led strip..." << std::endl;
 
     uint32_t num_leds = globe.getHeight();
-    m_last_curr_temporal_pos = -1;
+    m_last_temporal_pos = -1;
 
     // If we use double sided rendering, the led strip has twice the amount of leds.
     if (globe.getDoubleSidedRendering()) {
@@ -113,56 +115,59 @@ void RendererLedStrip::initialize(Globe& globe)
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
 }
 
-void RendererLedStrip::render(const Framebuffer& framebuffer)
-{
-    // Only RGB framebuffer supported
-    assert(framebuffer.getChannels() == 3U);
-
-    const auto start = std::chrono::high_resolution_clock::now();
+void RendererLedStrip::prepareLedData(const Framebuffer& framebuffer) {
     const uint32_t width = framebuffer.getWidth();
     const uint32_t height = framebuffer.getHeight();
-
-    const auto rpmData = m_rpmMeasure.getRpmData();
     
-    if (!rpmData.valid || rpmData.curr_temporal_pos == m_last_curr_temporal_pos) {
-        return;
-    } else if ( (m_last_curr_temporal_pos < rpmData.curr_temporal_pos) && (rpmData.curr_temporal_pos - m_last_curr_temporal_pos > 1)){
-      std::cout << "Skipped " << rpmData.curr_temporal_pos - m_last_curr_temporal_pos - 1U << " steps!" << std::endl;
-      std::cout << "Last " << m_last_curr_temporal_pos << " curr " << rpmData.curr_temporal_pos << std::endl;
-    }
-    m_last_curr_temporal_pos = rpmData.curr_temporal_pos;
-
     // Render first half of globe from top to bottom
     for (uint32_t pixel_index = 0U; pixel_index < height; pixel_index++) {
         const uint32_t led_index = pixel_index;
-        setPixel(framebuffer, m_last_curr_temporal_pos, pixel_index, led_index);
+        setPixel(framebuffer, m_next_temporal_pos, pixel_index, led_index);
     }
     // If double sided rendering is enabled (and if the globe as leds on the opposite side as well,
     // render the other side of the globe from bottom to top (with current wiring)
     // This might need adaption if the wiring of leds changes.
     if (m_doublesided) {
-        const uint32_t framebuffer_x = (rpmData.curr_temporal_pos + width / 2) % width;
+        const uint32_t framebuffer_x = (m_next_temporal_pos + width / 2) % width;
         uint32_t led_index = 2U * height - 1U;
         for (uint32_t pixel_index = 0U; pixel_index < height; pixel_index++) {
             setPixel(framebuffer, framebuffer_x, pixel_index, led_index--);
         }
     }
-    const auto finish1 = std::chrono::high_resolution_clock::now();
+}
 
+void RendererLedStrip::render(const Framebuffer& framebuffer)
+{
+    // Only RGB framebuffer supported
+    assert(framebuffer.getChannels() == 3U);
+
+    const uint32_t width = framebuffer.getWidth();
+    const RpmData rpmData = m_rpmMeasure.getRpmData();
+        
+    if (!rpmData.valid) {
+      return;
+    } else if(rpmData.curr_temporal_pos == m_last_temporal_pos) {
+      // If we are in the same time-step, prepare the next time step
+      if(!m_nextRowInitialized){
+        m_next_temporal_pos = (rpmData.curr_temporal_pos + 1) % width;
+        prepareLedData(framebuffer);
+        m_nextRowInitialized = true;
+      }
+      return;
+    } else if ( (m_last_temporal_pos < rpmData.curr_temporal_pos) && (rpmData.curr_temporal_pos - m_last_temporal_pos > 1)){
+      std::cout << "Skipped " << rpmData.curr_temporal_pos - m_last_temporal_pos - 1U << " steps!" << std::endl;
+      std::cout << "Last " << m_last_temporal_pos << " curr " << rpmData.curr_temporal_pos << std::endl;
+    }
+    
+    // If the current timestep is not already pre-calculated
+    // prepare the current timestep
+    if(!m_nextRowInitialized || rpmData.curr_temporal_pos != m_next_temporal_pos){
+      std::cout << "R" << std::endl;
+      m_next_temporal_pos = rpmData.curr_temporal_pos;
+      prepareLedData(framebuffer);
+    }
+    
     bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
-    
-    const auto finish2 = std::chrono::high_resolution_clock::now();
-    
-    std::chrono::duration<double> duration1 = finish1 - start;
-    std::chrono::duration<double> duration2 = finish2 - start;
-    //m_time1.push_back(duration1.count());
-    //m_time2.push_back(duration2.count());
-    
-    //if (m_time1.size() > 10000){
-     // for(int i = 0; i < m_time1.size(); i++){
-      //  myfile << m_time1[i]*1000 << ";"<< m_time2[i]*1000 << std::endl;
-      //}
-     // m_time1.clear();
-     // m_time2.clear();      
-    //}
+    m_nextRowInitialized = false;
+    m_last_temporal_pos = rpmData.curr_temporal_pos;        
 }

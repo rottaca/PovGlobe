@@ -6,7 +6,7 @@
 #include <vector>
 
 unsigned char led_lut[256] = {
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
@@ -34,8 +34,10 @@ public:
     void initialize(Globe& globe);
 
 protected:
-    int m_last_curr_temporal_pos;
+    int m_last_temporal_pos;
+    int m_next_temporal_pos;
     bool m_doublesided;
+    bool m_nextRowInitialized;
     std::vector<char> m_led_data;
     std::ofstream myfile;
     std::vector<float> m_time1, m_time2;
@@ -44,6 +46,8 @@ protected:
 
     void setPixel(const Framebuffer& framebuffer, 
                   uint32_t x, uint32_t pixel_index, uint32_t led_index);
+                  
+    void prepareLedData(const Framebuffer& framebuffer);   
 };
 
 
