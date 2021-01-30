@@ -2,6 +2,7 @@
 #include "globe.hpp"
 
 #include <iostream>
+#include <time.h>
 
 #if defined(__unix__) || defined(__unix) 
 #include <pthread.h>
@@ -34,7 +35,7 @@ void RendererBase::runAsync(Globe& globe)
     
 #if defined(__unix__) || defined(__unix) 
     // Set thread priority to max for optimized rendering performance.
-    int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    //int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(3, &cpuset);
@@ -54,7 +55,6 @@ void RendererBase::runAsync(Globe& globe)
     }else{
         std::cout << "Render thread policy changed to FIFO and priority increased."<< std::endl;
     }
-   
 #endif
 }
 
@@ -66,6 +66,10 @@ void RendererBase::run(Globe& globe)
         const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
         render(framebuffer);
         t.loopDone();
+        {
+          struct timespec delta = {0 /*secs*/, 1000 /*nanosecs*/};
+          while (nanosleep(&delta, &delta));
+        }
     }
 }
 

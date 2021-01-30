@@ -122,6 +122,8 @@ void ApplicationImageRotator::initialize(Globe& globe) {
 
 void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)
 {
+    m_offset_x = (m_offset_x + 1) % framebuffer.getWidth();
+    
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
         const size_t j_offsetted = (j + m_offset_x) % framebuffer.getWidth();  
@@ -135,6 +137,4 @@ void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)
                 framebuffer(j, i, 2));
         }
     }
-    
-    m_offset_x = (m_offset_x + 1) % framebuffer.getWidth();
 }

@@ -58,8 +58,9 @@ void Globe::runApplication(ApplicationBase& app)
         const auto loop_time = t.loopDone();
         const auto err = app.getTargetCycleTimeMs() - loop_time.count();
         if (err > 0) {
-            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(5));
+            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(err));
         }
+        t.resetTimer();
     }
 }
 

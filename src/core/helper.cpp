@@ -64,3 +64,7 @@ float LoopTimer::getMaxDuration()
   
     return maxTime;
 }
+void LoopTimer::resetTimer(){
+    const auto curr_time = std::chrono::steady_clock::now();
+    m_last_times[m_curr_idx] = curr_time;
+}

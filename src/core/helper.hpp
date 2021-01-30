@@ -26,6 +26,8 @@ public:
     std::chrono::duration<float, std::milli> loopDone();
     float getAvgDuration();
     float getMaxDuration();
+    
+    void resetTimer();
 
 private:
     

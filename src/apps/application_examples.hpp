@@ -28,7 +28,7 @@ public:
     virtual void process(Framebuffer& framebuffer, float time);
 
     float getTargetCycleTimeMs() const {
-        return 100.f;
+        return 1000.f;
     }
 
 protected:
@@ -56,7 +56,7 @@ public:
     void process(Framebuffer& framebuffer, float time);
 
     float getTargetCycleTimeMs() const {
-        return 100.f;
+        return 60.f;
     }
 
 private:

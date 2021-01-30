@@ -162,7 +162,7 @@ void RendererLedStrip::render(const Framebuffer& framebuffer)
     // If the current timestep is not already pre-calculated
     // prepare the current timestep
     if(!m_nextRowInitialized || rpmData.curr_temporal_pos != m_next_temporal_pos){
-      std::cout << "R" << std::endl;
+      //std::cout << "R" << std::endl;
       m_next_temporal_pos = rpmData.curr_temporal_pos;
       prepareLedData(framebuffer);
     }
