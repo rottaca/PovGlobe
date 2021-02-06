@@ -58,7 +58,7 @@ void ApplicationTest1::process(Framebuffer& framebuffer, float time)
 }
 
 
-ApplicationImageViwewer::ApplicationImageViwewer(const char* path,
+ApplicationImageViewer::ApplicationImageViewer(const char* path,
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation
 )
@@ -68,7 +68,7 @@ ApplicationImageViwewer::ApplicationImageViwewer(const char* path,
     , m_pixelInterpolation(pixelInterpolation)
 {}
 
-void ApplicationImageViwewer::initialize(Globe& globe) {
+void ApplicationImageViewer::initialize(Globe& globe) {
     std::cout << "Opening image file " << m_path << std::endl;
 
     if (!std::ifstream(m_path.c_str()).good()) {
@@ -91,7 +91,7 @@ void ApplicationImageViwewer::initialize(Globe& globe) {
         globe.getHeight(), globe.getWidth());
 }
 
-void ApplicationImageViwewer::process(Framebuffer& framebuffer, float time)
+void ApplicationImageViewer::process(Framebuffer& framebuffer, float time)
 {
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
@@ -111,12 +111,12 @@ void ApplicationImageViwewer::process(Framebuffer& framebuffer, float time)
 ApplicationImageRotator::ApplicationImageRotator(const char* path,
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation)
-    : ApplicationImageViwewer(path, projection, pixelInterpolation)
+    : ApplicationImageViewer(path, projection, pixelInterpolation)
     , m_offset_x(0)
 {}
 
 void ApplicationImageRotator::initialize(Globe& globe) {
-    ApplicationImageViwewer::initialize(globe);
+    ApplicationImageViewer::initialize(globe);
     m_offset_x = 0;
 }
 

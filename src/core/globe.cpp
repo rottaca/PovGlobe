@@ -1,5 +1,6 @@
 #include "globe.hpp"
 #include <iostream>
+#include <chrono>
 
 Globe::Globe(int height, int width, float radius, float spacing_top, float spacing_bottom, bool doublesidedRendering,
     RendererBase& renderer)
@@ -44,29 +45,38 @@ void Globe::runApplication(ApplicationBase& app)
 {
     std::cout << "Initialize Application..." << std::endl;
     app.initialize(*this);
+
+    const auto target_cycle_time = std::chrono::milliseconds((int)app.getTargetCycleTimeMs());
+
     const auto start = std::chrono::high_resolution_clock::now();
     LoopTimer t("Application Processing");
     while (m_applicationThread_running) {
-        const auto time = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<float, std::ratio<1, 1>> delta = time - start;
+        const auto cycle_start_time = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<float, std::ratio<1, 1>> delta = cycle_start_time - start;
         app.process(getAppFrameBuffer(), delta.count());
 
         // Lock buffer swap
         // TODO: Still not completely correct, as only the indices are locked, not the buffers itself.
         swapFramebuffers();
-
-        const auto loop_time = t.loopDone();
-        const auto err = app.getTargetCycleTimeMs() - loop_time.count();
-        if (err > 0) {
-            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(err));
-        }
-        t.resetTimer();
+        
+        const auto cycle_end_time = cycle_start_time + target_cycle_time;
+        const auto err = cycle_end_time - std::chrono::high_resolution_clock::now();
+        std::this_thread::sleep_for(err);
+        t.loopDone();
     }
 }
 
 void Globe::shutdown()
 {
     m_renderer.stopAndJoinRenderThread();
+    m_applicationThread_running = false;
+    if (m_applicationThread.joinable()) {
+        m_applicationThread.join();
+    }
+}
+
+void Globe::stopCurrentApp()
+{
     m_applicationThread_running = false;
     if (m_applicationThread.joinable()) {
         m_applicationThread.join();

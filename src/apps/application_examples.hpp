@@ -17,10 +17,10 @@ private:
     int m_last_pixel;
 };
 
-class ApplicationImageViwewer : public ApplicationBase {
+class ApplicationImageViewer : public ApplicationBase {
 
 public:
-    ApplicationImageViwewer(const char* path,
+    ApplicationImageViewer(const char* path,
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation);
 
@@ -45,7 +45,7 @@ protected:
 };
 
 
-class ApplicationImageRotator : public ApplicationImageViwewer {
+class ApplicationImageRotator : public ApplicationImageViewer {
 
 public:
     ApplicationImageRotator(const char* path,
@@ -56,7 +56,7 @@ public:
     void process(Framebuffer& framebuffer, float time);
 
     float getTargetCycleTimeMs() const {
-        return 60.f;
+        return 33.f;
     }
 
 private:

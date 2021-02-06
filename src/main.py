@@ -9,21 +9,16 @@ import PovGlobe
 width = 110
 height = 55
 radius = 13.25
-spacing_top = 1.0
+spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided=True
 
 rpm = PovGlobe.RpmMeasureSim()
 renderer = PovGlobe.RendererSim(rpm)
-
 globe = PovGlobe.Globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer)
-
-#app = PovGlobe.ApplicationTest1()
 
 proj = PovGlobe.EquirectangularProjection()
 interp = PovGlobe.NearestNeighbourPixelInterpolation()
-#app = PovGlobe.ApplicationImageRotator(r"D:\Benutzer\Andreas\GitProjects\PovGlobe\res\img\1_earth_8k.jpg",
-#                                       proj, interp)
 
 class MyApp(PovGlobe.ApplicationBase):
   def __init__(self):
@@ -57,13 +52,28 @@ class MyApp(PovGlobe.ApplicationBase):
             framebuffer[i][j] = self.tile_img.getpixel((i*3, j*3))
 
 
+res_dir = os.path.join(os.path.dirname(__file__), "..", "res")
 
-app = MyApp()
-
+all_apps = [
+    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "2_no_clouds_8k.jpg"), proj, interp),
+    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "kisspng-world-map-globe-equirectangular-projection-map.png"), proj, interp),
+    PovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "soccer2_sph.png"), proj, interp),
+    PovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "tennisenn_sph.png"), proj, interp),
+    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "1_earth_8k.jpg"), proj, interp),
+    #MyApp()
+]
 
 globe.runRendererAsync()
-globe.runApplicationAsync(app)
 
+app_idx = 0
+while(True):
+    globe.stopCurrentApp()
+    globe.runApplicationAsync(all_apps[app_idx])
 
-time.sleep(100)
+    time.sleep(3)
+
+    app_idx+=1
+    if app_idx >= len(all_apps):
+        app_idx = 0
+
 globe.shutdown()

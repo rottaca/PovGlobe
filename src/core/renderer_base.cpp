@@ -2,13 +2,16 @@
 #include "globe.hpp"
 
 #include <iostream>
-#include <time.h>
+
 
 #if defined(__unix__) || defined(__unix) 
 #include <pthread.h>
 #include <cstring>
 #include <unistd.h>
 #include <sched.h>
+#include <time.h>   // for nanosleep
+#else
+#include <windows.h>
 #endif
 
 RendererBase::RendererBase(RpmMeasureBase& rpm_measure)
@@ -67,8 +70,12 @@ void RendererBase::run(Globe& globe)
         render(framebuffer);
         t.loopDone();
         {
+#if defined(__unix__) || defined(__unix) 
           struct timespec delta = {0 /*secs*/, 1000 /*nanosecs*/};
           while (nanosleep(&delta, &delta));
+#else
+          Sleep(1);
+#endif
         }
     }
 }

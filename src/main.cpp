@@ -57,7 +57,7 @@ const std::map<std::string, AlgoFactory> algo_factory = {
     {"Test1", [](int argc, char* argv[]) {return std::make_unique<ApplicationTest1>(); }},
     {"ImageViewer", [](int argc, char* argv[]) {
         const char* file_name = getCmdOption(argv, argv + argc, "-f");
-        return std::make_unique<ApplicationImageViwewer>(file_name, equrectProj, nearestNeighbour);
+        return std::make_unique<ApplicationImageViewer>(file_name, equrectProj, nearestNeighbour);
     }},
     {"ImageRotator", [](int argc, char* argv[]) {
         const char* file_name = getCmdOption(argv, argv + argc, "-f");

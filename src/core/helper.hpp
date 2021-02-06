@@ -26,14 +26,12 @@ public:
     std::chrono::duration<float, std::milli> loopDone();
     float getAvgDuration();
     float getMaxDuration();
-    
-    void resetTimer();
 
 private:
     
     using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
     
-    static const int history_size = 1000; 
+    static const int history_size = 100; 
     
     int m_curr_idx;
     TimePoint m_last_times[history_size];

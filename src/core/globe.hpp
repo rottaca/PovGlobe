@@ -17,6 +17,7 @@ public:
     void runRendererAsync();
     void runApplicationAsync(ApplicationBase& app);
     void shutdown();
+    void stopCurrentApp();
 
     int getHeight() const;
     int getWidth() const;

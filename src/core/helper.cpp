@@ -33,19 +33,24 @@ std::chrono::duration<float, std::milli> LoopTimer::loopDone()
     }
 
     const std::chrono::duration<float, std::milli> delta = curr_time - m_last_times[m_curr_idx];
-    m_last_times[m_curr_idx] = curr_time;
     m_curr_idx = next_idx;
+    m_last_times[m_curr_idx] = curr_time;
     return delta;
 }
 
 float LoopTimer::getAvgDuration()
 {  
-  float avgTime = 0;
+    float avgTime = 0;
     for (int i = 0; i < history_size - 1; i++){
-      const std::chrono::duration<float, std::milli> delta = m_last_times[(m_curr_idx + i + 1) % history_size] 
-                                                           - m_last_times[(m_curr_idx + i + 0) % history_size];
-                                                           
-      avgTime += delta.count();                                                           
+
+        const int curr_idx = (m_curr_idx + i + 1) % history_size;
+        const int next_idx = (m_curr_idx + i + 2) % history_size;
+
+        const auto curr = m_last_times[curr_idx];
+        const auto next = m_last_times[next_idx];
+
+        const auto delta = next - curr;                                                           
+        avgTime += std::chrono::duration_cast<std::chrono::milliseconds>(delta).count();
     }
   
     return avgTime/(history_size - 1);
@@ -53,18 +58,20 @@ float LoopTimer::getAvgDuration()
 
 float LoopTimer::getMaxDuration()
 {  
-  float maxTime = 0;
+    float maxTime = 0;
     for (int i = 0; i < history_size - 1; i++){
-      const std::chrono::duration<float, std::milli> delta = m_last_times[(m_curr_idx + i + 1) % history_size] 
-                                                           - m_last_times[(m_curr_idx + i + 0) % history_size];
+        const int curr_idx = (m_curr_idx + i + 1) % history_size;
+        const int next_idx = (m_curr_idx + i + 2) % history_size;
+
+        const auto curr = m_last_times[curr_idx];
+        const auto next = m_last_times[next_idx];
+
+        const auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(next - curr);
+
       if (delta.count() > maxTime){
         maxTime = delta.count();
       }                                                  
     }
   
     return maxTime;
-}
-void LoopTimer::resetTimer(){
-    const auto curr_time = std::chrono::steady_clock::now();
-    m_last_times[m_curr_idx] = curr_time;
 }
