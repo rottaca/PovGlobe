@@ -8,8 +8,7 @@
 #include "hw/renderer_led_strip.hpp"
 #endif
 
-const int width = 120;
-const int height = 57;
+const int height = 55;
 const float radius = 13.25;
 const float spacing_top = 1.0;
 const float spacing_bottom = 2.0;
@@ -20,7 +19,7 @@ int main(int argc, char* argv[]) {
 #ifdef HW_AVAILABLE 
     RpmMeasureHall rpm(default_hall_sensor_gpio_pin);
     RendererLedStrip renderer(rpm);
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, true, renderer);
+    Globe globe(height, radius, spacing_top, spacing_bottom, true, renderer);
 
     rpm.initialize(globe);
 

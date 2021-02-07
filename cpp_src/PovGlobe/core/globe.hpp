@@ -11,7 +11,10 @@
 class Globe
 {
 public:
-    Globe(int height, int width, float radius, float spacing_top, float spacing_bottom, bool doublesidedRendering, RendererBase& renderer);
+    Globe(int vertical_num_leds,
+        float radius, 
+        float spacing_top, float spacing_bottom, 
+        bool doublesidedRendering, RendererBase& renderer);
     ~Globe();
 
     void runRendererAsync();
@@ -19,12 +22,21 @@ public:
     void shutdown();
     void stopCurrentApp();
 
-    int getHeight() const;
-    int getWidth() const;
+    int getVerticalNumPixelsWithLeds() const;
+    int getTotalVerticalNumPixels() const;
+    int getHorizontalNumPixels() const;
+
     float getRadius() const;
-    float getSpacingTop() const;
-    float getSpacingBottom() const;
     float getHalfCircumference() const;
+
+    float getSpacingTopCm() const;
+    float getSpacingTopRatio() const;
+    int getSpacingTopPixels() const;
+
+    float getSpacingBottomCm() const;
+    float getSpacingBottomRatio() const;
+    int getSpacingBottomPixels() const;
+
     bool getDoubleSidedRendering() const;
 
     const Framebuffer& getRenderFrameBuffer() const;
@@ -33,12 +45,20 @@ public:
     void swapFramebuffers();
 
 protected:
-    int m_height;
-    int m_width;
-    float m_radius;
-    float m_spacing_top;
-    float m_spacing_bottom;
-    float m_half_circumference;
+    int m_vertical_num_leds;
+    int m_horizontal_num_pixels;
+
+    int m_total_height_num_leds;
+    int m_spacing_top_num_leds;
+    int m_spacing_bottom_num_leds;
+
+    float m_spacing_top_ratio;
+    float m_spacing_bottom_ratio;
+
+    float m_radius_cm;
+    float m_spacing_top_cm;
+    float m_spacing_bottom_cm;
+    float m_half_circumference_cm;
     bool m_doublesidedRendering;
 
     RendererBase& m_renderer;

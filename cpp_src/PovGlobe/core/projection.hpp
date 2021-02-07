@@ -4,49 +4,17 @@
 #include <math.h>
 
 #include "helper.hpp"
+#include "globe.hpp"
 
 
 class ProjectionFunction {
 public:
-    ProjectionFunction() = default;
-    virtual float minIn1() const {
-        return m_minIn1;
-    }
-    virtual float maxIn1() const {
-        return m_maxIn1;
-    }
-    virtual float minIn2() const {
-        return m_minIn2;
-    }
-    virtual float maxIn2() const {
-        return  m_maxIn2;
-    }
-
     virtual void operator()(float in1, float in2, float& out1, float& out2) const = 0;
-
-protected:
-    ProjectionFunction(float minIn1, float maxIn1, float minIn2, float maxIn2)
-        : m_minIn1(minIn1)
-        , m_maxIn1(maxIn1)
-        , m_minIn2(minIn2)
-        , m_maxIn2(maxIn2) {}
-
-    float m_minIn1;
-    float m_maxIn1;
-    float m_minIn2;
-    float m_maxIn2;
 };
 
 
 class MercatorProjection : public ProjectionFunction {
 public:
-    MercatorProjection() : ProjectionFunction(
-        -180 * deg2rad,
-        +180 * deg2rad,
-        -90  * deg2rad,
-        +90  * deg2rad
-    ) {}
-
     // https://en.wikipedia.org/wiki/Miller_cylindrical_projection
     // lat = 0 at equator
     virtual void operator()(float lon, float lat, float& x, float& y) const override {
@@ -56,12 +24,6 @@ public:
 };
 class InvMercatorProjection : public ProjectionFunction {
 public:
-    InvMercatorProjection() : ProjectionFunction(
-        -90 * deg2rad,
-        +90 * deg2rad,
-        -180 * deg2rad,
-        +180 * deg2rad
-    ) {}
     virtual void operator()(float x, float y, float& lon, float& lat) const override {
         lon = x;
         lat = atan(exp(y) * 2 - pi / 2.f);
@@ -71,12 +33,6 @@ public:
 
 class EquirectangularProjection : public ProjectionFunction {
 public:
-    EquirectangularProjection() : ProjectionFunction(
-        -180 * deg2rad,
-        +180 * deg2rad,
-        -90 * deg2rad,
-        +90 * deg2rad
-    ) {}
     virtual void operator()(float lon, float lat, float& x, float& y) const override {
         x = lon;
         y = lat;
@@ -84,12 +40,6 @@ public:
 };
 class InvEquirectangularProjection : public ProjectionFunction {
 public:
-    InvEquirectangularProjection() : ProjectionFunction(
-        -90 * deg2rad,
-        +90 * deg2rad,
-        -180 * deg2rad,
-        +180 * deg2rad
-    ) {}
     virtual void operator()(float x, float y, float& lon, float& lat) const override {
         lon = x;
         lat = y;
@@ -110,44 +60,56 @@ inline std::vector<std::pair<float, float>> project(const CoordinateList& coordi
     return res;
 }
 
-inline CoordinateList buildImageProjectionLUT(const ProjectionFunction& projection,
-                                              int img_height, int img_width, int img_height_offset,
-                                              int globe_height, int globe_width) {
-    const float half_img_height = img_height / 2.0f;
-    const float half_img_width = img_width / 2.0f;
-    const float half_height = globe_height / 2.0f;
-    const float half_width = globe_width / 2.0f;
+inline CoordinateList buildImageProjectionLUT(const ProjectionFunction& projection, const Globe& globe,
+                                       int img_height, int img_width, float max_img_lat, float min_img_lat) {
 
-    // TODO 
-    const float xMin = projection.minIn1();
-    const float xMax = projection.maxIn1();
-    const float yMin = projection.minIn2();
-    const float yMax = projection.maxIn2();
+    const int globe_height_total = globe.getTotalVerticalNumPixels();
+    const int globe_height_with_leds = globe.getVerticalNumPixelsWithLeds();
+    const int globe_width = globe.getHorizontalNumPixels();
+    const int globe_width_half = globe_width / 2;
 
+    const float max_img_lon = pi;
+    const float min_img_lon = -max_img_lon;
+
+    const float max_globe_lon = pi;
+    const float min_globe_lon = -max_globe_lon;
+    const float max_globe_lat_leds = pi / 2.f * (1.0f - (globe.getSpacingTopRatio() * 2.0f));
+    const float min_globe_lat_leds = -pi / 2.f * (1.0f - (globe.getSpacingBottomRatio() * 2.0f));
+
+    // Calculate lat/lon gps locations for each pixel of the globe
+    // Take into account the limits of the globe (where are leds located along the vertical axis
     CoordinateList lonlat;
-    for (size_t i = 0; i < globe_height; i++)
+    for (size_t x = 0; x < globe_width; x++)
     {
-        const float ratio_y = (i + img_height_offset - half_height) / half_img_height;
-        const float lat = ratio_y * pi / 2.0f;
-        for (size_t j = 0; j < globe_width; j++)
+        const float ratio_x = x / (globe_width - 1.f);
+        const float lon = ratio_x * (max_globe_lon - min_globe_lon) + min_globe_lon;
+
+        for (size_t y = 0; y < globe_height_with_leds; y++)
         {
-            const float lon = (j - half_width) / half_width * pi;
+            const float ratio_y = y / (globe_height_with_leds - 1.f);
+            const float lat = ratio_y * (max_globe_lat_leds - min_globe_lat_leds) + min_globe_lat_leds;
+
             lonlat.push_back(std::make_pair(lon, lat));
         }
     }
 
+    assert(lonlat.size() == globe_width * globe_height_with_leds);
+    
+    // Apply given projection to lat/lon pairs
     auto projectedCoordinates = project(lonlat, projection);
 
-    float max_x;
-    float max_y;
-    projection(pi,
-        (half_height) / half_img_height * pi / 2.0f,
-        max_x, max_y);
+    // Project image limits to get max/min pixel positions for scaling
+    float max_img_proj_lat, min_img_proj_lat;
+    float max_img_proj_lon, min_img_proj_lon;
+    projection(min_img_lon, min_img_lat, min_img_proj_lon, min_img_proj_lat);
+    projection(max_img_lon, max_img_lat, max_img_proj_lon, max_img_proj_lat);
 
-    // rescale
+    // rescale projected coordinates to image plane
     for (auto& p : projectedCoordinates) {
-        p.first = p.first / max_x * half_img_width + half_img_width;
-        p.second = p.second / max_y * half_img_height + half_img_height;
+        const float ratio_x = (p.first - min_img_proj_lon) / (max_img_proj_lon - min_img_proj_lon);
+        const float ratio_y = (p.second - min_img_proj_lat) / (max_img_proj_lat - min_img_proj_lat);
+        p.first = ratio_x * img_width;
+        p.second = ratio_y * img_height;
     }
 
     return projectedCoordinates;

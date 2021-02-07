@@ -15,5 +15,5 @@ RpmMeasureBase::~RpmMeasureBase() {
 }
 void RpmMeasureBase::initialize(Globe& globe) {
     std::cout << "Initialize RpmMeasurment..." << std::endl;
-    m_temporal_resolution = globe.getWidth();
+    m_temporal_resolution = globe.getHorizontalNumPixels();
 }

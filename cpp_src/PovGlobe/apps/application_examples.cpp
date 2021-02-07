@@ -78,17 +78,20 @@ void ApplicationImageViewer::initialize(Globe& globe) {
 
     m_img = cimg_library::CImg<unsigned char>(m_path.c_str());
     std::cout << "Loaded image: "<< m_img.width() << "x" << m_img.height() << std::endl;
+    
+    // Lets assume, that image offsets are symmetrical along the vertical axis
+    // If an image is e.g. too wide, we have to cut of the vertical range
+    // A aspect ratio of 2.0 matches the surface of a sphere
+    const float image_aspect = m_img.width() / m_img.height();
+    const float max_img_lat = pi / 2.f * 2.0 / image_aspect;
+    const float min_img_lat = -max_img_lat;
 
-    const float top_pixel_skip_exact = globe.getSpacingTop() / globe.getHalfCircumference() * globe.getHeight();
-    m_top_pixel_skip = static_cast<int>(round(top_pixel_skip_exact));
-    const float bottom_pixel_skip_exact = globe.getSpacingBottom() / globe.getHalfCircumference() * globe.getHeight();
-    m_bottom_pixel_skip = static_cast<int>(round(bottom_pixel_skip_exact));
+    std::cout << "Image Aspect ratio:" << image_aspect << std::endl;
+    std::cout << "Resizing image to match the globe size: " << globe.getHorizontalNumPixels() << "x" << 2.0 / image_aspect * globe.getTotalVerticalNumPixels() << std::endl;
 
-    m_img.resize(globe.getWidth(), globe.getHeight() + m_top_pixel_skip + m_bottom_pixel_skip, 1, 3);
-
-    m_xy_img_for_lonlat = buildImageProjectionLUT(m_projection,
-        m_img.height(), m_img.width(), m_top_pixel_skip,
-        globe.getHeight(), globe.getWidth());
+    m_img.resize(globe.getHorizontalNumPixels(), 2.0 / image_aspect * globe.getTotalVerticalNumPixels(), 1, 3);
+    std::cout << "Building image projection lookup table" << std::endl;
+    m_xy_img_for_lonlat = buildImageProjectionLUT(m_projection, globe, m_img.height(), m_img.width(), max_img_lat, min_img_lat);
 }
 
 void ApplicationImageViewer::process(Framebuffer& framebuffer, float time)
@@ -97,7 +100,7 @@ void ApplicationImageViewer::process(Framebuffer& framebuffer, float time)
     {
         for (size_t i = 0; i < framebuffer.getHeight(); i++)
         {
-            const auto& xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j];
+            const auto& xy = m_xy_img_for_lonlat[j * framebuffer.getHeight() + i];
 
             m_pixelInterpolation(m_img, xy,
                 framebuffer(j, i, 0),
@@ -129,7 +132,7 @@ void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)
         const size_t j_offsetted = (j + m_offset_x) % framebuffer.getWidth();  
         for (size_t i = 0; i < framebuffer.getHeight(); i++)
         {
-            const auto& xy = m_xy_img_for_lonlat[i * framebuffer.getWidth() + j_offsetted];
+            const auto& xy = m_xy_img_for_lonlat[j_offsetted * framebuffer.getHeight() + i];
 
             m_pixelInterpolation(m_img, xy,
                 framebuffer(j, i, 0),

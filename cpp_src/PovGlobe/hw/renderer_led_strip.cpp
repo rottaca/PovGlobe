@@ -26,7 +26,7 @@ void RendererLedStrip::initialize(Globe& globe)
     RendererBase::initialize(globe);
     std::cout << "Initialize led strip..." << std::endl;
 
-    uint32_t num_leds = globe.getHeight();
+    uint32_t num_leds = globe.getVerticalNumPixelsWithLeds();
     m_last_temporal_pos = -1;
 
     // If we use double sided rendering, the led strip has twice the amount of leds.

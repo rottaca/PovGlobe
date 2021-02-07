@@ -23,8 +23,7 @@
 #include "hw/renderer_led_strip.hpp"
 #endif
 
-const int default_width = 110;
-const int default_height = 55;
+const int default_height_leds = 55;
 const float default_radius = 13.25;
 const float default_spacing_top = 1.5;
 const float default_spacing_bottom = 2.0;
@@ -93,8 +92,7 @@ int main(int argc, char* argv[]) {
         return strVal ? atof(strVal) : fallback;
     };
     // Parse commandline options
-    const int width = setterInt("-w", default_width);
-    const int height = setterInt("-h", default_height);
+    const int height_leds = setterInt("-h", default_height_leds);
     const float radius = setterFloat("-r", default_radius);
     const float spacing_top = setterFloat("-t", default_spacing_top);
     const float spacing_bottom = setterFloat("-b", default_spacing_bottom);
@@ -125,7 +123,7 @@ int main(int argc, char* argv[]) {
 #endif
     }
         
-    Globe globe(height, width, radius, spacing_top, spacing_bottom, double_sided, *renderer);
+    Globe globe(height_leds, radius, spacing_top, spacing_bottom, double_sided, *renderer);
 
     auto app_ptr = instantiateAlgorithms(argc, argv);
 

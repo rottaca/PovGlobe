@@ -1,14 +1,13 @@
 import sys
 import os
-#sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Debug (default)", "src", "wrapper_python"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Release", "src", "PyPovGlobe"))
-
 import time
+
+#sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Debug (default)", "src", "wrapper_python"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Release", "cpp_src", "PyPovGlobe"))
 import PyPovGlobe
 import tile_server_api
 
-width = 110
-height = 55
+num_leds_per_side = 55
 radius = 13.25
 spacing_top = 1.5
 spacing_bottom = 2.0
@@ -16,7 +15,7 @@ double_sided=True
 
 rpm = PyPovGlobe.RpmMeasureSim()
 renderer = PyPovGlobe.RendererSim(rpm)
-globe = PyPovGlobe.Globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer)
+globe = PyPovGlobe.Globe(num_leds_per_side, radius, spacing_top, spacing_bottom, double_sided, renderer)
 
 proj = PyPovGlobe.EquirectangularProjection()
 interp = PyPovGlobe.NearestNeighbourPixelInterpolation()

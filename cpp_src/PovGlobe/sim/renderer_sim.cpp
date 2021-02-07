@@ -78,7 +78,7 @@ void RendererSim::initialize(Globe& globe)
     RendererBase::initialize(globe);
     // Create render windows
     const float scale2d_visu = 4.0f;
-    m_draw_display.assign(scale2d_visu * globe.getWidth(), scale2d_visu * globe.getHeight(), "Flat Visualization");
+    m_draw_display.assign(scale2d_visu * globe.getHorizontalNumPixels(), scale2d_visu * globe.getVerticalNumPixelsWithLeds(), "Flat Visualization");
     m_draw_display.move(0, 0);
 
     m_draw_display_3d.assign(512, 512, "3D Visualization");
@@ -88,9 +88,10 @@ void RendererSim::initialize(Globe& globe)
     const float scale3d_visu = 180.f;
     const float nick_angle = 20.f;
     m_sphere_pts = buildSphere(m_sphere_primitives,
-                            globe.getWidth(), globe.getHeight(),
-                            scale3d_visu, scale3d_visu * globe.getSpacingTop() / globe.getRadius(),
-                            scale3d_visu * globe.getSpacingBottom() / globe.getRadius());
+                            globe.getHorizontalNumPixels(), globe.getVerticalNumPixelsWithLeds(),
+                            scale3d_visu, 
+                            scale3d_visu * globe.getSpacingTopCm() / globe.getRadius(),
+                            scale3d_visu * globe.getSpacingBottomCm() / globe.getRadius());
     // Rotate to show user the right side of the globe
     m_sphere_pts = CImg<>::rotation_matrix(1, 0, 0, nick_angle) * CImg<>::rotation_matrix(0, 0, 1, -90) * CImg<>::rotation_matrix(0, 1, 0, 90) * m_sphere_pts;
     m_sphere_colors = CImgList<unsigned char>(m_sphere_primitives.size(), CImg<unsigned char>::vector(0, 0, 0));
@@ -98,7 +99,7 @@ void RendererSim::initialize(Globe& globe)
 
     // Create render buffer
     m_visu_buffer3d = CImg<unsigned char>(3, m_draw_display_3d.width(), m_draw_display_3d.height(), 1).permute_axes("yzcx");
-    m_visu_buffer = CImg<unsigned char>(globe.getWidth(), globe.getHeight(), 1, 3);
+    m_visu_buffer = CImg<unsigned char>(globe.getHorizontalNumPixels(), globe.getVerticalNumPixelsWithLeds(), 1, 3);
 }
 
 void RendererSim::render(const Framebuffer& buffer)
