@@ -1,6 +1,5 @@
 find_package(SWIG 4.0 COMPONENTS python)
 
-
 if(SWIG_FOUND)
   message("SWIG found: ${SWIG_EXECUTABLE}")
   # Make swig generate standard target names
@@ -35,13 +34,6 @@ if(SWIG_FOUND)
   endforeach()
   set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_INCLUDE_DIRECTORIES ${ALL_INCLUDES})
   set_property(TARGET ${PY_WRAPPER_LIB_NAME} PROPERTY SWIG_COMPILE_DEFINITIONS ${ALL_COMPILE_DEFS})
-
-  set(PY_FILES
-    "tile_server_api.py"
-  )
-  foreach(PY_FILE ${PY_FILES})
-    configure_file(${PY_FILE} . COPYONLY)
-  endforeach()
 
 endif()
 

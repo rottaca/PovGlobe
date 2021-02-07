@@ -1,10 +1,11 @@
 import sys
 import os
 #sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Debug (default)", "src", "wrapper_python"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Release", "src", "wrapper_python"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", "x64-Release", "src", "PyPovGlobe"))
 
 import time
-import PovGlobe
+import PyPovGlobe
+import tile_server_api
 
 width = 110
 height = 55
@@ -13,22 +14,22 @@ spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided=True
 
-rpm = PovGlobe.RpmMeasureSim()
-renderer = PovGlobe.RendererSim(rpm)
-globe = PovGlobe.Globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer)
+rpm = PyPovGlobe.RpmMeasureSim()
+renderer = PyPovGlobe.RendererSim(rpm)
+globe = PyPovGlobe.Globe(height, width, radius, spacing_top, spacing_bottom, double_sided, renderer)
 
-proj = PovGlobe.EquirectangularProjection()
-interp = PovGlobe.NearestNeighbourPixelInterpolation()
+proj = PyPovGlobe.EquirectangularProjection()
+interp = PyPovGlobe.NearestNeighbourPixelInterpolation()
 
-class MyApp(PovGlobe.ApplicationBase):
+class MyApp(PyPovGlobe.ApplicationBase):
   def __init__(self):
-    PovGlobe.ApplicationBase.__init__(self)
+    PyPovGlobe.ApplicationBase.__init__(self)
     self.tile_img = None
-    self.proj = PovGlobe.EquirectangularProjection()
-    self.interp = PovGlobe.NearestNeighbourPixelInterpolation()
+    self.proj = PyPovGlobe.EquirectangularProjection()
+    self.interp = PyPovGlobe.NearestNeighbourPixelInterpolation()
 
   def initialize(self, globe):
-      self.tile_img = PovGlobe.tile_server_api.get_world(zoom=1)
+      self.tile_img = PyPovGlobe.tile_server_api.get_world(zoom=1)
       print(self.tile_img)
 
       top_pixel_skip_exact = globe.getSpacingTop() / globe.getHalfCircumference() * globe.getHeight()
@@ -55,11 +56,11 @@ class MyApp(PovGlobe.ApplicationBase):
 res_dir = os.path.join(os.path.dirname(__file__), "..", "res")
 
 all_apps = [
-    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "2_no_clouds_8k.jpg"), proj, interp),
-    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "kisspng-world-map-globe-equirectangular-projection-map.png"), proj, interp),
-    PovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "soccer2_sph.png"), proj, interp),
-    PovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "tennisenn_sph.png"), proj, interp),
-    PovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "1_earth_8k.jpg"), proj, interp),
+    PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "2_no_clouds_8k.jpg"), proj, interp),
+    PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "kisspng-world-map-globe-equirectangular-projection-map.png"), proj, interp),
+    PyPovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "soccer2_sph.png"), proj, interp),
+    PyPovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "tennisenn_sph.png"), proj, interp),
+    PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "1_earth_8k.jpg"), proj, interp),
     #MyApp()
 ]
 
