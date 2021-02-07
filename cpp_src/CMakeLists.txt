@@ -1,0 +1,15 @@
+add_subdirectory(PovGlobe)
+
+
+set(POV_GLOBE_TARGETS "")
+list(APPEND POV_GLOBE_TARGETS ${CORE_LIB_NAME})
+list(APPEND POV_GLOBE_TARGETS ${APPS_LIB_NAME})
+if(TARGET ${HW_LIB_EXT_NAME})
+  list(APPEND POV_GLOBE_TARGETS ${HW_LIB_EXT_NAME})
+endif()
+if(TARGET ${SIM_LIB_EXT_NAME})
+  list(APPEND POV_GLOBE_TARGETS ${SIM_LIB_EXT_NAME})
+endif()
+
+
+add_subdirectory(PyPovGlobe)

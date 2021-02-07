@@ -1,5 +1,5 @@
 
-%module(directors="1", threads="1")  PovGlobe
+%module(directors="1", threads="1")  PyPovGlobe
 
 %include <stl.i>
 
@@ -106,10 +106,3 @@ void RowProxy::__setitem__(int i, uint8_t value) {
 #endif
 
 %include "apps/application_examples.hpp"
-
-
-%pythoncode %{
-import tile_server_api
-
-
-%}

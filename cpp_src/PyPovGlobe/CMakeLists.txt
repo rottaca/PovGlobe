@@ -1,6 +1,5 @@
 find_package(SWIG 4.0 COMPONENTS python)
 
-
 if(SWIG_FOUND)
   message("SWIG found: ${SWIG_EXECUTABLE}")
   # Make swig generate standard target names
