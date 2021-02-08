@@ -1,8 +1,10 @@
 import math
 import requests
 import io
+import math
 from PIL import Image
 
+import PyPovGlobe
 
 def deg2num(lat_deg, lon_deg, zoom):
   lat_rad = math.radians(lat_deg)
@@ -43,7 +45,6 @@ def get_concat_v(im1, im2):
     dst.paste(im2, (0, im1.height))
     return dst
 
-
 def get_world(zoom):
     x_tiles = list(range(2**zoom))
     y_tiles = list(range(2**zoom))
@@ -64,11 +65,36 @@ def get_world(zoom):
 
     return img_full
 
+
+class TileServerApp(PyPovGlobe.PyApplicationBase):
+  def __init__(self):
+    super().__init__()
+    self.tile_img = None
+    self.proj = PyPovGlobe.MercatorProjection() #PyPovGlobe.EquirectangularProjection() #
+    self.interp = PyPovGlobe.NearestNeighbourPixelInterpolation()
+
+  def pyInitialize(self, globe):
+      zoom = 1
+      self.tile_img = get_world(zoom=zoom)
+      self.tile_img.show()
+
+      # Whats the maximum lat of this globe
+      max_lat = num2deg(0,0,zoom=zoom)[0] / 180.0 * math.pi
+      min_lat = num2deg(2**zoom,2**zoom, zoom=zoom)[0] / 180.0 * math.pi
+      print(min_lat, max_lat)
+      self.m_xy_img_for_lonlat = PyPovGlobe.buildImageProjectionLUT(self.proj, globe, 
+                                                                    self.tile_img.height, self.tile_img.width, 
+                                                                    max_lat, min_lat)
+
+  def pyProcess(self, framebuffer, time):
+      for j in range(framebuffer.getWidth()):
+        for i in range(framebuffer.getHeight()):
+            x, y = self.m_xy_img_for_lonlat[j * framebuffer.getHeight() + i];
+            xy = (int(x) % self.tile_img.width , 
+                  int(y) % self.tile_img.height)
+
+            framebuffer[j][i] = self.tile_img.getpixel(xy)
+
+
 # https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
         
-#print("x = 0 -> -180 Deg Lon")
-#print("x = 2**zoom - 1 -> +180 Deg Lon")
-#print("y = 0 -> -85.0511 Deg Lat")
-#print("y = 2**zoom - 1 -> +85.0511 Deg Lat")
-
-#img_full.show()

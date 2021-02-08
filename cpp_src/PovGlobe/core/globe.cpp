@@ -25,7 +25,7 @@ Globe::Globe(int vertical_num_leds,
     m_spacing_bottom_num_leds = std::round(m_total_height_num_leds * m_spacing_bottom_ratio);
     // The surface of a sphere has a 2:1 aspect ratio
     m_horizontal_num_pixels = 2 * m_total_height_num_leds;
-    assert(m_horizontal_num_leds % 2 == 0); // We always need an equal number of cols
+    assert(m_horizontal_num_pixels % 2 == 0); // We always need an equal number of cols
 
     m_framebuffers[0].initialize(m_vertical_num_leds, m_horizontal_num_pixels);
     m_framebuffers[1].initialize(m_vertical_num_leds, m_horizontal_num_pixels);

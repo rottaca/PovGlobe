@@ -88,7 +88,6 @@ inline CoordinateList buildImageProjectionLUT(const ProjectionFunction& projecti
         {
             const float ratio_y = y / (globe_height_with_leds - 1.f);
             const float lat = ratio_y * (max_globe_lat_leds - min_globe_lat_leds) + min_globe_lat_leds;
-
             lonlat.push_back(std::make_pair(lon, lat));
         }
     }

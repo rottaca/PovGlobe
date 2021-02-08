@@ -27,10 +27,13 @@
 
 %include "stdint.i"
 
-%include "std_vector.i"
-namespace std {
-  %template(UInt8Vector) vector<uint8_t>;
-}
+%include <std_pair.i>
+%include <std_vector.i>
+%include <std_string.i>
+
+%template() std::pair<float,float>;
+%template() std::vector<std::pair<float,float> >;
+%template(UInt8Vector) std::vector<uint8_t>;
 
 
 %include "core/helper.hpp"
@@ -106,3 +109,31 @@ void RowProxy::__setitem__(int i, uint8_t value) {
 #endif
 
 %include "apps/application_examples.hpp"
+
+
+%pythoncode %{
+import traceback 
+
+class PyApplicationBase(ApplicationBase):
+  def __init__(self):
+    super().__init__()
+
+  def pyInitialize(self, globe):  
+      pass
+
+  def initialize(self, globe):
+      try:
+        self.pyInitialize(globe)
+      except Exception:
+        traceback.print_exc() 
+        
+  def pyProcess(self, framebuffer, time):
+    pass
+
+  def process(self, framebuffer, time):
+      try:
+        self.pyProcess(framebuffer, time)
+      except Exception as e:
+        traceback.print_exc() 
+
+%}
