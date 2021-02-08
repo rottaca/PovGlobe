@@ -3,9 +3,10 @@
 #include <iostream>
 #include <fstream>
 
-void ApplicationTest1::initialize(Globe& globe)
+bool ApplicationTest1::initialize(Globe& globe)
 {
     m_last_pixel = 0;
+    return true;
 }
 
 void ApplicationTest1::process(Framebuffer& framebuffer, float time)
@@ -68,12 +69,12 @@ ApplicationImageViewer::ApplicationImageViewer(const char* path,
     , m_pixelInterpolation(pixelInterpolation)
 {}
 
-void ApplicationImageViewer::initialize(Globe& globe) {
+bool ApplicationImageViewer::initialize(Globe& globe) {
     std::cout << "Opening image file " << m_path << std::endl;
 
     if (!std::ifstream(m_path.c_str()).good()) {
         std::cerr << "Image file " << m_path << " does not exist!" << std::endl;
-        exit(4);
+        return false;
     }
 
     m_img = cimg_library::CImg<unsigned char>(m_path.c_str());
@@ -92,6 +93,8 @@ void ApplicationImageViewer::initialize(Globe& globe) {
     m_img.resize(globe.getHorizontalNumPixels(), 2.0 / image_aspect * globe.getTotalVerticalNumPixels(), 1, 3);
     std::cout << "Building image projection lookup table" << std::endl;
     m_xy_img_for_lonlat = buildImageProjectionLUT(m_projection, globe, m_img.height(), m_img.width(), max_img_lat, min_img_lat);
+
+    return true;
 }
 
 void ApplicationImageViewer::process(Framebuffer& framebuffer, float time)
@@ -118,9 +121,9 @@ ApplicationImageRotator::ApplicationImageRotator(const char* path,
     , m_offset_x(0)
 {}
 
-void ApplicationImageRotator::initialize(Globe& globe) {
-    ApplicationImageViewer::initialize(globe);
+bool ApplicationImageRotator::initialize(Globe& globe) {
     m_offset_x = 0;
+    return ApplicationImageViewer::initialize(globe);
 }
 
 void ApplicationImageRotator::process(Framebuffer& framebuffer, float time)

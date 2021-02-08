@@ -64,7 +64,12 @@ void Globe::runApplicationAsync(ApplicationBase& app)
 void Globe::runApplication(ApplicationBase& app)
 {
     std::cout << "Initialize Application..." << std::endl;
-    app.initialize(*this);
+    const bool appInitSuccessful = app.initialize(*this);
+
+    if (!appInitSuccessful) {
+        std::cerr << "App initialization failed." << std::endl;
+        return;
+    }
 
     const auto target_cycle_time = std::chrono::milliseconds((int)app.getTargetCycleTimeMs());
 

@@ -10,7 +10,7 @@
 class ApplicationTest1 : public ApplicationBase {
 
 public:
-    virtual void initialize(Globe& globe);
+    virtual bool initialize(Globe& globe);
     virtual void process(Framebuffer& framebuffer, float time);
 
 private:
@@ -24,7 +24,7 @@ public:
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation);
 
-    virtual void initialize(Globe& globe);
+    virtual bool initialize(Globe& globe);
     virtual void process(Framebuffer& framebuffer, float time);
 
     float getTargetCycleTimeMs() const {
@@ -52,7 +52,7 @@ public:
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation);
 
-    void initialize(Globe& globe);
+    bool initialize(Globe& globe);
     void process(Framebuffer& framebuffer, float time);
 
     float getTargetCycleTimeMs() const {

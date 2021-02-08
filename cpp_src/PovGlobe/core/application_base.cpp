@@ -4,8 +4,9 @@
 
 using namespace std::chrono_literals;
 
-void ApplicationBase::initialize(Globe& globe)
+bool ApplicationBase::initialize(Globe& globe)
 {
+    return true;
 }
 
 float ApplicationBase::getTargetCycleTimeMs() const {

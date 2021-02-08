@@ -8,7 +8,7 @@ class ApplicationBase {
 public:
     virtual ~ApplicationBase() = default;
 
-    virtual void initialize(Globe& globe);
+    virtual bool initialize(Globe& globe);
     virtual float getTargetCycleTimeMs() const;
 
     virtual void process(Framebuffer& framebuffer, float timeS) = 0;

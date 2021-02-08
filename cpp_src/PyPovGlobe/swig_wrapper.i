@@ -118,14 +118,15 @@ class PyApplicationBase(ApplicationBase):
   def __init__(self):
     super().__init__()
 
-  def pyInitialize(self, globe):  
-      pass
+  def pyInitialize(self, globe: Globe) -> bool:  
+      return True
 
-  def initialize(self, globe):
+  def initialize(self, globe: Globe) -> bool:
       try:
-        self.pyInitialize(globe)
+        return self.pyInitialize(globe)
       except Exception:
         traceback.print_exc() 
+        return False
         
   def pyProcess(self, framebuffer, time):
     pass
