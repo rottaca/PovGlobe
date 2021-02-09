@@ -44,13 +44,11 @@ all_apps = [
 globe.runRendererAsync()
 
 for url_name in tile_server_api.tile_map_urls:
-    #print(f"Showing weather map from {url_name}")
     app = tile_server_api.TileServerApp(tile_server_api.tile_map_urls[url_name])
     all_apps.append(app)
 
 app_idx = 0
 while(True):
-    globe.stopCurrentApp()
     globe.runApplicationAsync(all_apps[app_idx])
 
     time.sleep(10)

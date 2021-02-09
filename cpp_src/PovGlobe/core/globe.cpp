@@ -51,10 +51,7 @@ void Globe::runRendererAsync()
 
 void Globe::runApplicationAsync(ApplicationBase& app)
 {
-    m_applicationThread_running = false;
-    if (m_applicationThread.joinable()) {
-        m_applicationThread.join();
-    }
+    stopCurrentApp();
     m_applicationThread_running = true;
 
     m_applicationThread = std::thread(&Globe::runApplication, this, std::ref(app));
@@ -94,18 +91,17 @@ void Globe::runApplication(ApplicationBase& app)
 void Globe::shutdown()
 {
     m_renderer.stopAndJoinRenderThread();
-    m_applicationThread_running = false;
-    if (m_applicationThread.joinable()) {
-        m_applicationThread.join();
-    }
+    stopCurrentApp();
 }
 
 void Globe::stopCurrentApp()
 {
     m_applicationThread_running = false;
+    std::cout << "Waiting for app to stop..." << std::endl;
     if (m_applicationThread.joinable()) {
         m_applicationThread.join();
     }
+    std::cout << "App stopped." << std::endl;
 }
 
 int Globe::getVerticalNumPixelsWithLeds() const {
