@@ -16,8 +16,15 @@ spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided=True
 
-rpm = PyPovGlobe.RpmMeasureHall(25)
-renderer = PyPovGlobe.RendererLedStrip(rpm)
+usw_hw = False
+gpio_pin_rpm = 25
+if usw_hw:
+    rpm = PyPovGlobe.RpmMeasureHall(gpio_pin_rpm)
+    renderer = PyPovGlobe.RendererLedStrip(rpm)
+else:
+    rpm = PyPovGlobe.RpmMeasureSim()
+    renderer = PyPovGlobe.RendererSim(rpm)
+
 globe = PyPovGlobe.Globe(num_leds_per_side, radius, spacing_top, spacing_bottom, double_sided, renderer)
 
 proj = PyPovGlobe.EquirectangularProjection()
