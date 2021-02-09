@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "build", "cpp_src"
 
 import PyPovGlobe
 import tile_server_api
+import ClockApp
 
 num_leds_per_side = 55
 radius = 13.25
@@ -35,10 +36,10 @@ res_dir = os.path.join(os.path.dirname(__file__), "..", "res")
 all_apps = [
     PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "2_no_clouds_8k.jpg"), proj, interp),
     PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "kisspng-world-map-globe-equirectangular-projection-map.png"), proj, interp),
+    PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "1_earth_8k.jpg"), proj, interp),
     PyPovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "soccer2_sph.png"), proj, interp),
     PyPovGlobe.ApplicationImageViewer(os.path.join(res_dir, "img", "tennisenn_sph.png"), proj, interp),
-    PyPovGlobe.ApplicationImageRotator(os.path.join(res_dir, "img", "1_earth_8k.jpg"), proj, interp),
-    
+    ClockApp.ClockApp(),
 ]
 
 globe.runRendererAsync()
