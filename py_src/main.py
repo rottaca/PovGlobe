@@ -5,6 +5,7 @@ import time
 #build_config="x64-Debug (default)"
 build_config="x64-Release"
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "out", "build", build_config, "cpp_src", "PyPovGlobe"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "build", "cpp_src", "PyPovGlobe"))
 
 import PyPovGlobe
 import tile_server_api
@@ -15,8 +16,8 @@ spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided=True
 
-rpm = PyPovGlobe.RpmMeasureSim()
-renderer = PyPovGlobe.RendererSim(rpm)
+rpm = PyPovGlobe.RpmMeasureHall(25)
+renderer = PyPovGlobe.RendererLedStrip(rpm)
 globe = PyPovGlobe.Globe(num_leds_per_side, radius, spacing_top, spacing_bottom, double_sided, renderer)
 
 proj = PyPovGlobe.EquirectangularProjection()

@@ -9,7 +9,7 @@
 
 #ifdef HW_AVAILABLE
  #include "hw/renderer_led_strip.hpp"
- #include "hw/rpm_mreasure_hall.hpp"
+ #include "hw/rpm_measure_hall.hpp"
 #endif
 #ifdef SIM_AVAILABLE
  #include "sim/renderer_sim.hpp"
@@ -98,7 +98,7 @@ void RowProxy::__setitem__(int i, uint8_t value) {
 
 #ifdef HW_AVAILABLE
   %include "hw/renderer_led_strip.hpp"
-  %include "hw/rpm_mreasure_hall.hpp"
+  %include "hw/rpm_measure_hall.hpp"
 #endif
 #ifdef SIM_AVAILABLE
   %include "sim/renderer_sim.hpp"
