@@ -51,10 +51,7 @@ void Globe::runRendererAsync()
 
 void Globe::runApplicationAsync(ApplicationBase& app)
 {
-    m_applicationThread_running = false;
-    if (m_applicationThread.joinable()) {
-        m_applicationThread.join();
-    }
+    stopCurrentApp();
     m_applicationThread_running = true;
 
     m_applicationThread = std::thread(&Globe::runApplication, this, std::ref(app));
@@ -64,7 +61,12 @@ void Globe::runApplicationAsync(ApplicationBase& app)
 void Globe::runApplication(ApplicationBase& app)
 {
     std::cout << "Initialize Application..." << std::endl;
-    app.initialize(*this);
+    const bool appInitSuccessful = app.initialize(*this);
+
+    if (!appInitSuccessful) {
+        std::cerr << "App initialization failed." << std::endl;
+        return;
+    }
 
     const auto target_cycle_time = std::chrono::milliseconds((int)app.getTargetCycleTimeMs());
 
@@ -89,18 +91,17 @@ void Globe::runApplication(ApplicationBase& app)
 void Globe::shutdown()
 {
     m_renderer.stopAndJoinRenderThread();
-    m_applicationThread_running = false;
-    if (m_applicationThread.joinable()) {
-        m_applicationThread.join();
-    }
+    stopCurrentApp();
 }
 
 void Globe::stopCurrentApp()
 {
     m_applicationThread_running = false;
+    std::cout << "Waiting for app to stop..." << std::endl;
     if (m_applicationThread.joinable()) {
         m_applicationThread.join();
     }
+    std::cout << "App stopped." << std::endl;
 }
 
 int Globe::getVerticalNumPixelsWithLeds() const {

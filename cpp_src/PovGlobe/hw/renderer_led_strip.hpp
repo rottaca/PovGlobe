@@ -61,7 +61,7 @@ inline void RendererLedStrip::setPixel(const Framebuffer& framebuffer, uint32_t 
     const unsigned char r = framebuffer(x, pixel_index, 0U);
     const unsigned char g = framebuffer(x, pixel_index, 1U);
     const unsigned char b = framebuffer(x, pixel_index, 2U);
-    m_led_data[buffer_index + 1U] = led_lut[b / pixel_scaling];
-    m_led_data[buffer_index + 2U] = led_lut[g / pixel_scaling];
-    m_led_data[buffer_index + 3U] = led_lut[r / pixel_scaling];
+    m_led_data[buffer_index + 1U] = led_lut[b] / pixel_scaling;
+    m_led_data[buffer_index + 2U] = led_lut[g] / pixel_scaling;
+    m_led_data[buffer_index + 3U] = led_lut[r] / pixel_scaling;
 };

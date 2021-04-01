@@ -9,7 +9,7 @@
 
 #ifdef HW_AVAILABLE
  #include "hw/renderer_led_strip.hpp"
- #include "hw/rpm_mreasure_hall.hpp"
+ #include "hw/rpm_measure_hall.hpp"
 #endif
 #ifdef SIM_AVAILABLE
  #include "sim/renderer_sim.hpp"
@@ -98,7 +98,7 @@ void RowProxy::__setitem__(int i, uint8_t value) {
 
 #ifdef HW_AVAILABLE
   %include "hw/renderer_led_strip.hpp"
-  %include "hw/rpm_mreasure_hall.hpp"
+  %include "hw/rpm_measure_hall.hpp"
 #endif
 #ifdef SIM_AVAILABLE
   %include "sim/renderer_sim.hpp"
@@ -118,14 +118,15 @@ class PyApplicationBase(ApplicationBase):
   def __init__(self):
     super().__init__()
 
-  def pyInitialize(self, globe):  
-      pass
+  def pyInitialize(self, globe: Globe) -> bool:  
+      return True
 
-  def initialize(self, globe):
+  def initialize(self, globe: Globe) -> bool:
       try:
-        self.pyInitialize(globe)
+        return self.pyInitialize(globe)
       except Exception:
         traceback.print_exc() 
+        return False
         
   def pyProcess(self, framebuffer, time):
     pass
