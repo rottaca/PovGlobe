@@ -4,7 +4,7 @@
 
 UartDataReader::UartDataReader()
 {
-    next_pixel_buff_value = 0;
+    curr_pixel_buff_index = 0;
     current_input_column = 0;
     memset(pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_PIXELS_PER_CHANNEL);
 
@@ -53,28 +53,60 @@ UartDataReader& UartDataReader::getInstance() {
 //     }
 // }
 
-void UartDataReader::processUart(LEDController& ledController){
+bool UartDataReader::checkPreamble(){
 
-    current_input_column = 0;
+    // Check for preamble
+    bool preamble_found = true;
+    if (curr_pixel_buff_index >= N_PREAMBLE_BYTES-1){
+        for (size_t i = 0; i < N_PREAMBLE_BYTES && preamble_found; i++)
+        {
+            const size_t idx = curr_pixel_buff_index - N_PREAMBLE_BYTES + 1 + i;
+            if (i % 2 == 0)
+                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_EVEN_BYTE;
+            else
+                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_ODD_BYTE;
+        }
+    }else{
+        preamble_found = false;
+    }
+
+    return preamble_found;
+}
+
+void UartDataReader::processUart(LEDController& ledController){
     int c = getchar_timeout_us(0U);
     int max_chars_to_read = 100U;
     int chars_read = 0U;
 
     while(c != PICO_ERROR_TIMEOUT) {
-        pixel_column_buffer[next_pixel_buff_value++] = (uint8_t)c;
         chars_read++;
 
-        // Column completely received
-        if (next_pixel_buff_value == N_BUFFER_SIZE_PER_COLUMN){
-            printf("Received %d values.\n", next_pixel_buff_value);
-            printf("Updating pixel buffer for column %d\n", current_input_column);
+        pixel_column_buffer[curr_pixel_buff_index] = (uint8_t)c;
+        //printf("Received %c\n", c);
+        if (checkPreamble()){
+            printf("New preamble detected. Restarting.\n");
+            curr_pixel_buff_index = N_PREAMBLE_BYTES;
+        }else{
+            curr_pixel_buff_index++;
 
-            uint8_t* const pixelBuffer = ledController.getPixelBuffer();
-            uint8_t* const curr_column_output_buffer = pixelBuffer + current_input_column*N_BUFFER_SIZE_PER_COLUMN;
-            memcpy(pixel_column_buffer, curr_column_output_buffer, N_BUFFER_SIZE_PER_COLUMN);
-            next_pixel_buff_value = 0U;
+            // Column completely received
+            if (curr_pixel_buff_index == N_COL_BUFFER_BYTES){
+                if(c == '\n' || c == '\r'){
+                    // Last byte is column 
+                    // TODO 2 bytes
+                    current_input_column = pixel_column_buffer[N_PREAMBLE_BYTES];
+                    printf("Updating pixel buffer for column %d\n", current_input_column);
 
-            printf("Done pixel update.\n", current_input_column);
+                    uint8_t* const pixelBuffer = ledController.getPixelBuffer();
+                    uint8_t* const curr_column_output_buffer = pixelBuffer + current_input_column*N_BUFFER_SIZE_PER_COLUMN;
+                    memcpy(pixel_column_buffer, curr_column_output_buffer, N_BUFFER_SIZE_PER_COLUMN);
+                    curr_pixel_buff_index = 0U;
+                    printf("Done pixel update.\n");
+                }else{
+                    printf("Error, recieved invalid data! Restarting\n");
+                    curr_pixel_buff_index = 0U;
+                }
+            }
         }
 
         if(chars_read == max_chars_to_read)

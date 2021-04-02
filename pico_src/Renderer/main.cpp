@@ -38,20 +38,24 @@ int main() {
     while(true){
         reader.processUart(ledController);
 
-        const int64_t time_since_hall_sensor_event = rttMeasure.getDeltaTimeSinceLastEvent();
-        const int64_t rtt = rttMeasure.getRtt();
-        uint32_t curr_column = time_since_hall_sensor_event * (N_HORIZONTAL_RESOLUTION - 1U) / rtt;
-        if (curr_column > (N_HORIZONTAL_RESOLUTION - 1U)){
-            curr_column = (N_HORIZONTAL_RESOLUTION - 1U);
+        if (rttMeasure.rotationDetected()){
+            const int64_t time_since_hall_sensor_event = rttMeasure.getDeltaTimeSinceLastEvent();
+            const int64_t rtt = rttMeasure.getRtt();
+            uint32_t curr_column = time_since_hall_sensor_event * (N_HORIZONTAL_RESOLUTION - 1U) / rtt;
+            if (curr_column > (N_HORIZONTAL_RESOLUTION - 1U)){
+                curr_column = (N_HORIZONTAL_RESOLUTION - 1U);
+            }
+
+            multicore_fifo_push_blocking(curr_column);
+
+            printf("-----------\n");
+            printf("RTT             : %lld us\n", rtt);
+            printf("Time Since Event: %lld us\n", time_since_hall_sensor_event);
+            printf("Curr Column     : %lu\n", curr_column);
+            printf("-----------\n");
+        }else{
+            printf("No rotation detected.\n");
         }
-
-        multicore_fifo_push_blocking(curr_column);
-
-        printf("-----------\n");
-        printf("RTT             : %lld us\n", rtt);
-        printf("Time Since Event: %lld us\n", time_since_hall_sensor_event);
-        printf("Curr Column     : %lu\n", curr_column);
-        printf("-----------\n");
         
         gpio_put(LED_PIN, 1);
         sleep_ms(500);

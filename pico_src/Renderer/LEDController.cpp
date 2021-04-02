@@ -59,6 +59,7 @@ void LEDController::core1_write_pixels(){
                     pixel_buffer[i+2 + column*N_PIXELS_PER_CHANNEL]
             );
         }
+        // Double sided globe
         const uint32_t opposite_column = (column + N_HORIZONTAL_RESOLUTION/2) % N_HORIZONTAL_RESOLUTION;
         for (int i = N_VERTICAL_RESOLUTION*N_PIXELS_PER_CHANNEL-1; i >=0; i-=N_PIXELS_PER_CHANNEL) {
             ledController.put_rgb888(pio, sm,

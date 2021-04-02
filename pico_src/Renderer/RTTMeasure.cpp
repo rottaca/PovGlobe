@@ -20,6 +20,9 @@ RTTMeasure& RTTMeasure::getInstance() {
     static RTTMeasure instance;
     return instance;
 }
+bool RTTMeasure::rotationDetected(){
+    return (round_trip_time > 0) && (getDeltaTimeSinceLastEvent() < 2*getRtt());
+}
 
 int64_t RTTMeasure::getRtt(){
     return round_trip_time;

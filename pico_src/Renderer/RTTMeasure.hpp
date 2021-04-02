@@ -22,6 +22,7 @@ public:
     absolute_time_t getTimeLastHallSensorEvent();
     int64_t getRtt();
     int64_t getDeltaTimeSinceLastEvent();
+    bool rotationDetected();
 
 
     static RTTMeasure& getInstance();
