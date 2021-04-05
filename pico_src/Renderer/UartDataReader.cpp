@@ -107,7 +107,6 @@ void UartDataReader::processUart(LEDController& ledController){
                     }
                 }else{
                     printf("Error, recieved invalid data (last: %d, total %u bytes)! Restarting\n", (int)c, curr_pixel_buff_index);
-
                 }
                 curr_pixel_buff_index = 0U;
             }

@@ -36,3 +36,11 @@ else()
 endif()
 
 add_subdirectory(cpp_src)
+
+
+include(ExternalProject)
+ExternalProject_Add(pico_firmware
+  SOURCE_DIR        "${CMAKE_CURRENT_SOURCE_DIR}/pico_src/Renderer"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/pico_firmware"
+  INSTALL_COMMAND cmake -E echo "Skipping install step."
+)
