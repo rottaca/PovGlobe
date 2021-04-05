@@ -7,8 +7,6 @@ absolute_time_t RTTMeasure::last_hall_sensor_event = nil_time;
 
 RTTMeasure::RTTMeasure()
 {
-    last_hall_sensor_event = nil_time;
-    round_trip_time = 0;
     gpio_set_irq_enabled_with_callback(GPIO_HALL_SENSOR, GPIO_IRQ_EDGE_RISE, true, &RTTMeasure::gpio_hall_sensor_callback);
 }
 
@@ -40,10 +38,11 @@ int64_t RTTMeasure::getDeltaTimeSinceLastEvent(){
 void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     if (gpio != GPIO_HALL_SENSOR)
         return;
-
+    
     const absolute_time_t curr_time = get_absolute_time();
     if (!is_nil_time(last_hall_sensor_event)) {
-        round_trip_time = absolute_time_diff_us (last_hall_sensor_event, curr_time);
+        int64_t new_rtt = absolute_time_diff_us (last_hall_sensor_event, curr_time);
+        round_trip_time = 0.9f*round_trip_time +0.1f*new_rtt;
     }
     last_hall_sensor_event = curr_time;
 }

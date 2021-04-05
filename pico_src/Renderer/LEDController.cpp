@@ -1,6 +1,9 @@
 #include "LEDController.hpp"
 
+#include "pico/time.h"
+
 #include "apa102.pio.h"
+#include "RTTMeasure.hpp"
 
 PIO LEDController::pio{};
 uint LEDController::sm = 0;
@@ -46,27 +49,57 @@ void LEDController::core1_write_pixels(){
     sm = 0;
     uint offset = pio_add_program(pio, &apa102_mini_program);
     apa102_mini_program_init(pio, sm, offset, SERIAL_FREQ, PIN_CLK, PIN_DIN);
-
+    
+    RTTMeasure& rttMeasure = RTTMeasure::getInstance();
     LEDController& ledController = getInstance();
-    while (true) {
-        const uint32_t column = multicore_fifo_pop_blocking();
-        ledController.put_start_frame(pio, sm);
-        for (int i = 0; i < N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL; i+=N_CHANNELS_PER_PIXEL) {
-            ledController.put_rgb888(pio, sm,
-                    pixel_buffer[i + column*N_CHANNELS_PER_PIXEL],
-                    pixel_buffer[i+1 + column*N_CHANNELS_PER_PIXEL],
-                    pixel_buffer[i+2 + column*N_CHANNELS_PER_PIXEL]
-            );
+    
+    uint32_t column = 0;
+    uint32_t last_column = 0xFFFFFF;
+    bool last_cycle_rotation_detected = false;
+    while (true) {  
+        const absolute_time_t frame_start = get_absolute_time();    
+        if (rttMeasure.rotationDetected()){
+            last_cycle_rotation_detected = true;
+            const int64_t time_since_hall_sensor_event = rttMeasure.getDeltaTimeSinceLastEvent();
+            const int64_t rtt = rttMeasure.getRtt();
+            const uint32_t column = (time_since_hall_sensor_event * (N_HORIZONTAL_RESOLUTION - 1U) / rtt) % N_HORIZONTAL_RESOLUTION;
+            
+            if (last_column != column){
+                last_column = column;
+
+                 //printf("-----------\n");
+                 printf("RTT             : %lld us\n", rtt);
+                 //printf("Time Since Event: %lld us\n", time_since_hall_sensor_event);
+                 //printf("Curr Column     : %lu\n", curr_column);
+                 //printf("-----------\n");
+                ledController.put_start_frame(pio, sm);
+                const uint8_t* pixel_buffer_column = pixel_buffer + column*N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL;
+                for (int i = 0; i < N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL; i+=N_CHANNELS_PER_PIXEL) {
+                    ledController.put_rgb888(pio, sm,
+                            pixel_buffer_column[i],
+                            pixel_buffer_column[i+1],
+                            pixel_buffer_column[i+2]
+                    );
+                }
+                // Double sided globe
+                const uint32_t opposite_column = (column + N_HORIZONTAL_RESOLUTION/2) % N_HORIZONTAL_RESOLUTION;
+                const uint8_t* pixel_buffer_opposite_column = pixel_buffer + opposite_column*N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL;
+                for (int i = N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL-1; i >=0; i-=N_CHANNELS_PER_PIXEL) {
+                    ledController.put_rgb888(pio, sm,
+                            pixel_buffer_opposite_column[i-2],
+                            pixel_buffer_opposite_column[i-1],
+                            pixel_buffer_opposite_column[i-0]
+                    );
+                }
+                ledController.put_end_frame(pio, sm);
+                
+                int64_t render_time = absolute_time_diff_us (frame_start, get_absolute_time());
+                //printf("%lu: %lld us\n", column, render_time);
+            }
+        }else if(last_cycle_rotation_detected) {
+            printf("No rotation detected.\n");
+            //memset(pixel_buffer,0, N_BUFFER_SIZE);
+            last_cycle_rotation_detected = false;
         }
-        // Double sided globe
-        const uint32_t opposite_column = (column + N_HORIZONTAL_RESOLUTION/2) % N_HORIZONTAL_RESOLUTION;
-        for (int i = N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL-1; i >=0; i-=N_CHANNELS_PER_PIXEL) {
-            ledController.put_rgb888(pio, sm,
-                    pixel_buffer[i + opposite_column*N_CHANNELS_PER_PIXEL],
-                    pixel_buffer[i+1 + opposite_column*N_CHANNELS_PER_PIXEL],
-                    pixel_buffer[i+2 + opposite_column*N_CHANNELS_PER_PIXEL]
-            );
-        }
-        ledController.put_end_frame(pio, sm);
     }
 }

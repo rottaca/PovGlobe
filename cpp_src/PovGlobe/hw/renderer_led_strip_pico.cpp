@@ -46,13 +46,19 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
     buf[5] = '*';
     buf[6] = 0;
     buf[buff_size - 1] = '\n';
-
+  
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
         //std::cout << "Write preamble for row " << j << std::endl;
         //std::cout << buff_size << std::endl;
         buf[6] = j;
-        memcpy(&buf[7], &framebuffer(j, 0, 0), framebuffer.getHeight()*framebuffer.getChannels());
+        int buff_idx = 7;
+        for(size_t i = 0; i < framebuffer.getHeight(); i++){
+          buf[buff_idx++] = led_lut[framebuffer(j, i, 0)/2];
+          buf[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
+          buf[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
+        }
+        //memcpy(&buf[7], &framebuffer(j, 0, 0), framebuffer.getHeight()*framebuffer.getChannels());
 
         write(m_fd, buf, buff_size);
     }

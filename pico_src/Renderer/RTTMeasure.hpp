@@ -23,6 +23,7 @@ public:
     int64_t getRtt();
     int64_t getDeltaTimeSinceLastEvent();
     bool rotationDetected();
+    
 
 
     static RTTMeasure& getInstance();
