@@ -2,7 +2,6 @@
 set(SOURCE_FILES
 	"globe.cpp"
 	"application_base.cpp"
-	"rpm_measure_base.cpp"
 	"renderer_base.cpp"
 	"framebuffer.cpp"
 	"helper.cpp"

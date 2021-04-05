@@ -2,7 +2,6 @@
 message(STATUS "Building simulation framework.")
 
 set(SOURCE_FILES_SIM 
-	"rpm_measure_sim.cpp"  
 	"renderer_sim.cpp"
 )
 

@@ -14,13 +14,11 @@
 #include "apps/application_examples.hpp"
 
 #ifdef SIM_AVAILABLE 
-#include "sim/rpm_measure_sim.hpp"
 #include "sim/renderer_sim.hpp"
 #endif
 
 #ifdef HW_AVAILABLE
-#include "hw/rpm_measure_hall.hpp"
-#include "hw/renderer_led_strip.hpp"
+#include "hw/renderer_led_strip_pico.hpp"
 #endif
 
 const int default_height_leds = 55;
@@ -29,6 +27,7 @@ const float default_spacing_top = 1.5;
 const float default_spacing_bottom = 2.0;
 
 const int default_hall_sensor_gpio_pin = 25;
+const char* default_pico_port_name = "/dev/ttyACM0";
 
 using namespace std::chrono_literals;
 
@@ -91,32 +90,34 @@ int main(int argc, char* argv[]) {
         const char* strVal = getCmdOption(argv, argv + argc, opt);
         return strVal ? atof(strVal) : fallback;
     };
+    const auto setterStr = [argc, argv](const char* opt, const char* fallback) {
+        const char* strVal = getCmdOption(argv, argv + argc, opt);
+        return strVal ? strVal : fallback;
+    };
+
     // Parse commandline options
     const int height_leds = setterInt("-h", default_height_leds);
     const float radius = setterFloat("-r", default_radius);
     const float spacing_top = setterFloat("-t", default_spacing_top);
     const float spacing_bottom = setterFloat("-b", default_spacing_bottom);
-    const int hall_sensor_gpio_pin = setterInt("-s", default_hall_sensor_gpio_pin);
+    const char* pico_port_name = setterStr("-p", default_pico_port_name);
 
     const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");    
     const bool use_hw = cmdOptionExists(argv, argv + argc, "-k");
 
 
-    std::shared_ptr<RpmMeasureBase> rpmMeasure;
     std::shared_ptr<RendererBase> renderer;
 
     if (use_hw) {
 #ifdef HW_AVAILABLE 
-    rpmMeasure = std::make_shared<RpmMeasureHall>(hall_sensor_gpio_pin);
-    renderer = std::make_shared<RendererLedStrip>(*rpmMeasure);
+    renderer = std::make_shared<RendererLedStripPico>(pico_port_name);
 #else
     std::cerr << "Not build with HW support!" << std::endl;  
     exit(1);
 #endif
     } else{
 #ifdef SIM_AVAILABLE 
-    rpmMeasure = std::make_shared<RpmMeasureSim>();
-    renderer = std::make_shared<RendererSim>(*rpmMeasure);
+    renderer = std::make_shared<RendererSim>();
 #else
     std::cerr << "Not build with simulation support!" << std::endl;  
     exit(1);

@@ -22,14 +22,13 @@
 #define N_PREAMBLE_BYTES 6
 #define PREAMBLE_ODD_BYTE '*'
 #define PREAMBLE_EVEN_BYTE '+'
-#define N_COL_BUFFER_BYTES (N_PREAMBLE_BYTES + N_BUFFER_SIZE_PER_COLUMN + 1U)
+#define N_COL_BUFFER_BYTES (N_PREAMBLE_BYTES + N_BUFFER_SIZE_PER_COLUMN + 2U)
 
 class UartDataReader
 {
 private:
     uint8_t pixel_column_buffer[N_COL_BUFFER_BYTES];
     uint32_t curr_pixel_buff_index;
-    uint32_t current_input_column;
 
     UartDataReader();
     bool checkPreamble();

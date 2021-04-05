@@ -6,8 +6,7 @@
 class RendererSim : public RendererBase
 {
 public:
-    RendererSim(
-        RpmMeasureBase& rpm_measure_base);
+    RendererSim();
     ~RendererSim();
 
 

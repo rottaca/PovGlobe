@@ -20,9 +20,3 @@ add_executable(${EXEC_MAIN_NAME}
 	main.cpp
 )
 target_link_libraries(${EXEC_MAIN_NAME} ${POV_GLOBE_TARGETS})
-
-# executable
-add_executable(${EXEC_MAIN_NAME}_test_rpm
-	main_test_rpm.cpp
-)
-target_link_libraries(${EXEC_MAIN_NAME}_test_rpm ${POV_GLOBE_TARGETS})

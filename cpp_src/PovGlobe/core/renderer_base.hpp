@@ -3,7 +3,6 @@
 #include <thread>
 #include <atomic>
 
-#include "rpm_measure_base.hpp"
 #include "framebuffer.hpp"
 
 class Globe;
@@ -11,9 +10,7 @@ class Globe;
 class RendererBase
 {
 public:
-    RendererBase(
-        RpmMeasureBase& rpm_measure
-    );
+    RendererBase();
     virtual ~RendererBase();
 
     virtual void runAsync(Globe& globe);
@@ -23,7 +20,6 @@ public:
     virtual void stopAndJoinRenderThread();
 
 protected:
-    RpmMeasureBase& m_rpmMeasure;
     std::thread m_renderThread;
     std::atomic_bool m_renderThread_running;
 

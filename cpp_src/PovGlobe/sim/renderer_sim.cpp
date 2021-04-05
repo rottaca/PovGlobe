@@ -4,9 +4,7 @@
 
 using namespace cimg_library;
 
-RendererSim::RendererSim(
-    RpmMeasureBase& rpm_measure_base)
-    :RendererBase(rpm_measure_base)
+RendererSim::RendererSim()
 {
 }
 

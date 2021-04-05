@@ -5,8 +5,7 @@
 UartDataReader::UartDataReader()
 {
     curr_pixel_buff_index = 0;
-    current_input_column = 0;
-    memset(pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_PIXELS_PER_CHANNEL);
+    memset(pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL);
 
     // // Set up our UART with a basic baud rate.
     // int actual = uart_init(UART_ID, BAUD_RATE);
@@ -84,7 +83,7 @@ void UartDataReader::processUart(LEDController& ledController){
         pixel_column_buffer[curr_pixel_buff_index] = (uint8_t)c;
         //printf("Received %c\n", c);
         if (checkPreamble()){
-            printf("New preamble detected. Restarting.\n");
+            //printf("New preamble detected. Restarting.\n");
             curr_pixel_buff_index = N_PREAMBLE_BYTES;
         }else{
             curr_pixel_buff_index++;
@@ -94,18 +93,23 @@ void UartDataReader::processUart(LEDController& ledController){
                 if(c == '\n' || c == '\r'){
                     // Last byte is column 
                     // TODO 2 bytes
-                    current_input_column = pixel_column_buffer[N_PREAMBLE_BYTES];
-                    printf("Updating pixel buffer for column %d\n", current_input_column);
+                    uint32_t current_input_column = pixel_column_buffer[N_PREAMBLE_BYTES];
+                    
+                    if (current_input_column < N_HORIZONTAL_RESOLUTION){
+                        //printf("Updating pixel buffer for column %d\n", current_input_column);
 
-                    uint8_t* const pixelBuffer = ledController.getPixelBuffer();
-                    uint8_t* const curr_column_output_buffer = pixelBuffer + current_input_column*N_BUFFER_SIZE_PER_COLUMN;
-                    memcpy(pixel_column_buffer, curr_column_output_buffer, N_BUFFER_SIZE_PER_COLUMN);
-                    curr_pixel_buff_index = 0U;
-                    printf("Done pixel update.\n");
+                        uint8_t* const pixelBuffer = ledController.getPixelBuffer();
+                        uint8_t* const curr_column_output_buffer = pixelBuffer + current_input_column*N_BUFFER_SIZE_PER_COLUMN;
+                        uint8_t* const curr_column_input_buffer = pixel_column_buffer+N_PREAMBLE_BYTES+1;
+                        memcpy(curr_column_output_buffer, curr_column_input_buffer, N_BUFFER_SIZE_PER_COLUMN);
+                    }else{
+                        printf("Error, invalid column recieved: %d\n", current_input_column);
+                    }
                 }else{
-                    printf("Error, recieved invalid data! Restarting\n");
-                    curr_pixel_buff_index = 0U;
+                    printf("Error, recieved invalid data (last: %d, total %u bytes)! Restarting\n", (int)c, curr_pixel_buff_index);
+
                 }
+                curr_pixel_buff_index = 0U;
             }
         }
 

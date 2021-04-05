@@ -8,11 +8,6 @@ uint8_t LEDController::pixel_buffer[N_BUFFER_SIZE];
 
 LEDController::LEDController()
 {
-    pio = pio0;
-    sm = 0;
-    uint offset = pio_add_program(pio, &apa102_mini_program);
-    apa102_mini_program_init(pio, sm, offset, SERIAL_FREQ, PIN_CLK, PIN_DIN);
-
     multicore_launch_core1(&LEDController::core1_write_pixels);   
 }
 
@@ -47,25 +42,29 @@ void LEDController::put_rgb888(PIO pio, uint sm, uint8_t r, uint8_t g, uint8_t b
 }
 
 void LEDController::core1_write_pixels(){
+    pio = pio0;
+    sm = 0;
+    uint offset = pio_add_program(pio, &apa102_mini_program);
+    apa102_mini_program_init(pio, sm, offset, SERIAL_FREQ, PIN_CLK, PIN_DIN);
+
     LEDController& ledController = getInstance();
     while (true) {
         const uint32_t column = multicore_fifo_pop_blocking();
-
         ledController.put_start_frame(pio, sm);
-        for (int i = 0; i < N_VERTICAL_RESOLUTION*N_PIXELS_PER_CHANNEL; i+=N_PIXELS_PER_CHANNEL) {
+        for (int i = 0; i < N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL; i+=N_CHANNELS_PER_PIXEL) {
             ledController.put_rgb888(pio, sm,
-                    pixel_buffer[i + column*N_PIXELS_PER_CHANNEL],
-                    pixel_buffer[i+1 + column*N_PIXELS_PER_CHANNEL],
-                    pixel_buffer[i+2 + column*N_PIXELS_PER_CHANNEL]
+                    pixel_buffer[i + column*N_CHANNELS_PER_PIXEL],
+                    pixel_buffer[i+1 + column*N_CHANNELS_PER_PIXEL],
+                    pixel_buffer[i+2 + column*N_CHANNELS_PER_PIXEL]
             );
         }
         // Double sided globe
         const uint32_t opposite_column = (column + N_HORIZONTAL_RESOLUTION/2) % N_HORIZONTAL_RESOLUTION;
-        for (int i = N_VERTICAL_RESOLUTION*N_PIXELS_PER_CHANNEL-1; i >=0; i-=N_PIXELS_PER_CHANNEL) {
+        for (int i = N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL-1; i >=0; i-=N_CHANNELS_PER_PIXEL) {
             ledController.put_rgb888(pio, sm,
-                    pixel_buffer[i + opposite_column*N_PIXELS_PER_CHANNEL],
-                    pixel_buffer[i+1 + opposite_column*N_PIXELS_PER_CHANNEL],
-                    pixel_buffer[i+2 + opposite_column*N_PIXELS_PER_CHANNEL]
+                    pixel_buffer[i + opposite_column*N_CHANNELS_PER_PIXEL],
+                    pixel_buffer[i+1 + opposite_column*N_CHANNELS_PER_PIXEL],
+                    pixel_buffer[i+2 + opposite_column*N_CHANNELS_PER_PIXEL]
             );
         }
         ledController.put_end_frame(pio, sm);
