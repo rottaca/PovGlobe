@@ -8,12 +8,10 @@
 #include "core/application_base.hpp"
 
 #ifdef HW_AVAILABLE
- #include "hw/renderer_led_strip.hpp"
- #include "hw/rpm_measure_hall.hpp"
+ #include "hw/renderer_led_strip_pico.hpp"
 #endif
 #ifdef SIM_AVAILABLE
  #include "sim/renderer_sim.hpp"
- #include "sim/rpm_measure_sim.hpp"
 #endif
 #if !defined(HW_AVAILABLE) && !defined(SIM_AVAILABLE)
   #error "No build target specified"
@@ -97,12 +95,10 @@ void RowProxy::__setitem__(int i, uint8_t value) {
 %include "core/projection.hpp"
 
 #ifdef HW_AVAILABLE
-  %include "hw/renderer_led_strip.hpp"
-  %include "hw/rpm_measure_hall.hpp"
+  %include "hw/renderer_led_strip_pico.hpp"
 #endif
 #ifdef SIM_AVAILABLE
   %include "sim/renderer_sim.hpp"
-  %include "sim/rpm_measure_sim.hpp"
 #endif
 #if !defined(HW_AVAILABLE) && !defined(SIM_AVAILABLE)
   #error "No build target specified"
