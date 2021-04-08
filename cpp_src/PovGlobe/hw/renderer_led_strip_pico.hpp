@@ -37,9 +37,10 @@ public:
 
     void initialize(Globe& globe);
     void initSPI(Globe& globe);
+
 protected:
-    int m_fd;
     const char* m_portname;
+    int m_fd;
     std::vector<char> m_led_data;
 
     virtual void render(const Framebuffer&);
