@@ -2,11 +2,15 @@
 
 #include "RTTMeasure.hpp"
 
-int64_t RTTMeasure::round_trip_time = 0;
+int64_t RTTMeasure::measured_intervals[N_MAGNETS] = {};
+int8_t RTTMeasure::curr_segment_index = 0;
+int64_t RTTMeasure::rtt = 0;
 absolute_time_t RTTMeasure::last_hall_sensor_event = nil_time;
 
 RTTMeasure::RTTMeasure()
 {
+    init();
+
     gpio_set_irq_enabled_with_callback(GPIO_HALL_SENSOR, GPIO_IRQ_EDGE_RISE, true, &RTTMeasure::gpio_hall_sensor_callback);
 }
 
@@ -14,26 +18,41 @@ RTTMeasure::~RTTMeasure()
 {
 }
 
+void RTTMeasure::init(){
+    for (size_t i = 0; i < N_MAGNETS; i++)
+    {
+        measured_intervals[i] = 0;
+    }
+    rtt = 0;
+    curr_segment_index = 0;
+    last_hall_sensor_event = nil_time;
+}
+
 RTTMeasure& RTTMeasure::getInstance() {
     static RTTMeasure instance;
     return instance;
 }
 bool RTTMeasure::rotationDetected(){
-    return (round_trip_time > 0) && (getDeltaTimeSinceLastEvent() < 2*getRtt());
+    const int64_t dt_since_hall_sensor_event = absolute_time_diff_us(last_hall_sensor_event, get_absolute_time());
+    return (rtt > 0) && (dt_since_hall_sensor_event < 2*rtt);
 }
 
-int64_t RTTMeasure::getRtt(){
-    return round_trip_time;
-}
+uint32_t RTTMeasure::getCurrentColumn(uint32_t maxColumnsPerRotation){
+    const uint32_t columns_per_segment = maxColumnsPerRotation / N_MAGNETS;
 
-absolute_time_t RTTMeasure::getTimeLastHallSensorEvent() {
-    return last_hall_sensor_event;
-}
+    const int64_t exp_segment_dt = measured_intervals[curr_segment_index];
+    const int64_t dt_since_hall_sensor_event = absolute_time_diff_us(last_hall_sensor_event, get_absolute_time());
 
-int64_t RTTMeasure::getDeltaTimeSinceLastEvent(){
-    return absolute_time_diff_us(last_hall_sensor_event, get_absolute_time());
+    const uint32_t columns_since_segment_start = dt_since_hall_sensor_event*columns_per_segment/exp_segment_dt;
+    const uint32_t column_offset_for_segment_start = curr_segment_index*columns_per_segment;
+    const uint32_t column = (columns_since_segment_start + column_offset_for_segment_start) % maxColumnsPerRotation; 
+    
+    //printf("RTT             : %lld us\n", rtt);
+    //printf("Time Since Event: %lld us\n", dt_since_hall_sensor_event);
+    //printf("Curr Column     : %lu\n", curr_column);
+    
+    return column;
 }
-
 
 void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     if (gpio != GPIO_HALL_SENSOR)
@@ -41,8 +60,13 @@ void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     
     const absolute_time_t curr_time = get_absolute_time();
     if (!is_nil_time(last_hall_sensor_event)) {
-        int64_t new_rtt = absolute_time_diff_us (last_hall_sensor_event, curr_time);
-        round_trip_time = 0.9f*round_trip_time +0.1f*new_rtt;
+        const int64_t new_dt = absolute_time_diff_us (last_hall_sensor_event, curr_time);
+        const int64_t old_dt = measured_intervals[curr_segment_index];
+        measured_intervals[curr_segment_index] = new_dt;
+        
+        rtt += new_dt - old_dt;
+
+        curr_segment_index = (curr_segment_index + 1) % N_MAGNETS;
     }
     last_hall_sensor_event = curr_time;
 }

@@ -60,16 +60,12 @@ void LEDController::core1_write_pixels(){
         const absolute_time_t frame_start = get_absolute_time();    
         if (rttMeasure.rotationDetected()){
             last_cycle_rotation_detected = true;
-            const int64_t time_since_hall_sensor_event = rttMeasure.getDeltaTimeSinceLastEvent();
-            const int64_t rtt = rttMeasure.getRtt();
-            const uint32_t column = (time_since_hall_sensor_event * (N_HORIZONTAL_RESOLUTION - 1U) / rtt) % N_HORIZONTAL_RESOLUTION;
-            
+            const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION);
+
             if (last_column != column){
                 last_column = column;
 
                  //printf("-----------\n");
-                 printf("RTT             : %lld us\n", rtt);
-                 //printf("Time Since Event: %lld us\n", time_since_hall_sensor_event);
                  //printf("Curr Column     : %lu\n", curr_column);
                  //printf("-----------\n");
                 ledController.put_start_frame(pio, sm);
