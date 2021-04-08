@@ -2,6 +2,8 @@
 
 #include "core/renderer_base.hpp"
 
+#include <vector>
+
 #include <errno.h>
 #include <fcntl.h> 
 #include <string.h>
@@ -34,11 +36,12 @@ public:
     ~RendererLedStripPico();
 
     void initialize(Globe& globe);
-
+    void initSPI(Globe& globe);
 protected:
     int m_fd;
     const char* m_portname;
-    
+    std::vector<char> m_led_data;
+
     virtual void render(const Framebuffer&);
 
     int set_interface_attribs (int fd, int speed, int parity);
