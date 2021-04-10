@@ -55,19 +55,20 @@ void LEDController::core1_write_pixels(){
     
     uint32_t column = 0;
     uint32_t last_column = 0xFFFFFF;
+    uint64_t time_until_next_column;
     bool last_cycle_rotation_detected = false;
-    while (true) {  
-        const absolute_time_t frame_start = get_absolute_time();    
+    while (true) {   
         if (rttMeasure.rotationDetected()){
             last_cycle_rotation_detected = true;
-            const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION);
+            const absolute_time_t frame_start = get_absolute_time();   
+            const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION, time_until_next_column);
 
             if (last_column != column){
+                if ((column - last_column > 1) && (last_column < column)){
+                  printf("Skipped column %u %u\n", column, last_column);
+                } 
                 last_column = column;
 
-                 //printf("-----------\n");
-                 //printf("Curr Column     : %lu\n", curr_column);
-                 //printf("-----------\n");
                 ledController.put_start_frame(pio, sm);
                 const uint8_t* pixel_buffer_column = pixel_buffer + column*N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL;
                 for (int i = 0; i < N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL; i+=N_CHANNELS_PER_PIXEL) {
@@ -89,8 +90,12 @@ void LEDController::core1_write_pixels(){
                 }
                 ledController.put_end_frame(pio, sm);
                 
-                int64_t render_time = absolute_time_diff_us (frame_start, get_absolute_time());
-                //printf("%lu: %lld us\n", column, render_time);
+                //if (time_until_next_column < 10000){
+                //  const int64_t render_time = 2*absolute_time_diff_us (frame_start, get_absolute_time());
+                //  if (render_time < time_until_next_column){
+                //    //sleep_us(time_until_next_column - render_time);
+                //  }
+                //}
             }
         }else if(last_cycle_rotation_detected) {
             printf("No rotation detected.\n");
