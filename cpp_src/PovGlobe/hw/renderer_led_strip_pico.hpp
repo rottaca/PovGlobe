@@ -30,14 +30,14 @@ unsigned char led_lut[256] = {
 class RendererLedStripPico : public RendererBase
 {
 public:
-    RendererLedStripPico(const char* portname);
+    RendererLedStripPico(const std::string portname);
     ~RendererLedStripPico();
 
     void initialize(Globe& globe);
 
 protected:
     int m_fd;
-    const char* m_portname;
+    const std::string m_portname;
     
     virtual void render(const Framebuffer&);
 

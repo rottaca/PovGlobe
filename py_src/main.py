@@ -17,14 +17,12 @@ spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided=True
 
-usw_hw = False
-gpio_pin_rpm = 25
+usw_hw = True
 if usw_hw:
-    rpm = PyPovGlobe.RpmMeasureHall(gpio_pin_rpm)
-    renderer = PyPovGlobe.RendererLedStrip(rpm)
+    string = "/dev/ttyACM0"
+    renderer = PyPovGlobe.RendererLedStripPico(string)
 else:
-    rpm = PyPovGlobe.RpmMeasureSim()
-    renderer = PyPovGlobe.RendererSim(rpm)
+    renderer = PyPovGlobe.RendererSim()
 
 globe = PyPovGlobe.Globe(num_leds_per_side, radius, spacing_top, spacing_bottom, double_sided, renderer)
 

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "core/globe.hpp"
 
-RendererLedStripPico::RendererLedStripPico(const char* portname)
+RendererLedStripPico::RendererLedStripPico(const std::string portname)
 : m_portname(portname)
 ,m_fd(-1)
 {
@@ -17,7 +17,7 @@ RendererLedStripPico::~RendererLedStripPico()
 void RendererLedStripPico::initialize(Globe& globe)
 {
     RendererBase::initialize(globe);
-    m_fd = open(m_portname, O_RDWR | O_NOCTTY | O_SYNC);
+    m_fd = open(m_portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (m_fd < 0)
     {
         std::cout << "error " << errno << " opening " << m_portname << ": " << strerror (errno) << std::endl;
