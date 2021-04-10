@@ -15,7 +15,7 @@
 #include "hardware/gpio.h"
 
 #include "LEDController.hpp"
-#include "UartDataReader.hpp"
+#include "SpiDataReader.hpp"
 
 
 /// TODO This needs cleanup!
@@ -137,7 +137,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
 
 int main() {
     stdio_init_all();
-    UartDataReader& reader = UartDataReader::getInstance();
+    SpiDataReader& reader = SpiDataReader::getInstance();
     LEDController& ledController = LEDController::getInstance();
 
     uint8_t * pixels = ledController.getPixelBuffer();

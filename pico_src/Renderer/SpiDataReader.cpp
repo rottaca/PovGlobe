@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-SpiDataReader::UartDataReader()
+SpiDataReader::SpiDataReader()
 {
     curr_pixel_buff_index = 0;
     memset(pixel_column_buffer, 0, N_COL_BUFFER_BYTES);   
@@ -10,21 +10,20 @@ SpiDataReader::UartDataReader()
     static uint8_t rxbuf[TEST_SIZE];
 
      // Enable SPI at 1 MHz and connect to GPIOs
-    spi_init(spi_default, 1000 * 1000);
+    spi_init(spi_default, SPI_BAUD_RATE);
+    spi_set_slave(spi_default, true);
     gpio_set_function(PICO_DEFAULT_SPI_RX_PIN, GPIO_FUNC_SPI);
     gpio_init(PICO_DEFAULT_SPI_CSN_PIN);
     gpio_set_function(PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI);
     gpio_set_function(PICO_DEFAULT_SPI_TX_PIN, GPIO_FUNC_SPI);
     // Make the SPI pins available to picotool
-    bi_decl(bi_3pins_with_func(PICO_DEFAULT_SPI_RX_PIN, PICO_DEFAULT_SPI_TX_PIN, PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI));
+    bi_decl(bi_3pins_with_func(PIN_MOSI, PICO_DEFAULT_SPI_TX_PIN, PIN_SCK, GPIO_FUNC_SPI));
     // Make the CS pin available to picotool
-    bi_decl(bi_1pin_with_name(PICO_DEFAULT_SPI_CSN_PIN, "SPI CS"));
+    bi_decl(bi_1pin_with_name(PIN_CS, "SPI CS"));
 
 
     const uint dma_rx = dma_claim_unused_channel(true);
-
     printf("Configure RX DMA\n");
-
     // We set the inbound DMA to transfer from the SPI receive FIFO to a memory buffer paced by the SPI RX FIFO DREQ
     // We coinfigure the read address to remain unchanged for each element, but the write
     // address to increment (so data is written throughout the buffer)
@@ -44,9 +43,6 @@ SpiDataReader::UartDataReader()
     dma_start_channel_mask((1u << dma_rx);
     printf("Wait for RX complete...\n");
     dma_channel_wait_for_finish_blocking(dma_rx);
-    if (dma_channel_is_busy(dma_tx)) {
-        panic("RX completed before TX");
-    }
 
     printf("Done. Checking...");
     for (uint i = 0; i < TEST_SIZE; ++i) {
@@ -55,9 +51,8 @@ SpiDataReader::UartDataReader()
 
 }
 
-SpiDataReader::~UartDataReader()
+SpiDataReader::~SpiDataReader()
 {
-    dma_channel_unclaim(dma_tx);
     dma_channel_unclaim(dma_rx);
 }
 
@@ -66,7 +61,7 @@ SpiDataReader& SpiDataReader::getInstance() {
     return instance;
 }
 
-bool UartDataReader::checkPreamble(){
+bool SpiDataReader::checkPreamble(){
 
     // Check for preamble
     bool preamble_found = true;
@@ -86,7 +81,7 @@ bool UartDataReader::checkPreamble(){
     return preamble_found;
 }
 
-void UartDataReader::processUart(LEDController& ledController){
+void SpiDataReader::processUart(LEDController& ledController){
     int c = getchar_timeout_us(0U);
     int max_chars_to_read = 100U;
     int chars_read = 0U;
