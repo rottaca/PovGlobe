@@ -55,13 +55,12 @@ void LEDController::core1_write_pixels(){
     
     uint32_t column = 0;
     uint32_t last_column = 0xFFFFFF;
-    uint64_t time_until_next_column;
     bool last_cycle_rotation_detected = false;
     while (true) {   
         if (rttMeasure.rotationDetected()){
             last_cycle_rotation_detected = true;
             const absolute_time_t frame_start = get_absolute_time();   
-            const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION, time_until_next_column);
+            const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION);
 
             if (last_column != column){
                 if ((column - last_column > 1) && (last_column < column)){
@@ -89,13 +88,6 @@ void LEDController::core1_write_pixels(){
                     );
                 }
                 ledController.put_end_frame(pio, sm);
-                
-                //if (time_until_next_column < 10000){
-                //  const int64_t render_time = 2*absolute_time_diff_us (frame_start, get_absolute_time());
-                //  if (render_time < time_until_next_column){
-                //    //sleep_us(time_until_next_column - render_time);
-                //  }
-                //}
             }
         }else if(last_cycle_rotation_detected) {
             printf("No rotation detected.\n");

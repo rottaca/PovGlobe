@@ -35,7 +35,7 @@ bool RTTMeasure::rotationDetected(){
     return (dt_since_hall_sensor_event < 1000000);
 }
 
-uint32_t RTTMeasure::getCurrentColumn(uint32_t maxColumnsPerRotation, uint64_t& timeUntilNextColumn){
+uint32_t RTTMeasure::getCurrentColumn(uint32_t maxColumnsPerRotation){
     const uint32_t columns_per_segment = maxColumnsPerRotation / N_MAGNETS;
 
     const int64_t exp_segment_dt = measured_intervals[curr_segment_index];
@@ -49,17 +49,20 @@ uint32_t RTTMeasure::getCurrentColumn(uint32_t maxColumnsPerRotation, uint64_t& 
     //printf("Time Since Event: %lld us\n", dt_since_hall_sensor_event);
     //printf("Curr Column     : %lu\n", curr_column);
     
-    //uint64_t avg = 0;
-    //for(int i = 0; i < N_MAGNETS; i++){
-    //  avg += measured_intervals[i];
-    //}
-    //avg /= N_MAGNETS;
+    /*uint64_t avg = 0;
+    uint64_t rtt = 0;
+    for(int i = 0; i < N_MAGNETS; i++){
+      avg += measured_intervals[i];
+    }
+    rtt = avg; 
+    avg /= N_MAGNETS;
     
-    //printf("Segment Times (%lld us avg): ", avg);
-    //for(int i = 0; i < N_MAGNETS; i++){
-    //  printf("%lld, ", measured_intervals[i] - avg);
-    //}
-    //printf("\n");
+    printf("%lld, ", rtt);
+    printf("%lld, ", avg);
+    for(int i = 0; i < N_MAGNETS; i++){
+      printf("%lld, ", measured_intervals[i]);
+    }
+    printf("\n");*/
     
     //const uint32_t time_per_column =  exp_segment_dt / columns_per_segment;
     //const uint32_t time_in_curr_column = dt_since_hall_sensor_event - time_per_column*columns_since_segment_start;
@@ -81,8 +84,8 @@ void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     const absolute_time_t curr_time = get_absolute_time();
     if (!is_nil_time(last_hall_sensor_event)) {
         const int64_t new_dt = absolute_time_diff_us (last_hall_sensor_event, curr_time);
-        //const int64_t old_dt = measured_intervals[curr_segment_index];
-        measured_intervals[curr_segment_index] = new_dt;
+        const int64_t old_dt = measured_intervals[curr_segment_index];
+        measured_intervals[curr_segment_index] = old_dt*0.5f+new_dt*0.5f;
         
         //rtt += new_dt - old_dt;
 

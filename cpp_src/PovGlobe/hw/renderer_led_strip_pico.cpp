@@ -26,7 +26,7 @@ void RendererLedStripPico::initialize(Globe& globe)
         std::cout << "Connected to serial device" << std::endl;
     }
 
-    set_interface_attribs (m_fd, B115200, 0);   // set speed to 115,200 bps, 8n1 (no parity)
+    set_interface_attribs (m_fd, B3000000, 0);   // set speed to 115,200 bps, 8n1 (no parity)
     set_blocking (m_fd, 0);                     // set no blocking
 }
 
