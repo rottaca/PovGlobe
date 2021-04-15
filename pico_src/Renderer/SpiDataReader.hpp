@@ -11,12 +11,12 @@
 #include "LEDController.hpp"
 
 
-#define PIN_CS 17
-#define PIN_SCK 18
-#define PIN_MOSI 16  
-#define PIN_MISO 19  
+#define PIN_CS 17U
+#define PIN_SCK 18U
+#define PIN_MOSI 16U 
+#define PIN_MISO 19U  
  
-#define SPI_BAUD_RATE 1*1000*1000
+#define SPI_BAUD_RATE 3.90625f*1000*1000
 
 
 #define N_PREAMBLE_BYTES 6

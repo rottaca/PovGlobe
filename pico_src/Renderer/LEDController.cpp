@@ -64,7 +64,7 @@ void LEDController::core1_write_pixels(){
 
             if (last_column != column){
                 if ((column - last_column > 1) && (last_column < column)){
-                  printf("Skipped column %u %u\n", column, last_column);
+                  //printf("Skipped column %u %u\n", column, last_column);
                 } 
                 last_column = column;
 

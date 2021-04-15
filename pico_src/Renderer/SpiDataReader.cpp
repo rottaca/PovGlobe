@@ -4,6 +4,7 @@
 
 #include "pico/binary_info.h"
 
+
 SpiDataReader::SpiDataReader()
 {
     curr_pixel_buff_index = 0;
@@ -13,16 +14,20 @@ SpiDataReader::SpiDataReader()
     spi_init(spi0, SPI_BAUD_RATE);
     spi_set_slave(spi0, true);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
-    gpio_init(PIN_CS);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_CS, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
     // Make the SPI pins available to picotool
-    bi_decl(bi_3pins_with_func(PIN_MOSI, PIN_MISO, PIN_SCK, GPIO_FUNC_SPI));
+    bi_decl(bi_3pins_with_func(PIN_MISO, PIN_MOSI, PIN_SCK, GPIO_FUNC_SPI));
+    // Chip select is active-low, so we'll initialise it to a driven-high state
+    gpio_init(PIN_CS);
+    gpio_set_dir(PIN_CS, GPIO_OUT);
+    gpio_put(PIN_CS, 1);
     // Make the CS pin available to picotool
     bi_decl(bi_1pin_with_name(PIN_CS, "SPI CS"));
 
 
-    dma_rx = dma_claim_unused_channel(true);
+    /*dma_rx = dma_claim_unused_channel(true);
     printf("Configure RX DMA\n");
     // We set the inbound DMA to transfer from the SPI receive FIFO to a memory buffer paced by the SPI RX FIFO DREQ
     // We coinfigure the read address to remain unchanged for each element, but the write
@@ -47,15 +52,19 @@ SpiDataReader::SpiDataReader()
     printf("Done. Checking...");
     for (uint i = 0; i < N_COL_BUFFER_BYTES; ++i) {
         pixel_column_buffer[i];
-    }
-
+    }*/
+    
+    while(spi_is_readable(spi0)){
+      printf("Clear buffer by reading\n");
+      spi_read_blocking(spi0, 0, pixel_column_buffer, 1);
+    }    
 }
 
 SpiDataReader::~SpiDataReader()
 {
     dma_channel_unclaim(dma_rx);
 }
-
+ 
 SpiDataReader& SpiDataReader::getInstance() {
     static SpiDataReader instance;
     return instance;
@@ -82,5 +91,13 @@ bool SpiDataReader::checkPreamble(){
 }
 
 void SpiDataReader::processData(LEDController& ledController){
-    
+    if(spi_is_readable(spi0)){
+      printf("start reading...\n");
+      spi_read_blocking(spi0, 42, pixel_column_buffer, N_COL_BUFFER_BYTES);
+      for(int i = 0; i < N_COL_BUFFER_BYTES; i++)
+        printf("%d", pixel_column_buffer[i]);
+      printf("\n");
+    }else{
+      printf("Nothing to read!\n");
+    }
 }

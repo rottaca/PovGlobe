@@ -110,6 +110,7 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3U);
   
+    bcm2835_spi_begin();
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
         m_led_data[6] = j;
@@ -119,8 +120,11 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
           m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
           m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
         }
+        std::fill(m_led_data.begin(), m_led_data.end(), 0);
+        //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
         bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
     }
+    bcm2835_spi_end();
 
     // int n = read (m_fd, buf, sizeof buf);
     // if (n > 0){

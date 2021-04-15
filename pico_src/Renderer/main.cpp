@@ -20,7 +20,7 @@
 
 /// TODO This needs cleanup!
 bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
-    printf("Init frame %d\n", frameNumber);
+    //printf("Init frame %d\n", frameNumber);
     
     const float_t pi = 3.14159f;  
     
@@ -128,6 +128,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
       }
     }else{
       /// End rendering of init frames
+      printf("Init done.\n");
       return false;
     }
     
@@ -137,6 +138,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
 
 int main() {
     stdio_init_all();
+    sleep_ms(3000);
     SpiDataReader& reader = SpiDataReader::getInstance();
     LEDController& ledController = LEDController::getInstance();
 
@@ -145,7 +147,7 @@ int main() {
 
     uint32_t frameIdx = 0;
     
-    while(showNextInitFrame(frameIdx++, pixels));
+    //while(showNextInitFrame(frameIdx++, pixels));
     
     const uint LED_PIN = PICO_DEFAULT_LED_PIN;
     gpio_init(LED_PIN);
