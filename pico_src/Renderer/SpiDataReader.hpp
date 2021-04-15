@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
-#include "hardware/uart.h"
 #include "hardware/irq.h"
+#include "hardware/dma.h"
+#include "hardware/spi.h"
 
 #include "LEDController.hpp"
 
@@ -13,6 +14,7 @@
 #define PIN_CS 17
 #define PIN_SCK 18
 #define PIN_MOSI 16  
+#define PIN_MISO 19  
  
 #define SPI_BAUD_RATE 1*1000*1000
 
@@ -27,7 +29,8 @@ class SpiDataReader
 private:
     uint8_t pixel_column_buffer[N_COL_BUFFER_BYTES];
     uint32_t curr_pixel_buff_index;
-
+    uint dma_rx;
+    
     SpiDataReader();
     bool checkPreamble();
 public:
@@ -36,5 +39,5 @@ public:
     static SpiDataReader& getInstance();
     //static void on_uart_rx();
 
-    void processUart(LEDController& ledController);
+    void processData(LEDController& ledController);
 };

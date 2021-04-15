@@ -32,8 +32,9 @@ target_link_libraries(Renderer
         hardware_interp
         hardware_timer
         hardware_clocks
-        hardware_pio
-        hardware_spi
+        hardware_pio 
+        hardware_spi 
+        hardware_dma
         pico_multicore
         pico_sync
         pico_time

@@ -4,7 +4,7 @@
 
 #include <bcm2835.h>
 
-RendererLedStripPico::RendererLedStripPico(const char* portname)
+RendererLedStripPico::RendererLedStripPico(const std::string portname)
 : m_portname(portname)
 ,m_fd(-1)
 {
@@ -19,7 +19,7 @@ RendererLedStripPico::~RendererLedStripPico()
 void RendererLedStripPico::initialize(Globe& globe)
 {
     RendererBase::initialize(globe);
-    m_fd = open(m_portname, O_RDWR | O_NOCTTY | O_SYNC);
+    m_fd = open(m_portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (m_fd < 0)
     {
         std::cout << "error " << errno << " opening " << m_portname << ": " << strerror (errno) << std::endl;
@@ -28,7 +28,7 @@ void RendererLedStripPico::initialize(Globe& globe)
         std::cout << "Connected to serial device" << std::endl;
     }
 
-    set_interface_attribs (m_fd, B115200, 0);   // set speed to 115,200 bps, 8n1 (no parity)
+    set_interface_attribs (m_fd, B3000000, 0);   // set speed to 115,200 bps, 8n1 (no parity)
     set_blocking (m_fd, 0);                     // set no blocking
 
     initSPI(globe);

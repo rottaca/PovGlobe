@@ -153,6 +153,6 @@ int main() {
     gpio_put(LED_PIN, 1);
 
     while(true){
-        reader.processUart(ledController);
+        reader.processData(ledController);
     }
 }

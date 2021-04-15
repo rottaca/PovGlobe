@@ -22,7 +22,7 @@ public:
     ~RTTMeasure();
 
     bool rotationDetected();
-    uint32_t getCurrentColumn(uint32_t maxColumnsPerRotation, uint64_t& timeUntilNextColumn);
+    uint32_t getCurrentColumn(uint32_t maxColumnsPerRotation);
 
     static RTTMeasure& getInstance();
     static void gpio_hall_sensor_callback(uint gpio, uint32_t events);
