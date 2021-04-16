@@ -138,7 +138,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
 
 int main() {
     stdio_init_all();
-    sleep_ms(3000);
+    sleep_ms(5000);
     SpiDataReader& reader = SpiDataReader::getInstance();
     LEDController& ledController = LEDController::getInstance();
 

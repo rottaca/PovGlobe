@@ -4,29 +4,26 @@
 
 #include "pico/binary_info.h"
 
+#define SPI_DEV spi0
 
 SpiDataReader::SpiDataReader()
 {
-    curr_pixel_buff_index = 0;
-    memset(pixel_column_buffer, 0, N_COL_BUFFER_BYTES);   
+    memset(pixel_column_buffer, 0, N_BUFFER_SIZE);   
     
      // Enable SPI at 1 MHz and connect to GPIOs
-    spi_init(spi0, SPI_BAUD_RATE);
-    spi_set_slave(spi0, true);
+    spi_init(SPI_DEV, SPI_BAUD_RATE);
+    uint baudrate = spi_set_baudrate(SPI_DEV,SPI_BAUD_RATE);
+    spi_set_slave(SPI_DEV, true);
+    spi_set_format(SPI_DEV, 8U, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+    
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_CS, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
+    
     // Make the SPI pins available to picotool
-    bi_decl(bi_3pins_with_func(PIN_MISO, PIN_MOSI, PIN_SCK, GPIO_FUNC_SPI));
-    // Chip select is active-low, so we'll initialise it to a driven-high state
-    gpio_init(PIN_CS);
-    gpio_set_dir(PIN_CS, GPIO_OUT);
-    gpio_put(PIN_CS, 1);
-    // Make the CS pin available to picotool
-    bi_decl(bi_1pin_with_name(PIN_CS, "SPI CS"));
-
-
+    bi_decl(bi_4pins_with_func(PIN_MOSI, PIN_MISO, PIN_SCK, PIN_CS, GPIO_FUNC_SPI));
+    
     /*dma_rx = dma_claim_unused_channel(true);
     printf("Configure RX DMA\n");
     // We set the inbound DMA to transfer from the SPI receive FIFO to a memory buffer paced by the SPI RX FIFO DREQ
@@ -34,12 +31,12 @@ SpiDataReader::SpiDataReader()
     // address to increment (so data is written throughout the buffer)
     dma_channel_config c = dma_channel_get_default_config(dma_rx);
     channel_config_set_transfer_data_size(&c, DMA_SIZE_8);
-    channel_config_set_dreq(&c, spi_get_index(spi0) ? DREQ_SPI1_RX : DREQ_SPI0_RX);
+    channel_config_set_dreq(&c, spi_get_index(SPI_DEV) ? DREQ_SPI1_RX : DREQ_SPI_DEV_RX);
     channel_config_set_read_increment(&c, false);
     channel_config_set_write_increment(&c, true);
     dma_channel_configure(dma_rx, &c,
                           pixel_column_buffer, // write address
-                          &spi_get_hw(spi0)->dr, // read address
+                          &spi_get_hw(SPI_DEV)->dr, // read address
                           N_COL_BUFFER_BYTES, // element count (each element is of size transfer_data_size)
                           false); // don't start yet
 
@@ -54,15 +51,16 @@ SpiDataReader::SpiDataReader()
         pixel_column_buffer[i];
     }*/
     
-    while(spi_is_readable(spi0)){
+    while(spi_is_readable(SPI_DEV)){
       printf("Clear buffer by reading\n");
-      spi_read_blocking(spi0, 0, pixel_column_buffer, 1);
+      spi_read_blocking(SPI_DEV, 0, pixel_column_buffer, 1);
     }    
+    printf("Baudrate used: %u\n", baudrate);
 }
 
 SpiDataReader::~SpiDataReader()
 {
-    dma_channel_unclaim(dma_rx);
+    //dma_channel_unclaim(dma_rx);
 }
  
 SpiDataReader& SpiDataReader::getInstance() {
@@ -70,34 +68,24 @@ SpiDataReader& SpiDataReader::getInstance() {
     return instance;
 }
 
-bool SpiDataReader::checkPreamble(){
-
-    // Check for preamble
-    bool preamble_found = true;
-    if (curr_pixel_buff_index >= N_PREAMBLE_BYTES-1){
-        for (size_t i = 0; i < N_PREAMBLE_BYTES && preamble_found; i++)
-        {
-            const size_t idx = curr_pixel_buff_index - N_PREAMBLE_BYTES + 1 + i;
-            if (i % 2 == 0)
-                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_EVEN_BYTE;
-            else
-                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_ODD_BYTE;
-        }
-    }else{
-        preamble_found = false;
-    }
-
-    return preamble_found;
-}
 
 void SpiDataReader::processData(LEDController& ledController){
-    if(spi_is_readable(spi0)){
-      printf("start reading...\n");
-      spi_read_blocking(spi0, 42, pixel_column_buffer, N_COL_BUFFER_BYTES);
-      for(int i = 0; i < N_COL_BUFFER_BYTES; i++)
-        printf("%d", pixel_column_buffer[i]);
-      printf("\n");
+    if(spi_is_readable(SPI_DEV)){
+      //printf("start reading...\n");
+      for(int i = 0; i < N_BUFFER_SIZE+1; i++){
+       spi_read_blocking(SPI_DEV, 42, &pixel_column_buffer[i], 1);
+      }
+      
+      if (pixel_column_buffer[N_BUFFER_SIZE] == 42){
+        memcpy(ledController.getPixelBuffer(), pixel_column_buffer, N_BUFFER_SIZE);
+      }else{
+        printf("Invalid data %d, %d, %d\n", (int)pixel_column_buffer[N_BUFFER_SIZE], (int)pixel_column_buffer[N_BUFFER_SIZE-1], (int)pixel_column_buffer[N_BUFFER_SIZE-2]);
+      }
+      //printf("Read: %d\n", numRead);
+      //for(int i = 0; i < numRead; i++)
+      //  printf("%d ", (int)pixel_column_buffer[i]);
+      //printf("\n");
     }else{
-      printf("Nothing to read!\n");
+      //printf("Nothing to read!\n");
     }
 }

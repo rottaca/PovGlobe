@@ -13,7 +13,8 @@ RendererLedStripPico::RendererLedStripPico(const std::string portname)
 
 RendererLedStripPico::~RendererLedStripPico()
 {
-    
+    bcm2835_spi_end();
+    bcm2835_close();
 }
 
 void RendererLedStripPico::initialize(Globe& globe)
@@ -36,29 +37,21 @@ void RendererLedStripPico::initialize(Globe& globe)
 
 void RendererLedStripPico::initSPI(Globe& globe) {
 
-    int spiFrameLength = 6 + 2 + globe.getVerticalNumPixelsWithLeds()*3;
+    int spiFrameLength = globe.getHorizontalNumPixels()*globe.getVerticalNumPixelsWithLeds()*3U + 1U;
 
     m_led_data.resize(spiFrameLength);
  
     int16_t ledIndex = 0;
 
     //Init the start Frame
-    m_led_data[0] = '+';
-    m_led_data[1] = '*';
-    m_led_data[2] = '+';
-    m_led_data[3] = '*';
-    m_led_data[4] = '+';
-    m_led_data[5] = '*';
-    m_led_data[6] = 0;
     //init each LED
-    for (ledIndex = 7; ledIndex < spiFrameLength-1; ledIndex += 3)
+    for (ledIndex = 0; ledIndex < spiFrameLength; ledIndex += 3)
     {
-        m_led_data[ledIndex + 1] = 0;
+        m_led_data[ledIndex + 0] = 0;
+        m_led_data[ledIndex + 1] = 50;
         m_led_data[ledIndex + 2] = 0;
-        m_led_data[ledIndex + 3] = 0;
     }
-    // End Frame
-    m_led_data[spiFrameLength - 1] = '\n';
+    m_led_data[spiFrameLength -1] = 42;
 
     if (!bcm2835_init())
     {
@@ -71,38 +64,46 @@ void RendererLedStripPico::initSPI(Globe& globe) {
         printf("bcm2835_spi_begin failed. Are you running as root??\n");
         exit(1);
     }
-
-    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
-    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
+    
     /*
-
-    BCM2835_SPI_MODE0 		CPOL = 0, CPHA = 0
-    BCM2835_SPI_MODE1 		CPOL = 0, CPHA = 1
-    BCM2835_SPI_MODE2 		CPOL = 1, CPHA = 0
-    BCM2835_SPI_MODE3 		CPOL = 1, CPHA = 1
+    because of core_freq = 250, rpi2 timings count !
+    BCM2835_SPI_CLOCK_DIVIDER_65536 	
+    65536 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_32768 	
+    32768 = 7.629394531kHz on Rpi2, 12.20703125kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_16384 	
+    16384 = 15.25878906kHz on Rpi2, 24.4140625kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_8192 	
+    8192 = 30.51757813kHz on Rpi2, 48.828125kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_4096 	
+    4096 = 61.03515625kHz on Rpi2, 97.65625kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_2048 	
+    2048 = 122.0703125kHz on Rpi2, 195.3125kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_1024 	
+    1024 = 244.140625kHz on Rpi2, 390.625kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_512 	
+    512 = 488.28125kHz on Rpi2, 781.25kHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_256 	
+    256 = 976.5625kHz on Rpi2, 1.5625MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_128 	
+    128 = 1.953125MHz on Rpi2, 3.125MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_64 	
+    64 = 3.90625MHz on Rpi2, 6.250MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_32 	
+    32 = 7.8125MHz on Rpi2, 12.5MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_16 	
+    16 = 15.625MHz on Rpi2, 25MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_8 	
+    8 = 31.25MHz on Rpi2, 50MHz on RPI3
+    BCM2835_SPI_CLOCK_DIVIDER_4 	
+    4 = 62.5MHz on Rpi2, 100MHz on RPI3. Dont expect this speed to work reliably.
+    BCM2835_SPI_CLOCK_DIVIDER_2 	
+    2 = 125MHz on Rpi2, 200MHz on RPI3, fastest you can get. Dont expect this speed to work reliably.
+    BCM2835_SPI_CLOCK_DIVIDER_1 	
+    1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_16); // The default
-    /*
-        BCM2835_SPI_CLOCK_DIVIDER_65536 	65536 = 262.144us = 3.814697260kHz
-        BCM2835_SPI_CLOCK_DIVIDER_32768 	32768 = 131.072us = 7.629394531kHz
-        BCM2835_SPI_CLOCK_DIVIDER_16384 	16384 = 65.536us = 15.25878906kHz
-        BCM2835_SPI_CLOCK_DIVIDER_8192 		8192 = 32.768us = 30/51757813kHz
-        BCM2835_SPI_CLOCK_DIVIDER_4096 		4096 = 16.384us = 61.03515625kHz
-        BCM2835_SPI_CLOCK_DIVIDER_2048 		2048 = 8.192us = 122.0703125kHz
-        BCM2835_SPI_CLOCK_DIVIDER_1024 		1024 = 4.096us = 244.140625kHz
-        BCM2835_SPI_CLOCK_DIVIDER_512 		512 = 2.048us = 488.28125kHz
-        BCM2835_SPI_CLOCK_DIVIDER_256 		256 = 1.024us = 976.5625kHz
-        BCM2835_SPI_CLOCK_DIVIDER_128 		128 = 512ns = = 1.953125MHz
-        BCM2835_SPI_CLOCK_DIVIDER_64 		64 = 256ns = 3.90625MHz
-        BCM2835_SPI_CLOCK_DIVIDER_32 		32 = 128ns = 7.8125MHz
-        BCM2835_SPI_CLOCK_DIVIDER_16 		16 = 64ns = 15.625MHz
-        BCM2835_SPI_CLOCK_DIVIDER_8 		8 = 32ns = 31.25MHz
-        BCM2835_SPI_CLOCK_DIVIDER_4 		4 = 16ns = 62.5MHz
-        BCM2835_SPI_CLOCK_DIVIDER_2 		2 = 8ns = 125MHz, fastest you can get
-
-    */
-    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
-    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);
+    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
 }
 
 void RendererLedStripPico::render(const Framebuffer& framebuffer)
@@ -110,8 +111,7 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3U);
   
-    bcm2835_spi_begin();
-    for (size_t j = 0; j < framebuffer.getWidth(); j++)
+    /*for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
         m_led_data[6] = j;
         int buff_idx = 7;
@@ -120,11 +120,22 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
           m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
           m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
         }
-        std::fill(m_led_data.begin(), m_led_data.end(), 0);
+        //std::fill(m_led_data.begin(), m_led_data.end(), 42);
         //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
-        bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
+        //bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
+    }*/
+    
+    //for (size_t j = 0; j < m_led_data.size()-1; j++)
+    //  m_led_data[j] = j % 50;
+      
+    
+    for (size_t j = 0; j < m_led_data.size(); j++){
+      //std::cout <<  (int)m_led_data[j] << "->" << (int)bcm2835_spi_transfer(m_led_data[j])<< " ";
+      //bcm2835_spi_transfer(m_led_data[j]);
     }
-    bcm2835_spi_end();
+    //std::cout << std::endl;
+    //std::cout << m_led_data.size() << std::endl;
+    bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
 
     // int n = read (m_fd, buf, sizeof buf);
     // if (n > 0){
