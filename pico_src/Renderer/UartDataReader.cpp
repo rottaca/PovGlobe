@@ -54,10 +54,9 @@ UartDataReader& UartDataReader::getInstance() {
 // }
 
 bool UartDataReader::checkPreamble(){
-
     // Check for preamble
     bool preamble_found = true;
-    if (curr_pixel_buff_index >= N_PREAMBLE_BYTES-1){
+    if (curr_pixel_buff_index >= N_BUFFER_SIZE/2){
         for (size_t i = 0; i < N_PREAMBLE_BYTES && preamble_found; i++)
         {
             const size_t idx = curr_pixel_buff_index - N_PREAMBLE_BYTES + 1 + i;
@@ -75,12 +74,9 @@ bool UartDataReader::checkPreamble(){
 
 void UartDataReader::processUart(LEDController& ledController){    
 
-    int max_chars_to_read = 100U;
-    int chars_read = 0U;
+    uint8_t* const pixelBuffer = ledController.getPixelBuffer();
     int c = uart_getc(UART_ID);
     while(c != PICO_ERROR_TIMEOUT) {
-        chars_read++;
-
         pixel_column_buffer[curr_pixel_buff_index] = (uint8_t)c;
         //printf("Received %c\n", c);
         if (checkPreamble()){
@@ -91,31 +87,14 @@ void UartDataReader::processUart(LEDController& ledController){
 
             // Column completely received
             if (curr_pixel_buff_index == N_COL_BUFFER_BYTES){
-                if(c == '\n' || c == '\r'){
-                    // Last byte is column 
-                    // TODO 2 bytes
-                    uint32_t current_input_column = pixel_column_buffer[N_PREAMBLE_BYTES];
-                    
-                    if (current_input_column < N_HORIZONTAL_RESOLUTION){
-                        //printf("Updating pixel buffer for column %d\n", current_input_column);
-
-                        uint8_t* const pixelBuffer = ledController.getPixelBuffer();
-                        uint8_t* const curr_column_output_buffer = pixelBuffer + current_input_column*N_BUFFER_SIZE_PER_COLUMN;
-                        uint8_t* const curr_column_input_buffer = pixel_column_buffer+N_PREAMBLE_BYTES+1;
-                        memcpy(curr_column_output_buffer, curr_column_input_buffer, N_BUFFER_SIZE_PER_COLUMN);
-                    }else{
-                        printf("Error, invalid column recieved: %d\n", current_input_column);
-                    }
+                if(c == '\n'){
+                    memcpy(pixelBuffer, pixel_column_buffer+N_PREAMBLE_BYTES, N_BUFFER_SIZE);
                 }else{
                     printf("Error, recieved invalid data (last: %d, total %u bytes)! Restarting\n", (int)c, curr_pixel_buff_index);
                 }
                 curr_pixel_buff_index = 0U;
             }
         }
-
-        if(chars_read == max_chars_to_read)
-            break;
-
         c = uart_getc(UART_ID);
     }
 }
