@@ -7,28 +7,29 @@ UartDataReader::UartDataReader()
     curr_pixel_buff_index = 0;
     memset(pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL);
 
-    // // Set up our UART with a basic baud rate.
-    // int actual = uart_init(UART_ID, BAUD_RATE);
-    // // Set the TX and RX pins by using the function select on the GPIO
-    // // Set datasheet for more information on function select
-    // gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
-    // gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
-    // // Set UART flow control CTS/RTS, we don't want these, so turn them off
-    // uart_set_hw_flow(UART_ID, false, false);
-    // // Set our data format
-    // uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
-    // // Turn off FIFO's - we want to do this character by character
-    // uart_set_fifo_enabled(UART_ID, false); 
-    // // Set up a RX interrupt
-    // // We need to set up the handler first
-    // // Select correct interrupt for the UART we are using
-    // int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
-    // // Now enable the UART to send interrupts - RX only
-    // uart_set_irq_enables(UART_ID, true, false);
+    // Set up our UART with a basic baud rate.
+    int actual = uart_init(UART_ID, BAUD_RATE);
+    printf("Uart baud is %d..\n", actual);
+    // Set the TX and RX pins by using the function select on the GPIO
+    // Set datasheet for more information on function select
+    gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+    gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+    // Set UART flow control CTS/RTS, we don't want these, so turn them off
+    uart_set_hw_flow(UART_ID, false, false);
+    // Set our data format
+    uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    // Turn off FIFO's - we want to do this character by character
+    //uart_set_fifo_enabled(UART_ID, false); 
+    // Set up a RX interrupt
+    // We need to set up the handler first
+    // Select correct interrupt for the UART we are using
+    //int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+    // Now enable the UART to send interrupts - RX only
+    //uart_set_irq_enables(UART_ID, true, false);
 
-    // // And set up and enable the interrupt handlers
-    // irq_set_exclusive_handler(UART_IRQ, &UartDataReader::on_uart_rx);
-    // irq_set_enabled(UART_IRQ, true);
+    // And set up and enable the interrupt handlers
+    //irq_set_exclusive_handler(UART_IRQ, &UartDataReader::on_uart_rx);
+    //irq_set_enabled(UART_IRQ, true);
 }
 
 UartDataReader::~UartDataReader()
@@ -72,11 +73,11 @@ bool UartDataReader::checkPreamble(){
     return preamble_found;
 }
 
-void UartDataReader::processUart(LEDController& ledController){
-    int c = getchar_timeout_us(0U);
+void UartDataReader::processUart(LEDController& ledController){    
+
     int max_chars_to_read = 100U;
     int chars_read = 0U;
-
+    int c = uart_getc(UART_ID);
     while(c != PICO_ERROR_TIMEOUT) {
         chars_read++;
 
@@ -115,6 +116,6 @@ void UartDataReader::processUart(LEDController& ledController){
         if(chars_read == max_chars_to_read)
             break;
 
-        c = getchar_timeout_us(0U);
+        c = uart_getc(UART_ID);
     }
 }

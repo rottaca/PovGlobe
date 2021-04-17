@@ -17,7 +17,7 @@ RendererLedStripPico::~RendererLedStripPico()
 void RendererLedStripPico::initialize(Globe& globe)
 {
     RendererBase::initialize(globe);
-    m_fd = open(m_portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    m_fd = open("/dev/serial0", O_RDWR | O_NOCTTY);
     if (m_fd < 0)
     {
         std::cout << "error " << errno << " opening " << m_portname << ": " << strerror (errno) << std::endl;
@@ -26,8 +26,20 @@ void RendererLedStripPico::initialize(Globe& globe)
         std::cout << "Connected to serial device" << std::endl;
     }
 
-    set_interface_attribs (m_fd, B3000000, 0);   // set speed to 115,200 bps, 8n1 (no parity)
-    set_blocking (m_fd, 0);                     // set no blocking
+    struct termios options;
+  	tcgetattr(m_fd, &options);
+  	options.c_cflag = B3000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+  	options.c_iflag = IGNPAR;
+  	options.c_oflag = 0;
+  	options.c_lflag = 0;
+  	if (tcflush(m_fd, TCIFLUSH) != 0)
+    {
+        std::cout << "error " << errno << " from tcflush" << std::endl;
+    }
+  	if (tcsetattr(m_fd, TCSANOW, &options) != 0)
+    {
+        std::cout << "error " << errno << " from tcsetattr" << std::endl;
+    }
 }
 
 void RendererLedStripPico::render(const Framebuffer& framebuffer)
@@ -59,8 +71,11 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
           buf[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
         }
         //memcpy(&buf[7], &framebuffer(j, 0, 0), framebuffer.getHeight()*framebuffer.getChannels());
-
-        write(m_fd, buf, buff_size);
+        int sent = write(m_fd, buf, buff_size);
+        
+        if (sent != buff_size){
+          std::cout << "Sending: " << buff_size << " acutal: " << std::endl;
+        }
     }
 
     // int n = read (m_fd, buf, sizeof buf);

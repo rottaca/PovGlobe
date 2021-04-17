@@ -137,6 +137,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
 
 int main() {
     stdio_init_all();
+    sleep_ms(5000);
     UartDataReader& reader = UartDataReader::getInstance();
     LEDController& ledController = LEDController::getInstance();
 
@@ -144,8 +145,9 @@ int main() {
     memset(pixels,0, N_BUFFER_SIZE);
 
     uint32_t frameIdx = 0;
+    //while(showNextInitFrame(frameIdx++, pixels));
     
-    while(showNextInitFrame(frameIdx++, pixels));
+    printf("Ready\n");
     
     const uint LED_PIN = PICO_DEFAULT_LED_PIN;
     gpio_init(LED_PIN);
