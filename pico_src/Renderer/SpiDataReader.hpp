@@ -16,12 +16,15 @@
 #define PIN_MOSI 16U 
 #define PIN_MISO 19U  
  
-#define SPI_BAUD_RATE 1.953125f*1000*1000
-
+#define SPI_BAUD_RATE 15.625f*1000*1000
+ 
+#define SPI_BUFF_SIZE (N_BUFFER_SIZE + 1)
+#define SPI_BUFF_LAST_IDX (SPI_BUFF_SIZE - 1)
+#define SPI_END_BYTE 42
 class SpiDataReader
 {
 private:
-    uint8_t pixel_column_buffer[N_BUFFER_SIZE + 1];
+    uint8_t pixel_column_buffer[SPI_BUFF_SIZE];
     
     SpiDataReader();
     bool checkPreamble();
@@ -29,7 +32,6 @@ public:
     ~SpiDataReader();
 
     static SpiDataReader& getInstance();
-    //static void on_uart_rx();
 
     void processData(LEDController& ledController);
 };

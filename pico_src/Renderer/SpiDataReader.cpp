@@ -55,7 +55,12 @@ SpiDataReader::SpiDataReader()
       printf("Clear buffer by reading\n");
       spi_read_blocking(SPI_DEV, 0, pixel_column_buffer, 1);
     }    
-    printf("Baudrate used: %u\n", baudrate);
+    printf("SPI interface initialized!\n");
+    printf("--------------\n");
+    printf("Baudrate used: %u Hz\n", baudrate);
+    printf("Expected Bytes per Transmission: %d\n", SPI_BUFF_SIZE);
+    printf("Expected End Byte: %d\n", SPI_BUFF_LAST_IDX);
+    printf("--------------\n");
 }
 
 SpiDataReader::~SpiDataReader()
@@ -71,15 +76,23 @@ SpiDataReader& SpiDataReader::getInstance() {
 
 void SpiDataReader::processData(LEDController& ledController){
     if(spi_is_readable(SPI_DEV)){
-      //printf("start reading...\n");
-      for(int i = 0; i < N_BUFFER_SIZE+1; i++){
-       spi_read_blocking(SPI_DEV, 42, &pixel_column_buffer[i], 1);
-      }
-      
-      if (pixel_column_buffer[N_BUFFER_SIZE] == 42){
-        memcpy(ledController.getPixelBuffer(), pixel_column_buffer, N_BUFFER_SIZE);
+      /*for(int i = 0; i < SPI_BUFF_SIZE; i++){
+      if (i == 0){
+       spi_read_blocking(SPI_DEV, 0, &pixel_column_buffer[i], 1);
       }else{
-        printf("Invalid data %d, %d, %d\n", (int)pixel_column_buffer[N_BUFFER_SIZE], (int)pixel_column_buffer[N_BUFFER_SIZE-1], (int)pixel_column_buffer[N_BUFFER_SIZE-2]);
+       spi_read_blocking(SPI_DEV, pixel_column_buffer[i-1], &pixel_column_buffer[i], 1);
+      }
+      }*/
+      
+      spi_read_blocking(SPI_DEV, 42, pixel_column_buffer, SPI_BUFF_SIZE);
+      
+      if (pixel_column_buffer[SPI_BUFF_LAST_IDX] == SPI_END_BYTE){
+        printf("Data valid!\n");
+        memcpy(ledController.getPixelBuffer(), pixel_column_buffer, SPI_BUFF_LAST_IDX);
+      }else{
+        printf("Invalid data %d, %d, %d\n", (int)pixel_column_buffer[SPI_BUFF_LAST_IDX], 
+        (int)pixel_column_buffer[SPI_BUFF_LAST_IDX-1], 
+        (int)pixel_column_buffer[SPI_BUFF_LAST_IDX-2]);
       }
       //printf("Read: %d\n", numRead);
       //for(int i = 0; i < numRead; i++)

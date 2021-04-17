@@ -45,13 +45,11 @@ void RendererLedStripPico::initSPI(Globe& globe) {
 
     //Init the start Frame
     //init each LED
-    for (ledIndex = 0; ledIndex < spiFrameLength; ledIndex += 3)
+    for (ledIndex = 0; ledIndex < spiFrameLength/3; ledIndex ++)
     {
-        m_led_data[ledIndex + 0] = 0;
-        m_led_data[ledIndex + 1] = 50;
-        m_led_data[ledIndex + 2] = 0;
+        m_led_data[3*ledIndex] = 10;
     }
-    m_led_data[spiFrameLength -1] = 42;
+    m_led_data[spiFrameLength - 1] = 42;
 
     if (!bcm2835_init())
     {
@@ -102,41 +100,57 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_16);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
+
+    std::cout << "SPI initialiezed!" << std::endl;
+    std::cout << "Bytes per Transmission: " << m_led_data.size() << std::endl;
+    std::cout << "End Byte: " << (int)m_led_data[spiFrameLength - 1] << std::endl;
 }
 
 void RendererLedStripPico::render(const Framebuffer& framebuffer)
 {
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3U);
-  
-    /*for (size_t j = 0; j < framebuffer.getWidth(); j++)
+    int buff_idx = 0;
+    for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
-        m_led_data[6] = j;
-        int buff_idx = 7;
-        for(size_t i = 0; i < framebuffer.getHeight(); i++){
-          m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 0)/2];
-          m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
-          m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
-        }
-        //std::fill(m_led_data.begin(), m_led_data.end(), 42);
-        //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
-        //bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
-    }*/
+      for(size_t i = 0; i < framebuffer.getHeight(); i++){
+        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 0)/2];
+        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
+        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
+      }
+      //std::fill(m_led_data.begin(), m_led_data.end(), 42);
+      //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
+      //bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
+    }
     
     //for (size_t j = 0; j < m_led_data.size()-1; j++)
     //  m_led_data[j] = j % 50;
       
     
     for (size_t j = 0; j < m_led_data.size(); j++){
-      //std::cout <<  (int)m_led_data[j] << "->" << (int)bcm2835_spi_transfer(m_led_data[j])<< " ";
+      int rx = bcm2835_spi_transfer(m_led_data[j]);
+      /*if ( j > 0){
+        std::cout << (int)m_led_data[j-1]<< "==" << rx << std::endl;
+      }else{
+        std::cout << "Started: " << rx << std::endl;
+      }*/
+      //usleep(1);
       //bcm2835_spi_transfer(m_led_data[j]);
     }
     //std::cout << std::endl;
     //std::cout << m_led_data.size() << std::endl;
-    bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
-
+    /*std::vector<char> m_inputData;
+    m_inputData.resize(m_led_data.size());
+    bcm2835_spi_transfernb(m_led_data.data(), m_inputData.data(), m_led_data.size());
+    
+    for (size_t j = 0; j < m_inputData.size(); j++){
+      std::cout << (int)m_led_data[j] << "->" << (int)m_inputData[j] << std::endl;
+    }*/
     // int n = read (m_fd, buf, sizeof buf);
     // if (n > 0){
     //     buf[n] = '\0';
