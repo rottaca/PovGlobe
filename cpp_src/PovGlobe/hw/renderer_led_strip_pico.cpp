@@ -87,7 +87,7 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_16);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_4096);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
@@ -110,17 +110,24 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
         m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
         m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
       }
+      assert(buff_idx == m_led_data.size());
       //std::fill(m_led_data.begin(), m_led_data.end(), 42);
       //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
       //bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
     }
-    
+    m_led_data[m_led_data.size() - 1] = 42;
+    m_led_data[m_led_data.size() - 2] = 42;
+    m_led_data[m_led_data.size() - 3] = 42;
     //for (size_t j = 0; j < m_led_data.size()-1; j++)
     //  m_led_data[j] = j % 50;
-      
     
+
     for (size_t j = 0; j < m_led_data.size(); j++){
       int rx = bcm2835_spi_transfer(m_led_data[j]);
+      if (rx != 42) {
+          j--;
+          std::cout << "Retrying.." << std::endl;
+      }
       /*if ( j > 0){
         std::cout << (int)m_led_data[j-1]<< "==" << rx << std::endl;
       }else{
