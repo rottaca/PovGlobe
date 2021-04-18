@@ -142,7 +142,7 @@ int main() {
     SpiDataReader& reader = SpiDataReader::getInstance();
     LEDController& ledController = LEDController::getInstance();
 
-    uint8_t * pixels = ledController.getPixelBuffer();
+    uint8_t * pixels = ledController.getRenderBuffer();
     memset(pixels,0, N_BUFFER_SIZE);
 
     uint32_t frameIdx = 0;

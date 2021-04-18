@@ -55,7 +55,7 @@ void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     if (!is_nil_time(last_hall_sensor_event)) {
         const int64_t new_dt = absolute_time_diff_us (last_hall_sensor_event, curr_time);
         const int64_t old_dt = measured_intervals[curr_segment_index];
-        measured_intervals[curr_segment_index] = new_dt;
+        measured_intervals[curr_segment_index] = new_dt*0.2f+ 0.8f*old_dt;
         
         //rtt += new_dt - old_dt;
 

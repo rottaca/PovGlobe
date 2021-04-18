@@ -24,7 +24,7 @@ void RendererLedStripPico::initialize(Globe& globe)
 
 void RendererLedStripPico::initSPI(Globe& globe) {
 
-    int spiFrameLength = globe.getHorizontalNumPixels()*globe.getVerticalNumPixelsWithLeds()*3U + 1U;
+    int spiFrameLength = globe.getHorizontalNumPixels()*globe.getVerticalNumPixelsWithLeds()*3U;
 
     m_led_data.resize(spiFrameLength);
  
@@ -36,7 +36,6 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     {
         m_led_data[3*ledIndex] = 10;
     }
-    m_led_data[spiFrameLength - 1] = 42;
 
     if (!bcm2835_init())
     {
@@ -87,15 +86,17 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_4096);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_1024);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
 
-    std::cout << "SPI initialiezed!" << std::endl;
+    std::cout << "SPI initialized!" << std::endl;
     std::cout << "Bytes per Transmission: " << m_led_data.size() << std::endl;
     std::cout << "End Byte: " << (int)m_led_data[spiFrameLength - 1] << std::endl;
+
+    usleep(1000000);
 }
 
 void RendererLedStripPico::render(const Framebuffer& framebuffer)
@@ -110,44 +111,31 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
         m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
         m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
       }
-      assert(buff_idx == m_led_data.size());
-      //std::fill(m_led_data.begin(), m_led_data.end(), 42);
-      //std::cout << "Sending "<<m_led_data.size()<< " bytes to pico" << std::endl;
-      //bcm2835_spi_writenb(m_led_data.data(), m_led_data.size());
     }
-    m_led_data[m_led_data.size() - 1] = 42;
-    m_led_data[m_led_data.size() - 2] = 42;
-    m_led_data[m_led_data.size() - 3] = 42;
-    //for (size_t j = 0; j < m_led_data.size()-1; j++)
-    //  m_led_data[j] = j % 50;
     
+    int bytes_sent = 0;
+    int default_junk_size = 2048;
+    int junk_nr = 0;
+    while (bytes_sent < m_led_data.size()) {
+        int junk_size = default_junk_size;
 
-    for (size_t j = 0; j < m_led_data.size(); j++){
-      int rx = bcm2835_spi_transfer(m_led_data[j]);
-      if (rx != 42) {
-          j--;
-          std::cout << "Retrying.." << std::endl;
-      }
-      /*if ( j > 0){
-        std::cout << (int)m_led_data[j-1]<< "==" << rx << std::endl;
-      }else{
-        std::cout << "Started: " << rx << std::endl;
-      }*/
-      //usleep(1);
-      //bcm2835_spi_transfer(m_led_data[j]);
+        if (bytes_sent + default_junk_size > m_led_data.size()) {
+            junk_size -= (bytes_sent + default_junk_size) - m_led_data.size();
+        }
+        std::cout << bytes_sent << "-" << bytes_sent + junk_size << ": " << junk_nr << std::endl;
+        for (size_t j = 0; j < junk_size; j++) {
+            int rx = bcm2835_spi_transfer(m_led_data[bytes_sent+j]);
+            if (rx != junk_nr) {
+                std::cout << bytes_sent + j << ": " << rx << " != " << junk_nr << std::endl;
+            }
+        }
+
+        bytes_sent += junk_size;
+        junk_nr++;
     }
-    //std::cout << std::endl;
-    //std::cout << m_led_data.size() << std::endl;
-    /*std::vector<char> m_inputData;
-    m_inputData.resize(m_led_data.size());
-    bcm2835_spi_transfernb(m_led_data.data(), m_inputData.data(), m_led_data.size());
-    
-    for (size_t j = 0; j < m_inputData.size(); j++){
-      std::cout << (int)m_led_data[j] << "->" << (int)m_inputData[j] << std::endl;
-    }*/
-    // int n = read (m_fd, buf, sizeof buf);
-    // if (n > 0){
-    //     buf[n] = '\0';
-    //     std::cerr << "PICO: " << buf << std::endl;
-    // }
+
+    int res = bcm2835_spi_transfer(42);
+    if (res != 255) {
+        std::cout << "error: " << res << std::endl;
+    }
 }    

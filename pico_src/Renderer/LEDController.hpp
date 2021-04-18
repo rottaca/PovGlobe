@@ -32,7 +32,8 @@ class LEDController
 private:
     static PIO pio;
     static uint sm;
-    static uint8_t pixel_buffer[N_BUFFER_SIZE];
+    static uint8_t pixel_buffer[2][N_BUFFER_SIZE];
+    static uint8_t render_buffer_idx;
     static critical_section_t crit;
 
     LEDController();
@@ -46,7 +47,9 @@ public:
     static LEDController& getInstance();
     static void core1_write_pixels();
 
-    uint8_t* getPixelBuffer();
+    void swapBuffers();
+    uint8_t* getRenderBuffer();
+    uint8_t* getInputBuffer();
     critical_section_t* getCriticalSection();
 
 };

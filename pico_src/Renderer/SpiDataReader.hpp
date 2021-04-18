@@ -16,16 +16,12 @@
 #define PIN_MOSI 16U 
 #define PIN_MISO 19U  
  
-#define SPI_BAUD_RATE 61.03515625*1000
+#define SPI_BAUD_RATE 244.140625*1000
  
-#define SPI_BUFF_SIZE (N_BUFFER_SIZE + 1)
-#define SPI_BUFF_LAST_IDX (SPI_BUFF_SIZE - 1)
 #define SPI_END_BYTE 42
 class SpiDataReader
 {
-private:
-    uint8_t pixel_column_buffer[SPI_BUFF_SIZE];
-    
+private:    
     SpiDataReader();
     bool checkPreamble();
 public:

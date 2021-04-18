@@ -14,7 +14,7 @@ project(Renderer C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(Renderer main.cpp RTTMeasure.cpp UartDataReader.cpp SpiDataReader.cpp LEDController.cpp)
+add_executable(Renderer main.cpp RTTMeasure.cpp SpiDataReader.cpp LEDController.cpp)
 
 pico_generate_pio_header(Renderer ${CMAKE_CURRENT_LIST_DIR}/apa102.pio)
 
