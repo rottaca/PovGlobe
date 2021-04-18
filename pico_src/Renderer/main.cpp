@@ -146,8 +146,9 @@ int main() {
     memset(pixels,0, N_BUFFER_SIZE);
 
     uint32_t frameIdx = 0;
-    
     //while(showNextInitFrame(frameIdx++, pixels));
+    
+    printf("Ready\n");
     
     const uint LED_PIN = PICO_DEFAULT_LED_PIN;
     gpio_init(LED_PIN);

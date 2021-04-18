@@ -8,9 +8,12 @@
 PIO LEDController::pio{};
 uint LEDController::sm = 0;
 uint8_t LEDController::pixel_buffer[N_BUFFER_SIZE];
+critical_section_t LEDController::crit = {};
 
 LEDController::LEDController()
 {
+    critical_section_init(&crit);
+
     multicore_launch_core1(&LEDController::core1_write_pixels);   
 }
 
@@ -68,6 +71,8 @@ void LEDController::core1_write_pixels(){
                 } 
                 last_column = column;
 
+                critical_section_enter_blocking(&crit);
+
                 ledController.put_start_frame(pio, sm);
                 const uint8_t* pixel_buffer_column = pixel_buffer + column*N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL;
                 for (int i = 0; i < N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL; i+=N_CHANNELS_PER_PIXEL) {
@@ -88,11 +93,16 @@ void LEDController::core1_write_pixels(){
                     );
                 }
                 ledController.put_end_frame(pio, sm);
+                critical_section_exit(&crit);
             }
         }else if(last_cycle_rotation_detected) {
             printf("No rotation detected.\n");
-            //memset(pixel_buffer,0, N_BUFFER_SIZE);
             last_cycle_rotation_detected = false;
         }
     }
+}
+
+
+critical_section_t* LEDController::getCriticalSection() {
+    return &crit;
 }

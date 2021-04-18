@@ -42,9 +42,9 @@ all_apps = [
 
 globe.runRendererAsync()
 
-for url_name in tile_server_api.tile_map_urls:
-    app = tile_server_api.TileServerApp(tile_server_api.tile_map_urls[url_name])
-    all_apps.append(app)
+#for url_name in tile_server_api.tile_map_urls:
+#    app = tile_server_api.TileServerApp(tile_server_api.tile_map_urls[url_name])
+#    all_apps.append(app)
 
 app_idx = 0
 while(True):

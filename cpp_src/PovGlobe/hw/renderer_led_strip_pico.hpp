@@ -4,12 +4,6 @@
 
 #include <vector>
 
-#include <errno.h>
-#include <fcntl.h> 
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-
 unsigned char led_lut[256] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
@@ -32,19 +26,15 @@ unsigned char led_lut[256] = {
 class RendererLedStripPico : public RendererBase
 {
 public:
-    RendererLedStripPico(const std::string portname);
+    RendererLedStripPico();
     ~RendererLedStripPico();
 
     void initialize(Globe& globe);
     void initSPI(Globe& globe);
 
 protected:
-    const std::string m_portname;
     int m_fd;
-    std::vector<char> m_led_data;
+    std::vector<unsigned char> m_led_data;
     
     virtual void render(const Framebuffer&);
-
-    int set_interface_attribs (int fd, int speed, int parity);
-    void set_blocking (int fd, int should_block);
 };

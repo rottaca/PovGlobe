@@ -26,9 +26,6 @@ const float default_radius = 13.25;
 const float default_spacing_top = 1.5;
 const float default_spacing_bottom = 2.0;
 
-const int default_hall_sensor_gpio_pin = 25;
-const char* default_pico_port_name = "/dev/ttyACM0";
-
 using namespace std::chrono_literals;
 
 using AlgoFactory = std::function<std::unique_ptr<ApplicationBase>(int, char* [])>;
@@ -100,7 +97,6 @@ int main(int argc, char* argv[]) {
     const float radius = setterFloat("-r", default_radius);
     const float spacing_top = setterFloat("-t", default_spacing_top);
     const float spacing_bottom = setterFloat("-b", default_spacing_bottom);
-    const char* pico_port_name = setterStr("-p", default_pico_port_name);
 
     const bool double_sided = cmdOptionExists(argv, argv + argc, "-d");    
     const bool use_hw = cmdOptionExists(argv, argv + argc, "-k");
@@ -110,7 +106,7 @@ int main(int argc, char* argv[]) {
 
     if (use_hw) {
 #ifdef HW_AVAILABLE 
-    renderer = std::make_shared<RendererLedStripPico>(pico_port_name);
+    renderer = std::make_shared<RendererLedStripPico>();
 #else
     std::cerr << "Not build with HW support!" << std::endl;  
     exit(1);
