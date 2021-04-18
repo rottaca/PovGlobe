@@ -22,13 +22,14 @@
 #define N_PREAMBLE_BYTES 6
 #define PREAMBLE_ODD_BYTE '*'
 #define PREAMBLE_EVEN_BYTE '+'
-#define N_COL_BUFFER_BYTES (N_PREAMBLE_BYTES + N_BUFFER_SIZE + 1U)
+#define N_UART_BUFFER_BYTES (N_PREAMBLE_BYTES + N_BUFFER_SIZE + 1U)
 
 class UartDataReader
 {
 private:
-    uint8_t pixel_column_buffer[N_COL_BUFFER_BYTES];
-    uint32_t curr_pixel_buff_index;
+    uint8_t m_pixel_column_buffer[N_UART_BUFFER_BYTES];
+    uint32_t m_curr_pixel_buff_index;
+    bool m_preamble_found;
 
     UartDataReader();
     bool checkPreamble();
@@ -36,7 +37,6 @@ public:
     ~UartDataReader();
 
     static UartDataReader& getInstance();
-    //static void on_uart_rx();
 
     void processUart(LEDController& ledController);
 };

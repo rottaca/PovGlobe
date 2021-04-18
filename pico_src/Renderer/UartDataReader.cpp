@@ -4,8 +4,9 @@
 
 UartDataReader::UartDataReader()
 {
-    curr_pixel_buff_index = 0;
-    memset(pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL);
+    m_curr_pixel_buff_index = 0;
+    m_preamble_found = false;
+    memset(m_pixel_column_buffer, 0, N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL);
 
     // Set up our UART with a basic baud rate.
     int actual = uart_init(UART_ID, BAUD_RATE);
@@ -18,6 +19,7 @@ UartDataReader::UartDataReader()
     uart_set_hw_flow(UART_ID, false, false);
     // Set our data format
     uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    uart_set_translate_crlf(UART_ID, false);
     // Turn off FIFO's - we want to do this character by character
     //uart_set_fifo_enabled(UART_ID, false); 
     // Set up a RX interrupt
@@ -41,58 +43,49 @@ UartDataReader& UartDataReader::getInstance() {
     return instance;
 }
 
-// void UartDataReader::on_uart_rx() {
-//     while (uart_is_readable(UART_ID)) {
-//         uint8_t ch = uart_getc(UART_ID);
-//         // Can we send it back?
-//         if (uart_is_writable(UART_ID)) {
-//             // Change it slightly first!
-//             ch++;
-//             uart_putc(UART_ID, ch);
-//         }
-//     }
-// }
-
 bool UartDataReader::checkPreamble(){
     // Check for preamble
-    bool preamble_found = true;
-    if (curr_pixel_buff_index >= N_BUFFER_SIZE/2){
-        for (size_t i = 0; i < N_PREAMBLE_BYTES && preamble_found; i++)
+    m_preamble_found = true;
+    if (m_curr_pixel_buff_index >= N_PREAMBLE_BYTES){
+        for (size_t i = 0; i < N_PREAMBLE_BYTES && m_preamble_found; i++)
         {
-            const size_t idx = curr_pixel_buff_index - N_PREAMBLE_BYTES + 1 + i;
+            const size_t idx = m_curr_pixel_buff_index - N_PREAMBLE_BYTES + i;
             if (i % 2 == 0)
-                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_EVEN_BYTE;
+                m_preamble_found &= m_pixel_column_buffer[idx] == PREAMBLE_EVEN_BYTE;
             else
-                preamble_found &= pixel_column_buffer[idx] == PREAMBLE_ODD_BYTE;
+                m_preamble_found &= m_pixel_column_buffer[idx] == PREAMBLE_ODD_BYTE;
         }
     }else{
-        preamble_found = false;
+        m_preamble_found = false;
     }
 
-    return preamble_found;
+    return m_preamble_found;
 }
 
-void UartDataReader::processUart(LEDController& ledController){    
-
+void UartDataReader::processUart(LEDController& ledController){
     uint8_t* const pixelBuffer = ledController.getPixelBuffer();
+    critical_section_t* crit = ledController.getCriticalSection();
+
     int c = uart_getc(UART_ID);
     while(c != PICO_ERROR_TIMEOUT) {
-        pixel_column_buffer[curr_pixel_buff_index] = (uint8_t)c;
-        //printf("Received %c\n", c);
-        if (checkPreamble()){
-            //printf("New preamble detected. Restarting.\n");
-            curr_pixel_buff_index = N_PREAMBLE_BYTES;
-        }else{
-            curr_pixel_buff_index++;
+        m_pixel_column_buffer[m_curr_pixel_buff_index++] = (uint8_t)c;
 
+        if (checkPreamble()) {
+            m_curr_pixel_buff_index = N_PREAMBLE_BYTES;
+        }
+        else {
             // Column completely received
-            if (curr_pixel_buff_index == N_COL_BUFFER_BYTES){
-                if(c == '\n'){
-                    memcpy(pixelBuffer, pixel_column_buffer+N_PREAMBLE_BYTES, N_BUFFER_SIZE);
-                }else{
-                    printf("Error, recieved invalid data (last: %d, total %u bytes)! Restarting\n", (int)c, curr_pixel_buff_index);
+            if (m_curr_pixel_buff_index == N_UART_BUFFER_BYTES) {
+                if (c == 42) {
+                    critical_section_enter_blocking(crit);
+                    memcpy(pixelBuffer, m_pixel_column_buffer + N_PREAMBLE_BYTES, N_BUFFER_SIZE);
+                    critical_section_exit(crit);
                 }
-                curr_pixel_buff_index = 0U;
+                else {
+                    printf("Invalid data (last: %d, total %u bytes)! Restarting\n", (int)c, m_curr_pixel_buff_index);
+                }
+                m_curr_pixel_buff_index = 0U;
+                m_preamble_found = false;
             }
         }
         c = uart_getc(UART_ID);

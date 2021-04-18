@@ -2,9 +2,17 @@
 #include <iostream>
 #include "core/globe.hpp"
 
-RendererLedStripPico::RendererLedStripPico(const std::string portname)
-: m_portname(portname)
-,m_fd(-1)
+
+#include <errno.h>
+#include <fcntl.h> 
+#include <string.h>
+//#include <termios.h>
+#include <asm/termios.h>
+#include <stropts.h> /* Oddly, for ioctl, because ioctl.h causes include dramas */
+#include <unistd.h>
+
+RendererLedStripPico::RendererLedStripPico()
+:m_fd(-1)
 {
     
 }
@@ -20,26 +28,49 @@ void RendererLedStripPico::initialize(Globe& globe)
     m_fd = open("/dev/serial0", O_RDWR | O_NOCTTY);
     if (m_fd < 0)
     {
-        std::cout << "error " << errno << " opening " << m_portname << ": " << strerror (errno) << std::endl;
+        std::cout << "error " << errno << " opening /dev/serial0: " << strerror (errno) << std::endl;
         return;
     }else{
         std::cout << "Connected to serial device" << std::endl;
     }
+    // check this : https://gist.github.com/kennethryerson/f7d1abcf2633b7c03cf0
+    
+    int baudrate = 3000000;
 
-    struct termios options;
-  	tcgetattr(m_fd, &options);
-  	options.c_cflag = B3000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-  	options.c_iflag = IGNPAR;
-  	options.c_oflag = 0;
-  	options.c_lflag = 0;
-  	if (tcflush(m_fd, TCIFLUSH) != 0)
+   // struct termios options;
+  	//tcgetattr(m_fd, &options);
+  	//options.c_cflag = B3000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+  	//options.c_iflag = IGNPAR;
+  	//options.c_oflag = 0;
+  	//options.c_lflag = 0;
+
+    struct termios2 tio;
+    if (ioctl(m_fd, TCGETS2, &tio) != 0) {
+        std::cout << "error " << errno << " from TCGETS2" << std::endl;
+    }
+    tio.c_cflag &= ~CBAUD;
+    tio.c_cflag |= CS8 | CLOCAL | CREAD | BOTHER;
+    tio.c_iflag = IGNPAR;
+    tio.c_ispeed = baudrate;
+    tio.c_ospeed = baudrate;
+    /* do other miscellaneous setup options with the flags here */
+    if (ioctl(m_fd, TCSETS2, &tio) != 0)
+    {
+        std::cout << "error " << errno << " from TCSETS2" << std::endl;
+    }
+    if (ioctl(m_fd, TCGETS2, &tio) != 0) {
+        std::cout << "error " << errno << " from TCGETS2" << std::endl;
+    }
+    std::cout << "Custom baudrate: " << tio.c_ospeed << std::endl;
+
+  	/*if (tcflush(m_fd, TCIFLUSH) != 0)
     {
         std::cout << "error " << errno << " from tcflush" << std::endl;
     }
   	if (tcsetattr(m_fd, TCSANOW, &options) != 0)
     {
         std::cout << "error " << errno << " from tcsetattr" << std::endl;
-    }
+    }*/
 }
 
 void RendererLedStripPico::render(const Framebuffer& framebuffer)
@@ -57,7 +88,7 @@ void RendererLedStripPico::render(const Framebuffer& framebuffer)
       buf[3] = '*';
       buf[4] = '+';
       buf[5] = '*';
-      buf[buff_size - 1] = '\n';
+      buf[buff_size - 1] = 42;
     }
   
     int buff_idx = 6;  

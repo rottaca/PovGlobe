@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/sync.h"
 
 #include "hardware/pio.h"
 #include "hardware/gpio.h"
@@ -32,6 +33,7 @@ private:
     static PIO pio;
     static uint sm;
     static uint8_t pixel_buffer[N_BUFFER_SIZE];
+    static critical_section_t crit;
 
     LEDController();
 
@@ -45,5 +47,6 @@ public:
     static void core1_write_pixels();
 
     uint8_t* getPixelBuffer();
+    critical_section_t* getCriticalSection();
 
 };

@@ -2,11 +2,6 @@
 
 #include "core/renderer_base.hpp"
 
-#include <errno.h>
-#include <fcntl.h> 
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
 
 unsigned char led_lut[256] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -30,14 +25,13 @@ unsigned char led_lut[256] = {
 class RendererLedStripPico : public RendererBase
 {
 public:
-    RendererLedStripPico(const std::string portname);
+    RendererLedStripPico();
     ~RendererLedStripPico();
 
     void initialize(Globe& globe);
 
 protected:
     int m_fd;
-    const std::string m_portname;
     std::vector<uint8_t> buf;
     
     virtual void render(const Framebuffer&);
