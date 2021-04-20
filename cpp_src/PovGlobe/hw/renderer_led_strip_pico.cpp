@@ -4,10 +4,12 @@
 
 #include <bcm2835.h>
 
+#define SPI_MASTER_END_BYTE 42
+#define SPI_SLAVE_END_BYTE 255
+
 RendererLedStripPico::RendererLedStripPico()
-:m_fd(-1)
+    : m_fd(-1)
 {
-    
 }
 
 RendererLedStripPico::~RendererLedStripPico()
@@ -16,25 +18,26 @@ RendererLedStripPico::~RendererLedStripPico()
     bcm2835_close();
 }
 
-void RendererLedStripPico::initialize(Globe& globe)
+void RendererLedStripPico::initialize(Globe &globe)
 {
     RendererBase::initialize(globe);
     initSPI(globe);
 }
 
-void RendererLedStripPico::initSPI(Globe& globe) {
+void RendererLedStripPico::initSPI(Globe &globe)
+{
 
-    int spiFrameLength = globe.getHorizontalNumPixels()*globe.getVerticalNumPixelsWithLeds()*3U;
+    int spiFrameLength = globe.getHorizontalNumPixels() * globe.getVerticalNumPixelsWithLeds() * 3U;
 
     m_led_data.resize(spiFrameLength);
- 
+
     int16_t ledIndex = 0;
 
     //Init the start Frame
     //init each LED
-    for (ledIndex = 0; ledIndex < spiFrameLength/3; ledIndex ++)
+    for (ledIndex = 0; ledIndex < spiFrameLength / 3; ledIndex++)
     {
-        m_led_data[3*ledIndex] = 10;
+        m_led_data[3 * ledIndex] = 10;
     }
 
     if (!bcm2835_init())
@@ -48,7 +51,7 @@ void RendererLedStripPico::initSPI(Globe& globe) {
         printf("bcm2835_spi_begin failed. Are you running as root??\n");
         exit(1);
     }
-    
+
     /*
     because of core_freq = 250, rpi2 timings count !
     BCM2835_SPI_CLOCK_DIVIDER_65536 	
@@ -86,7 +89,7 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_1024);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
@@ -97,45 +100,75 @@ void RendererLedStripPico::initSPI(Globe& globe) {
     std::cout << "End Byte: " << (int)m_led_data[spiFrameLength - 1] << std::endl;
 
     usleep(1000000);
+
+    syncWithSlave();
 }
 
-void RendererLedStripPico::render(const Framebuffer& framebuffer)
+void RendererLedStripPico::syncWithSlave(){
+    for(int i = 0; i < 100; i++){
+        int rx = bcm2835_spi_transfer(i);
+        if (rx != i){
+            std::cout << "Correcting desync: " << (rx - i) << std::endl;
+            if (rx < i){
+                i = rx;
+            }else{
+                i = i - 1U;
+            }
+        }
+        usleep(10000);
+    }
+    usleep(1000000);
+}
+
+void RendererLedStripPico::render(const Framebuffer &framebuffer)
 {
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3U);
     int buff_idx = 0;
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
-      for(size_t i = 0; i < framebuffer.getHeight(); i++){
-        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 0)/2];
-        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1)/2];
-        m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2)/2];
-      }
+        for (size_t i = 0; i < framebuffer.getHeight(); i++)
+        {
+            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 0) / 2];
+            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1) / 2];
+            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2) / 2];
+        }
     }
-    
-    int bytes_sent = 0;
-    int default_junk_size = 2048;
-    int junk_nr = 0;
-    while (bytes_sent < m_led_data.size()) {
-        int junk_size = default_junk_size;
 
-        if (bytes_sent + default_junk_size > m_led_data.size()) {
+    size_t bytes_sent = 0;
+    size_t default_junk_size = 2048;
+    size_t junk_nr = 0;
+    while (bytes_sent < m_led_data.size())
+    {
+        size_t junk_size = default_junk_size;
+
+        if (bytes_sent + default_junk_size > m_led_data.size())
+        {
             junk_size -= (bytes_sent + default_junk_size) - m_led_data.size();
         }
-        std::cout << bytes_sent << "-" << bytes_sent + junk_size << ": " << junk_nr << std::endl;
-        for (size_t j = 0; j < junk_size; j++) {
-            int rx = bcm2835_spi_transfer(m_led_data[bytes_sent+j]);
-            if (rx != junk_nr) {
-                std::cout << bytes_sent + j << ": " << rx << " != " << junk_nr << std::endl;
+        //std::cout << junk_size << std::endl;
+        //std::cout << bytes_sent << "-" << bytes_sent + junk_size << ": " << junk_nr << std::endl;
+        for (size_t j = 0; j < junk_size; j++)
+        {
+            int rx = bcm2835_spi_transfer(m_led_data[bytes_sent + j]);
+            if (rx != junk_nr)
+            {
+                std::cout << "error: " << bytes_sent + j << ": " << rx << " != " << junk_nr << std::endl;
             }
         }
 
         bytes_sent += junk_size;
         junk_nr++;
+        usleep(1000);
     }
 
-    int res = bcm2835_spi_transfer(42);
-    if (res != 255) {
+    int res = bcm2835_spi_transfer(SPI_MASTER_END_BYTE);
+    if (res != SPI_SLAVE_END_BYTE)
+    {
         std::cout << "error: " << res << std::endl;
     }
-}    
+    usleep(100000);
+
+    //syncWithSlave();
+}
+

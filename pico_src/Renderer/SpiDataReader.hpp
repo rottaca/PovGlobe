@@ -10,15 +10,6 @@
 
 #include "LEDController.hpp"
 
-
-#define PIN_CS 17U
-#define PIN_SCK 18U
-#define PIN_MOSI 16U 
-#define PIN_MISO 19U  
- 
-#define SPI_BAUD_RATE 244.140625*1000
- 
-#define SPI_END_BYTE 42
 class SpiDataReader
 {
 private:    
@@ -29,5 +20,6 @@ public:
 
     static SpiDataReader& getInstance();
 
+    void syncWithMaster();
     void processData(LEDController& ledController);
 };
