@@ -14,7 +14,8 @@
 #define SPI_BAUD_RATE 1.953125*1000*1000
  
 #define SPI_MASTER_END_BYTE 42
-#define SPI_SLAVE_END_BYTE 255
+#define SPI_SLAVE_END_BYTE 255 
+#define SPI_DATA_JUNK_SIZE 4096
 
 SpiDataReader::SpiDataReader()
 {
@@ -31,33 +32,6 @@ SpiDataReader::SpiDataReader()
 
     // Make the SPI pins available to picotool
     bi_decl(bi_4pins_with_func(PIN_MOSI, PIN_MISO, PIN_SCK, PIN_CS, GPIO_FUNC_SPI));
-
-    /*dma_rx = dma_claim_unused_channel(true);
-    printf("Configure RX DMA\n");
-    // We set the inbound DMA to transfer from the SPI receive FIFO to a memory buffer paced by the SPI RX FIFO DREQ
-    // We coinfigure the read address to remain unchanged for each element, but the write
-    // address to increment (so data is written throughout the buffer)
-    dma_channel_config c = dma_channel_get_default_config(dma_rx);
-    channel_config_set_transfer_data_size(&c, DMA_SIZE_8);
-    channel_config_set_dreq(&c, spi_get_index(SPI_DEV) ? DREQ_SPI1_RX : DREQ_SPI_DEV_RX);
-    channel_config_set_read_increment(&c, false);
-    channel_config_set_write_increment(&c, true);
-    dma_channel_configure(dma_rx, &c,
-                          pixel_column_buffer, // write address
-                          &spi_get_hw(SPI_DEV)->dr, // read address
-                          N_COL_BUFFER_BYTES, // element count (each element is of size transfer_data_size)
-                          false); // don't start yet
-
-    printf("Starting DMAs...\n");
-    // start them exactly simultaneously to avoid races (in extreme cases the FIFO could overflow)
-    dma_start_channel_mask((1u << dma_rx));
-    printf("Wait for RX complete...\n");
-    dma_channel_wait_for_finish_blocking(dma_rx);
-
-    printf("Done. Checking...");
-    for (uint i = 0; i < N_COL_BUFFER_BYTES; ++i) {
-        pixel_column_buffer[i];
-    }*/
 
     printf("SPI interface initialized!\n");
     printf("--------------\n");
@@ -86,6 +60,7 @@ void SpiDataReader::syncWithMaster(){
     }
     printf("Waiting for master...\n");
     spi_write_read_blocking(SPI_DEV, values, values, 100);
+    printf("Done.\n");
 
 }
 
@@ -93,15 +68,14 @@ void SpiDataReader::processData(LEDController &ledController)
 {
     uint8_t *input_buffer = ledController.getInputBuffer();
     size_t bytes_read = 0;
-    size_t default_junk_size = 2048;
     size_t junk_nr = 0;
     while (bytes_read < N_BUFFER_SIZE)
     {
-        size_t junk_size = default_junk_size;
+        size_t junk_size = SPI_DATA_JUNK_SIZE;
 
-        if (bytes_read + default_junk_size > N_BUFFER_SIZE)
+        if (bytes_read + SPI_DATA_JUNK_SIZE > N_BUFFER_SIZE)
         {
-            junk_size -= (bytes_read + default_junk_size) - N_BUFFER_SIZE;
+            junk_size -= (bytes_read + SPI_DATA_JUNK_SIZE) - N_BUFFER_SIZE;
         }
         spi_read_blocking(SPI_DEV, junk_nr, input_buffer + bytes_read, junk_size);
         bytes_read += junk_size;

@@ -6,6 +6,7 @@
 
 #define SPI_MASTER_END_BYTE 42
 #define SPI_SLAVE_END_BYTE 255
+#define SPI_DATA_JUNK_SIZE 4096
 
 RendererLedStripPico::RendererLedStripPico()
     : m_fd(-1)
@@ -117,6 +118,7 @@ void RendererLedStripPico::syncWithSlave(){
         }
         usleep(10000);
     }
+    std::cout << "Sync done" << std::endl;
     usleep(1000000);
 }
 
@@ -136,30 +138,32 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
     }
 
     size_t bytes_sent = 0;
-    size_t default_junk_size = 2048;
     size_t junk_nr = 0;
+    size_t num_errors = 0;
     while (bytes_sent < m_led_data.size())
     {
-        size_t junk_size = default_junk_size;
+        size_t junk_size = SPI_DATA_JUNK_SIZE;
 
-        if (bytes_sent + default_junk_size > m_led_data.size())
+        if (bytes_sent + SPI_DATA_JUNK_SIZE > m_led_data.size())
         {
-            junk_size -= (bytes_sent + default_junk_size) - m_led_data.size();
+            junk_size -= (bytes_sent + SPI_DATA_JUNK_SIZE) - m_led_data.size();
         }
-        //std::cout << junk_size << std::endl;
-        //std::cout << bytes_sent << "-" << bytes_sent + junk_size << ": " << junk_nr << std::endl;
         for (size_t j = 0; j < junk_size; j++)
         {
             int rx = bcm2835_spi_transfer(m_led_data[bytes_sent + j]);
             if (rx != junk_nr)
             {
-                std::cout << "error: " << bytes_sent + j << ": " << rx << " != " << junk_nr << std::endl;
+                num_errors++;
             }
         }
 
         bytes_sent += junk_size;
         junk_nr++;
-        usleep(1000);
+        usleep(100);
+    }
+
+    if (num_errors > 0){
+        std::cout << "errors: " << num_errors << std::endl;
     }
 
     int res = bcm2835_spi_transfer(SPI_MASTER_END_BYTE);
@@ -167,7 +171,7 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
     {
         std::cout << "error: " << res << std::endl;
     }
-    usleep(100000);
+    usleep(10000);
 
     //syncWithSlave();
 }
