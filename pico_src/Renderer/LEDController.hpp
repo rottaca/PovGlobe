@@ -9,20 +9,7 @@
 #include "hardware/pio.h"
 #include "hardware/gpio.h"
 
-
-#define PIN_CLK 8
-#define PIN_DIN 9
-
-#define N_VERTICAL_RESOLUTION 55
-#define N_HORIZONTAL_RESOLUTION 120
-#define N_CHANNELS_PER_PIXEL 3
-
-#define N_PIXEL (N_VERTICAL_RESOLUTION*N_HORIZONTAL_RESOLUTION)
-
-#define N_BUFFER_SIZE_PER_COLUMN (N_VERTICAL_RESOLUTION*N_CHANNELS_PER_PIXEL)
-#define N_BUFFER_SIZE (N_PIXEL*N_CHANNELS_PER_PIXEL)
-
-#define SERIAL_FREQ (19 * 1000 * 1000)
+#include "constants.hpp"
 
 // Global brightness value 0->31
 #define BRIGHTNESS 31
@@ -32,7 +19,7 @@ class LEDController
 private:
     static PIO pio;
     static uint sm;
-    static uint8_t pixel_buffer[2][N_BUFFER_SIZE];
+    static uint8_t pixel_buffer[2U][N_BUFFER_SIZE];
     static uint8_t render_buffer_idx;
     static critical_section_t crit;
 

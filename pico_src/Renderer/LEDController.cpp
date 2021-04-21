@@ -68,7 +68,7 @@ void LEDController::core1_write_pixels()
     pio = pio0;
     sm = 0;
     uint offset = pio_add_program(pio, &apa102_mini_program);
-    apa102_mini_program_init(pio, sm, offset, SERIAL_FREQ, PIN_CLK, PIN_DIN);
+    apa102_mini_program_init(pio, sm, offset, LED_SERIAL_FREQ, LED_PIN_CLK, LED_PIN_DIN);
 
     RTTMeasure &rttMeasure = RTTMeasure::getInstance();
     LEDController &ledController = getInstance();

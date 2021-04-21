@@ -4,9 +4,7 @@
 #include "hardware/gpio.h"
 #include "pico/time.h"
 
-
-#define GPIO_HALL_SENSOR 5
-#define N_MAGNETS 8
+#include "constants.hpp"
 
 class RTTMeasure
 {

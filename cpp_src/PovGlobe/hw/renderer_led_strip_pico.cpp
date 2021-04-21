@@ -6,7 +6,7 @@
 
 #define SPI_MASTER_END_BYTE 42
 #define SPI_SLAVE_END_BYTE 255
-#define SPI_DATA_JUNK_SIZE 4096
+#define SPI_DATA_JUNK_SIZE 8192
 
 RendererLedStripPico::RendererLedStripPico()
     : m_fd(-1)
@@ -102,10 +102,10 @@ void RendererLedStripPico::initSPI(Globe &globe)
 
     usleep(1000000);
 
-    syncWithSlave();
+    syncWithSlave(globe);
 }
 
-void RendererLedStripPico::syncWithSlave(){
+void RendererLedStripPico::syncWithSlave(const Globe &globe){
     for(int i = 0; i < 100; i++){
         int rx = bcm2835_spi_transfer(i);
         if (rx != i){
@@ -118,8 +118,44 @@ void RendererLedStripPico::syncWithSlave(){
         }
         usleep(10000);
     }
-    std::cout << "Sync done" << std::endl;
-    usleep(1000000);
+
+    int rpi_vertical_res = globe.getVerticalNumPixelsWithLeds();
+    int rpi_horizontal_res = globe.getHorizontalNumPixels();
+    int num_channels = 3U;
+
+    int pico_vertical_res = bcm2835_spi_transfer(rpi_vertical_res);
+    int pico_horizontal_res = bcm2835_spi_transfer(globe.getHorizontalNumPixels());
+    int pico_channels = bcm2835_spi_transfer(num_channels);
+    int pico_junk_size_high = bcm2835_spi_transfer((uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff);
+    int pico_junk_size_low = bcm2835_spi_transfer((uint8_t)(SPI_DATA_JUNK_SIZE & 0xff));
+    int pico_junk_size = (((int32_t)pico_junk_size_high) << 8) | pico_junk_size_low;
+
+    std::cout << "Checking pico config..." << std::endl;
+    bool failed = false;
+    if (pico_vertical_res != rpi_vertical_res){
+        std::cout << "Vertical resolution does not match: " << pico_vertical_res << " (pico) vs " <<  rpi_vertical_res << " (rpi)." << std::endl;
+        failed = true;
+    }
+    if (pico_horizontal_res != rpi_horizontal_res){
+        std::cout << "Horizontal resolution does not match: " << pico_horizontal_res << " (pico) vs " <<  rpi_horizontal_res << " (rpi)." << std::endl;
+        failed = true;
+    }
+    if (pico_channels != num_channels){
+        std::cout << "Number of channels per pixel does not match: " << pico_channels << " (pico) vs " <<  num_channels << " (rpi)." << std::endl;
+        failed = true;
+    }
+    if (pico_junk_size != SPI_DATA_JUNK_SIZE){
+        std::cout << "SPI junk size does not match: " << pico_junk_size << " (pico) vs " <<  SPI_DATA_JUNK_SIZE << " (rpi)." << std::endl;
+        failed = true;
+    }
+
+    if (failed){
+        std::cout << "Pico configuration does not mach the compiled rpi binary. Aborting." << std::endl;
+        exit(1);
+    }else{
+        std::cout << "Pico config matches rpi. Continuing.." << std::endl;
+        usleep(1000000);
+    }
 }
 
 void RendererLedStripPico::render(const Framebuffer &framebuffer)

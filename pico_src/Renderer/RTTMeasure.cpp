@@ -10,7 +10,7 @@ RTTMeasure::RTTMeasure()
 {
     init();
 
-    gpio_set_irq_enabled_with_callback(GPIO_HALL_SENSOR, GPIO_IRQ_EDGE_RISE, true, &RTTMeasure::gpio_hall_sensor_callback);
+    gpio_set_irq_enabled_with_callback(PIN_HALL_SENSOR, GPIO_IRQ_EDGE_RISE, true, &RTTMeasure::gpio_hall_sensor_callback);
 }
 
 RTTMeasure::~RTTMeasure()
@@ -48,7 +48,7 @@ uint32_t RTTMeasure::getCurrentColumn(uint32_t maxColumnsPerRotation){
 }
 
 void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
-    if (gpio != GPIO_HALL_SENSOR)
+    if (gpio != PIN_HALL_SENSOR)
         return;
     
     const absolute_time_t curr_time = get_absolute_time();

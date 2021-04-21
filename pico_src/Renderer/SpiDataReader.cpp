@@ -4,18 +4,7 @@
 
 #include "pico/binary_info.h"
 
-#define SPI_DEV spi0
-
-#define PIN_CS 17U
-#define PIN_SCK 18U
-#define PIN_MOSI 16U 
-#define PIN_MISO 19U  
- 
-#define SPI_BAUD_RATE 1.953125*1000*1000
- 
-#define SPI_MASTER_END_BYTE 42
-#define SPI_SLAVE_END_BYTE 255 
-#define SPI_DATA_JUNK_SIZE 4096
+#include "constants.hpp"
 
 SpiDataReader::SpiDataReader()
 {
@@ -25,13 +14,13 @@ SpiDataReader::SpiDataReader()
     spi_set_slave(SPI_DEV, true);
     spi_set_format(SPI_DEV, 8U, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
 
-    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_CS, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_PIN_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_PIN_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_PIN_CS, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_PIN_MISO, GPIO_FUNC_SPI);
 
     // Make the SPI pins available to picotool
-    bi_decl(bi_4pins_with_func(PIN_MOSI, PIN_MISO, PIN_SCK, PIN_CS, GPIO_FUNC_SPI));
+    bi_decl(bi_4pins_with_func(SPI_PIN_MOSI, SPI_PIN_MISO, SPI_PIN_SCK, SPI_PIN_CS, GPIO_FUNC_SPI));
 
     printf("SPI interface initialized!\n");
     printf("--------------\n");
@@ -54,14 +43,21 @@ SpiDataReader &SpiDataReader::getInstance()
 }
 
 void SpiDataReader::syncWithMaster(){
-    uint8_t values[100];
+
+    uint8_t values[105];
     for(int i = 0; i < 100; i++){
         values[i] = i;
     }
-    printf("Waiting for master...\n");
-    spi_write_read_blocking(SPI_DEV, values, values, 100);
-    printf("Done.\n");
+    
+    values[100] = N_VERTICAL_RESOLUTION;
+    values[101] = N_HORIZONTAL_RESOLUTION;
+    values[102] = N_CHANNELS_PER_PIXEL;
+    values[103] = (uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff;   // high
+    values[104] = (uint8_t)(SPI_DATA_JUNK_SIZE & 0xff);          // low
 
+    printf("Syncing with master...\n");
+    spi_write_read_blocking(SPI_DEV, values, values, 105);
+    printf("Done.\n");
 }
 
 void SpiDataReader::processData(LEDController &ledController)
