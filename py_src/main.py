@@ -19,8 +19,7 @@ double_sided=True
 
 usw_hw = True
 if usw_hw:
-    string = "/dev/ttyACM0"
-    renderer = PyPovGlobe.RendererLedStripPico(string)
+    renderer = PyPovGlobe.RendererLedStripPico()
 else:
     renderer = PyPovGlobe.RendererSim()
 

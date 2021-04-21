@@ -56,7 +56,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
             pixel_idx+=N_CHANNELS_PER_PIXEL;
         }
       }
-    } else if (frameNumber < 120+3*N_VERTICAL_RESOLUTION){
+    } else if (frameNumber < 120+2*N_VERTICAL_RESOLUTION){
       // Show cos/sin pattern with motion along the vertical axis
       const uint32_t seq_offset = frameNumber - 120 - N_VERTICAL_RESOLUTION;
       uint32_t pixel_idx = 0;
@@ -75,9 +75,9 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
             pixel_idx+=N_CHANNELS_PER_PIXEL;
         }
       }
-    } else if (frameNumber < 120+4*N_VERTICAL_RESOLUTION){
+    } else if (frameNumber < 120+3*N_VERTICAL_RESOLUTION){
       // Delete last pattern by fading out from top to bottom
-      const uint32_t seq_offset = frameNumber - 120 - 3*N_VERTICAL_RESOLUTION;
+      const uint32_t seq_offset = frameNumber - 120 - 2*N_VERTICAL_RESOLUTION;
       uint32_t pixel_idx = 0;
       for (size_t j = 0; j < N_HORIZONTAL_RESOLUTION; j++)
       {            
@@ -92,9 +92,9 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
             pixel_idx+=N_CHANNELS_PER_PIXEL;
         }
       }
-    } else if (frameNumber < 120+5*N_VERTICAL_RESOLUTION){
+    } else if (frameNumber < 120+4*N_VERTICAL_RESOLUTION){
       // Show horizontal rgb stripes 
-      const uint32_t seq_offset = frameNumber - 120 - 4*N_VERTICAL_RESOLUTION;
+      const uint32_t seq_offset = frameNumber - 120 - 3*N_VERTICAL_RESOLUTION;
       uint32_t pixel_idx = 0;
       for (size_t j = 0; j < N_HORIZONTAL_RESOLUTION; j++)
       {            
@@ -109,9 +109,9 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
             pixel_idx+=N_CHANNELS_PER_PIXEL;
         }
       }
-    } else if (frameNumber < 120+6*N_VERTICAL_RESOLUTION){
+    } else if (frameNumber < 120+5*N_VERTICAL_RESOLUTION){
       // Fade out and only keep rgb stribes in top 3 rows
-      const uint32_t seq_offset = frameNumber - 120 - 5*N_VERTICAL_RESOLUTION;
+      const uint32_t seq_offset = frameNumber - 120 - 4*N_VERTICAL_RESOLUTION;
       uint32_t pixel_idx = 0;
       for (size_t j = 0; j < N_HORIZONTAL_RESOLUTION; j++)
       {            
@@ -151,12 +151,9 @@ int main() {
 
     SpiDataReader& reader = SpiDataReader::getInstance();
 
-    printf("Ready\n");
-
-    //uint32_t frameIdx = 0;
-    //while(showNextInitFrame(frameIdx++, pixels));
+    // uint32_t frameIdx = 0;
+    // while(showNextInitFrame(frameIdx++, pixels));
   
-    while(true){
-        reader.processData(ledController);
-    }
+    reader.syncWithMaster();
+    reader.processData(ledController);
 }

@@ -6,6 +6,7 @@
 
 #define SPI_MASTER_END_BYTE 42
 #define SPI_SLAVE_END_BYTE 255
+#define SPI_COM_START_BYTE 48
 #define SPI_DATA_JUNK_SIZE 8192
 
 RendererLedStripPico::RendererLedStripPico()
@@ -27,19 +28,9 @@ void RendererLedStripPico::initialize(Globe &globe)
 
 void RendererLedStripPico::initSPI(Globe &globe)
 {
-
     int spiFrameLength = globe.getHorizontalNumPixels() * globe.getVerticalNumPixelsWithLeds() * 3U;
 
     m_led_data.resize(spiFrameLength);
-
-    int16_t ledIndex = 0;
-
-    //Init the start Frame
-    //init each LED
-    for (ledIndex = 0; ledIndex < spiFrameLength / 3; ledIndex++)
-    {
-        m_led_data[3 * ledIndex] = 10;
-    }
 
     if (!bcm2835_init())
     {
@@ -90,45 +81,32 @@ void RendererLedStripPico::initSPI(Globe &globe)
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_256);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
 
     std::cout << "SPI initialized!" << std::endl;
-    std::cout << "Bytes per Transmission: " << m_led_data.size() << std::endl;
-    std::cout << "End Byte: " << (int)m_led_data[spiFrameLength - 1] << std::endl;
-
-    usleep(1000000);
-
     syncWithSlave(globe);
 }
 
 void RendererLedStripPico::syncWithSlave(const Globe &globe){
-    for(int i = 0; i < 100; i++){
-        int rx = bcm2835_spi_transfer(i);
-        if (rx != i){
-            std::cout << "Correcting desync: " << (rx - i) << std::endl;
-            if (rx < i){
-                i = rx;
-            }else{
-                i = i - 1U;
-            }
-        }
-        usleep(10000);
+    const int rpi_vertical_res = globe.getVerticalNumPixelsWithLeds();
+    const int rpi_horizontal_res = globe.getHorizontalNumPixels();
+    const int num_channels = 3U;
+
+    while(bcm2835_spi_transfer(0) != SPI_COM_START_BYTE){
+        std::cout << "Waiting for pico..." << std::endl;
+        usleep(1000000);
     }
 
-    int rpi_vertical_res = globe.getVerticalNumPixelsWithLeds();
-    int rpi_horizontal_res = globe.getHorizontalNumPixels();
-    int num_channels = 3U;
-
-    int pico_vertical_res = bcm2835_spi_transfer(rpi_vertical_res);
-    int pico_horizontal_res = bcm2835_spi_transfer(globe.getHorizontalNumPixels());
-    int pico_channels = bcm2835_spi_transfer(num_channels);
-    int pico_junk_size_high = bcm2835_spi_transfer((uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff);
-    int pico_junk_size_low = bcm2835_spi_transfer((uint8_t)(SPI_DATA_JUNK_SIZE & 0xff));
-    int pico_junk_size = (((int32_t)pico_junk_size_high) << 8) | pico_junk_size_low;
+    const int pico_vertical_res = bcm2835_spi_transfer(rpi_vertical_res);
+    const int pico_horizontal_res = bcm2835_spi_transfer(rpi_horizontal_res);
+    const int pico_channels = bcm2835_spi_transfer(num_channels);
+    const int pico_junk_size_high = bcm2835_spi_transfer((uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff);
+    const int pico_junk_size_low = bcm2835_spi_transfer((uint8_t)(SPI_DATA_JUNK_SIZE & 0xff));
+    const int pico_junk_size = (((int32_t)pico_junk_size_high) << 8) | pico_junk_size_low;
 
     std::cout << "Checking pico config..." << std::endl;
     bool failed = false;
@@ -154,7 +132,6 @@ void RendererLedStripPico::syncWithSlave(const Globe &globe){
         exit(1);
     }else{
         std::cout << "Pico config matches rpi. Continuing.." << std::endl;
-        usleep(1000000);
     }
 }
 
@@ -175,21 +152,24 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
 
     size_t bytes_sent = 0;
     size_t junk_nr = 0;
-    size_t num_errors = 0;
+    size_t junk_size = 0;
     while (bytes_sent < m_led_data.size())
     {
-        size_t junk_size = SPI_DATA_JUNK_SIZE;
-
         if (bytes_sent + SPI_DATA_JUNK_SIZE > m_led_data.size())
         {
-            junk_size -= (bytes_sent + SPI_DATA_JUNK_SIZE) - m_led_data.size();
+            junk_size = m_led_data.size() - bytes_sent;
+        } else {
+            junk_size = SPI_DATA_JUNK_SIZE;
         }
+        
         for (size_t j = 0; j < junk_size; j++)
         {
             int rx = bcm2835_spi_transfer(m_led_data[bytes_sent + j]);
             if (rx != junk_nr)
             {
-                num_errors++;
+                std::cout << "Error: Pico failed to recieve the data or it is not sending the correct response. Aborting." << std::endl;
+                std::cout << "Junk " << junk_nr << ", byte nr " << j << " in junk, received: " << rx << std::endl;
+                exit(1);
             }
         }
 
@@ -198,16 +178,13 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
         usleep(100);
     }
 
-    if (num_errors > 0){
-        std::cout << "errors: " << num_errors << std::endl;
-    }
-
     int res = bcm2835_spi_transfer(SPI_MASTER_END_BYTE);
     if (res != SPI_SLAVE_END_BYTE)
     {
-        std::cout << "error: " << res << std::endl;
+        std::cout << "Error: Pico failed to recieve the data or it is not sending the correct response. Aborting." << std::endl;
+        exit(1);
     }
-    usleep(10000);
+    usleep(100);
 
     //syncWithSlave();
 }

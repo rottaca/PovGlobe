@@ -23,12 +23,7 @@ SpiDataReader::SpiDataReader()
     bi_decl(bi_4pins_with_func(SPI_PIN_MOSI, SPI_PIN_MISO, SPI_PIN_SCK, SPI_PIN_CS, GPIO_FUNC_SPI));
 
     printf("SPI interface initialized!\n");
-    printf("--------------\n");
-    printf("Baudrate used: %u Hz\n", baudrate);
-    printf("Expected Bytes per Transmission: %d\n", N_BUFFER_SIZE + 1);
-    printf("--------------\n");
-
-    syncWithMaster();
+    printf("SPI Baudrate: %u Hz\n", baudrate);
 }
 
 SpiDataReader::~SpiDataReader()
@@ -43,51 +38,59 @@ SpiDataReader &SpiDataReader::getInstance()
 }
 
 void SpiDataReader::syncWithMaster(){
-
-    uint8_t values[105];
-    for(int i = 0; i < 100; i++){
-        values[i] = i;
-    }
+    uint8_t values[6];
     
-    values[100] = N_VERTICAL_RESOLUTION;
-    values[101] = N_HORIZONTAL_RESOLUTION;
-    values[102] = N_CHANNELS_PER_PIXEL;
-    values[103] = (uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff;   // high
-    values[104] = (uint8_t)(SPI_DATA_JUNK_SIZE & 0xff);          // low
+    values[0] = SPI_COM_START_BYTE;
+    values[1] = N_VERTICAL_RESOLUTION;
+    values[2] = N_HORIZONTAL_RESOLUTION;
+    values[3] = N_CHANNELS_PER_PIXEL;
+    values[4] = (uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff;   // high
+    values[5] = (uint8_t)(SPI_DATA_JUNK_SIZE & 0xff);          // low
 
     printf("Syncing with master...\n");
-    spi_write_read_blocking(SPI_DEV, values, values, 105);
-    printf("Done.\n");
+    spi_write_read_blocking(SPI_DEV, values, values, 6);
+
+    if (values[1] != N_VERTICAL_RESOLUTION){
+        printf("Vertical resolution does not match.\n");
+    }
+    if (values[2] != N_HORIZONTAL_RESOLUTION){
+        printf("Horizontal resolution does not match.\n");
+    }
+    if (values[3] != N_CHANNELS_PER_PIXEL){
+        printf("Number of channels per pixel does not match.\n");
+    }
 }
 
 void SpiDataReader::processData(LEDController &ledController)
 {
-    uint8_t *input_buffer = ledController.getInputBuffer();
-    size_t bytes_read = 0;
-    size_t junk_nr = 0;
-    while (bytes_read < N_BUFFER_SIZE)
-    {
-        size_t junk_size = SPI_DATA_JUNK_SIZE;
+    uint8_t end_value = 0;
+    size_t junk_size = 0;
 
-        if (bytes_read + SPI_DATA_JUNK_SIZE > N_BUFFER_SIZE)
+    while(true){
+        uint8_t *input_buffer = ledController.getInputBuffer();
+        size_t bytes_read = 0;
+        size_t junk_nr = 0;
+        while (bytes_read < N_BUFFER_SIZE)
         {
-            junk_size -= (bytes_read + SPI_DATA_JUNK_SIZE) - N_BUFFER_SIZE;
+            if (bytes_read + SPI_DATA_JUNK_SIZE > N_BUFFER_SIZE)
+            {
+                junk_size = N_BUFFER_SIZE - bytes_read;
+            } else {
+                junk_size = SPI_DATA_JUNK_SIZE;
+            }
+            spi_read_blocking(SPI_DEV, junk_nr, input_buffer + bytes_read, junk_size);
+            bytes_read += junk_size;
+            junk_nr++;
         }
-        spi_read_blocking(SPI_DEV, junk_nr, input_buffer + bytes_read, junk_size);
-        bytes_read += junk_size;
-        junk_nr++;
+        
+        spi_read_blocking(SPI_DEV, SPI_SLAVE_END_BYTE, &end_value, 1);
+        if (end_value == SPI_MASTER_END_BYTE)
+        {
+            ledController.swapBuffers();
+        }
+        else
+        {
+            printf("Invalid data %d\n", (int)end_value);
+        }
     }
-    uint8_t end_value;
-    spi_read_blocking(SPI_DEV, SPI_SLAVE_END_BYTE, &end_value, 1);
-
-    if (end_value == SPI_MASTER_END_BYTE)
-    {
-        ledController.swapBuffers();
-    }
-    else
-    {
-        printf("Invalid data %d\n", (int)end_value);
-    }
-
-    //syncWithMaster();
 }
