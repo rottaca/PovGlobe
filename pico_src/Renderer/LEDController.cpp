@@ -81,6 +81,8 @@ void LEDController::core1_write_pixels()
         if (rttMeasure.rotationDetected())
         {
             last_cycle_rotation_detected = true;
+            
+            critical_section_enter_blocking(&crit);            
             const absolute_time_t frame_start = get_absolute_time();
             const uint32_t column = rttMeasure.getCurrentColumn(N_HORIZONTAL_RESOLUTION);
 
@@ -92,7 +94,6 @@ void LEDController::core1_write_pixels()
                 }
                 last_column = column;
 
-                critical_section_enter_blocking(&crit);
                 uint8_t *render_buff = ledController.getRenderBuffer();
 
                 ledController.put_start_frame(pio, sm);
@@ -115,8 +116,9 @@ void LEDController::core1_write_pixels()
                                              pixel_buffer_opposite_column[i - 0]);
                 }
                 ledController.put_end_frame(pio, sm);
-                critical_section_exit(&crit);
             }
+
+            critical_section_exit(&crit);
         }
         else if (last_cycle_rotation_detected)
         {
