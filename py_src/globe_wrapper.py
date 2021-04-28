@@ -30,7 +30,7 @@ class GlobeWrapper:
     spacing_top = 1.5
     spacing_bottom = 2.0
     double_sided = True
-    usw_hw = True
+    usw_hw = os.name != "nt"
 
     def __init__(self):
         if self.usw_hw:
