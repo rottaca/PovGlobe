@@ -175,8 +175,8 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
 
         bytes_sent += junk_size;
         junk_nr++;
-        usleep(100);
     }
+    usleep(1000);
 
     int res = bcm2835_spi_transfer(SPI_MASTER_END_BYTE);
     if (res != SPI_SLAVE_END_BYTE)

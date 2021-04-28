@@ -2,7 +2,7 @@ import flask
 from flask import request
 import threading
 
-from .globe_wrapper import GlobeWrapper
+from globe_wrapper import GlobeWrapper
 
 app = flask.Flask(__name__)
 
@@ -49,4 +49,4 @@ def list_apps():
 
 
 if __name__ == "__main__":
-    app.run(threaded=False, processes=1)
+    app.run(host='0.0.0.0', threaded=False, processes=1)

@@ -20,8 +20,8 @@ sys.path.append(
 )
 
 import PyPovGlobe
-from . import tile_server_api
-from . import ClockApp
+import tile_server_api
+import ClockApp
 
 
 class GlobeWrapper:
@@ -30,7 +30,7 @@ class GlobeWrapper:
     spacing_top = 1.5
     spacing_bottom = 2.0
     double_sided = True
-    usw_hw = False
+    usw_hw = True
 
     def __init__(self):
         if self.usw_hw:
