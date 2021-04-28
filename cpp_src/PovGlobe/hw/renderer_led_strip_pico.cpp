@@ -81,7 +81,7 @@ void RendererLedStripPico::initSPI(Globe &globe)
     BCM2835_SPI_CLOCK_DIVIDER_1 	
     1 = 3.814697260kHz on Rpi2, 6.1035156kHz on RPI3, same as 0/65536
     */
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_256);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_128);
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);

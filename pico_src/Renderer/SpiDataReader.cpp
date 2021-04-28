@@ -1,6 +1,7 @@
 #include "SpiDataReader.hpp"
 
 #include <string.h>
+#include <cmath>
 
 #include "pico/binary_info.h"
 
@@ -24,6 +25,10 @@ SpiDataReader::SpiDataReader()
 
     printf("SPI interface initialized!\n");
     printf("SPI Baudrate: %u Hz\n", baudrate);
+
+    //printf("Init rx DMA")
+    //const uint dma_rx = dma_claim_unused_channel(true);
+
 }
 
 SpiDataReader::~SpiDataReader()
@@ -64,23 +69,23 @@ void SpiDataReader::syncWithMaster(){
 void SpiDataReader::processData(LEDController &ledController)
 {
     uint8_t end_value = 0;
-    size_t junk_size = 0;
+    const size_t num_junks = ceil((float)N_BUFFER_SIZE / SPI_DATA_JUNK_SIZE);
 
     while(true){
         uint8_t *input_buffer = ledController.getInputBuffer();
-        size_t bytes_read = 0;
-        size_t junk_nr = 0;
-        while (bytes_read < N_BUFFER_SIZE)
-        {
-            if (bytes_read + SPI_DATA_JUNK_SIZE > N_BUFFER_SIZE)
-            {
-                junk_size = N_BUFFER_SIZE - bytes_read;
-            } else {
-                junk_size = SPI_DATA_JUNK_SIZE;
+
+        for(int junk_nr = 0; junk_nr < num_junks; junk_nr++){
+            size_t sz = SPI_DATA_JUNK_SIZE;
+            if ((junk_nr+1)*SPI_DATA_JUNK_SIZE >= N_BUFFER_SIZE) {
+                sz = N_BUFFER_SIZE - junk_nr*SPI_DATA_JUNK_SIZE;
             }
-            spi_read_blocking(SPI_DEV, junk_nr, input_buffer + bytes_read, junk_size);
-            bytes_read += junk_size;
-            junk_nr++;
+            memset(input_buffer + junk_nr*SPI_DATA_JUNK_SIZE, junk_nr, sz);
+        }
+
+        const int bytes_read = spi_write_read_blocking(SPI_DEV, input_buffer, input_buffer, N_BUFFER_SIZE);
+
+        if (bytes_read != N_BUFFER_SIZE){
+            printf("Invalid number of bytes read: %d, expected %d\n", bytes_read, N_BUFFER_SIZE);
         }
         
         spi_read_blocking(SPI_DEV, SPI_SLAVE_END_BYTE, &end_value, 1);
