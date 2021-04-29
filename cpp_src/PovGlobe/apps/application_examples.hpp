@@ -14,7 +14,7 @@ public:
     virtual void process(Framebuffer& framebuffer, float time);
 
 private:
-    int m_last_pixel;
+    int m_horizontal_offset;
 };
 
 class ApplicationImageViewer : public ApplicationBase {

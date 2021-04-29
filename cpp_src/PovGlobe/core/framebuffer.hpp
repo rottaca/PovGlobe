@@ -20,6 +20,8 @@ public:
 
     void initialize(uint32_t height, uint32_t width, uint32_t channels = 3);
 
+    void fill(uint8_t v);
+
     uint8_t& operator() (uint32_t row, uint32_t col, uint32_t channel);
     const uint8_t& operator() (uint32_t row, uint32_t col, uint32_t channel) const;
 
@@ -46,12 +48,16 @@ private:
 };
 
 
+inline void Framebuffer::fill(const uint8_t v){
+    std::fill(m_values.begin(), m_values.end(), v);
+}
+
 inline const uint8_t* Framebuffer::values() const
 {
     return m_values.data();
 }
 
-inline uint8_t* Framebuffer::values()
+inline uint8_t* Framebuffer::values() 
 {
     return m_values.data();
 }
