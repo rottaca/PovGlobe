@@ -1,6 +1,8 @@
 import sys
 import os
 import time
+import glob
+from pathlib import Path
 
 # build_config="x64-Debug (default)"
 build_config = "x64-Release"
@@ -23,87 +25,102 @@ import PyPovGlobe
 import tile_server_api
 import ClockApp
 
+num_leds_per_side = 55
+radius = 13.25
+spacing_top = 1.5
+spacing_bottom = 2.0
+double_sided = True
+usw_hw = os.name != "nt"
+
+proj = PyPovGlobe.EquirectangularProjection()
+interp = PyPovGlobe.NearestNeighbourPixelInterpolation()
+img_dir = Path(os.path.dirname(__file__)) / ".." / "res" / "img"
+
+all_images = {
+    os.path.basename(f): str(Path(f).resolve()) for f in glob.glob(str(img_dir) + "/*")
+}
+
+arg_projection = dict(
+    type="proj",
+    name="Projection Type",
+    desc="",
+    options={"EquirectangularProjection": proj},
+)
+
+arg_interpolation = dict(
+    type="interp",
+    name="Interpolation Type",
+    desc="",
+    options={"NearestNeighbourPixelInterpolation": interp},
+)
+
+arg_images = dict(type="img_path", name="Image Path", desc="", options=all_images)
+
+all_apps = [
+    dict(
+        name="ImageViewer",
+        type=PyPovGlobe.ApplicationImageViewer,
+        args=[
+            arg_images,
+            arg_projection,
+            arg_interpolation,
+        ],
+    ),
+    dict(
+        name="ImageRotator",
+        type=PyPovGlobe.ApplicationImageRotator,
+        args=[
+            arg_images,
+            arg_projection,
+            arg_interpolation,
+        ],
+    ),
+    dict(
+        name="ClockApp",
+        type=ClockApp.ClockApp,
+        args=[],
+    ),
+]
+
+
+all_apps = {a["name"]: a for a in all_apps}
+
 
 class GlobeWrapper:
-    num_leds_per_side = 55
-    radius = 13.25
-    spacing_top = 1.5
-    spacing_bottom = 2.0
-    double_sided = True
-    usw_hw = os.name != "nt"
-
     def __init__(self):
-        if self.usw_hw:
+        if usw_hw:
             self.renderer = PyPovGlobe.RendererLedStripPico()
         else:
             self.renderer = PyPovGlobe.RendererSim()
 
         self.globe = PyPovGlobe.Globe(
-            self.num_leds_per_side,
-            self.radius,
-            self.spacing_top,
-            self.spacing_bottom,
-            self.double_sided,
+            num_leds_per_side,
+            radius,
+            spacing_top,
+            spacing_bottom,
+            double_sided,
             self.renderer,
         )
-
-        self.proj = PyPovGlobe.EquirectangularProjection()
-        self.interp = PyPovGlobe.NearestNeighbourPixelInterpolation()
-
-        self.res_dir = os.path.join(os.path.dirname(__file__), "..", "res")
-
-        self.all_apps = {
-            "ImageRotator_EarthNoClouds": PyPovGlobe.ApplicationImageRotator(
-                os.path.join(self.res_dir, "img", "2_no_clouds_8k.jpg"),
-                self.proj,
-                self.interp,
-            ),
-            "ImageRotator_Countries": PyPovGlobe.ApplicationImageRotator(
-                os.path.join(
-                    self.res_dir,
-                    "img",
-                    "kisspng-world-map-globe-equirectangular-projection-map.png",
-                ),
-                self.proj,
-                self.interp,
-            ),
-            "ImageRotator_EarthClouds": PyPovGlobe.ApplicationImageRotator(
-                os.path.join(self.res_dir, "img", "1_earth_8k.jpg"),
-                self.proj,
-                self.interp,
-            ),
-            "ImageViewer_Soccer": PyPovGlobe.ApplicationImageViewer(
-                os.path.join(self.res_dir, "img", "soccer2_sph.png"),
-                self.proj,
-                self.interp,
-            ),
-            "ImageViewer_Tennis": PyPovGlobe.ApplicationImageViewer(
-                os.path.join(self.res_dir, "img", "tennisenn_sph.png"),
-                self.proj,
-                self.interp,
-            ),
-            "ClockApp": ClockApp.ClockApp(),
-        }
-
+        self.running_app_args = None
+        self.running_app = None
+        self.running_app_name = None
         self.globe.runRendererAsync()
-        self.app_idx = 0
 
-    def get_all_app_names(self):
-        return tuple(self.all_apps.keys())
+    def get_all_apps(self):
+        return all_apps
 
-    def next_app(self):
-        key, val = list(self.all_apps.items())[self.app_idx]
-        self.globe.runApplicationAsync(val)
-        self.app_idx += 1
-        if self.app_idx >= len(self.all_apps):
-            self.app_idx = 0
-
-        return key
-
-    def app_by_name(self, name):
-        if name not in self.all_apps:
+    def app_by_name(self, name, args):
+        if name not in all_apps:
             return False
 
-        self.globe.runApplicationAsync(self.all_apps[name])
+        app = all_apps[name]
+        app_cls = app["type"]
+
+        self.running_app_args = args
+        self.running_app_name = name
+        new_app = app_cls(*self.running_app_args)
+
+        self.globe.runApplicationAsync(new_app)
+        self.running_app = new_app
 
         return True

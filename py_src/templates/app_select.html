@@ -28,8 +28,12 @@
                 {% for v in app_names %}
                 <tr class="justify-content-center">
                     <td class="">{{loop.index}}</td>
+                    {% if running_app_name == v %}
+                    <td class="">{{ v }} (running)</td>
+                    {% else %}
                     <td class="">{{ v }}</td>
-                    <td class=""><a href="by_name?name={{ v }}"><i class="fas fa-play"></i></a></td>
+                    {% endif %}
+                    <td class=""><a href="configure_app?name={{ v }}"><i class="fas fa-play"></i></a></td>
                 </tr>
                 {% endfor %}
             </tbody>
