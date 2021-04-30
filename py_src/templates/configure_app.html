@@ -19,18 +19,23 @@
             <input class="form-check-input" style="display: none;" type="text" name="name" value="{{app_name}}">
 
             {% for arg in options_args %}
-            <h1>{{arg["name"]}}</h1>
-
-            {% for option_name in arg["options"] %}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="{{arg['name']}}_{{option_name}}"
-                    id="opt_{{option_name}}">
-                <label class="form-check-label" for="opt_{{option_name}}">
-                    {{option_name}}
-                </label>
+            {% if arg["options"]|length > 1 %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">{{arg['name']}}</span>
+                <select class="form-select" id="arg_{{arg['name']}}" name="{{arg['name']}}">
+                    {% for option_name in arg["options"] %}
+                    <option selected>{{option_name}}</option>
+                    {% endfor %}
+                </select>
             </div>
-            {% endfor %}
+            {% elif arg["options"]|length == 1 %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">{{arg['name']}}</span>
+                <input class="form-control" id="arg_{{arg['name']}}" type="text" value="{{arg['options'] | first}}"
+                    name="{{arg['name']}}" aria-label="" readonly>
+            </div>
 
+            {% endif %}
             {% endfor %}
             <button type="submit" class="btn btn-primary">Launch App</button>
         </form>

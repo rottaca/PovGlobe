@@ -37,11 +37,11 @@ def launch_app():
         arg_name = arg["name"]
         arg_val = None
         if "options" in arg:
-            for o in arg["options"]:
-                arg_val = request.args.get(f"{arg_name}_{o}", default=None, type=str)
-                if arg_val == "on":
-                    arg_val = arg["options"][o]
-                    break
+            arg_val = request.args.get(f"{arg_name}", default=None, type=str)
+            if arg_val in arg["options"]:
+                arg_val = arg["options"][arg_val]
+            else:
+                return "Failed: Invalid option for arg {}".format(arg_name)
 
         args.append(arg_val)
 
@@ -69,20 +69,21 @@ def configure_app():
     simple_args = []
     options_args = []
 
-    for arg in app["args"]:
-        if arg["type"] == "img_path":
-            options_args.append(arg)
-        elif arg["type"] == "proj":
-            options_args.append(arg)
-        elif arg["type"] == "interp":
-            options_args.append(arg)
+    if len(app["args"]) == 0:
+        return redirect("/launch_app?name=" + app_name, code=302)
+    else:
+        for arg in app["args"]:
+            if arg["type"] == "options":
+                options_args.append(arg)
+            else:
+                raise NotImplementedError()
 
-    res = render_template(
-        "configure_app.html",
-        app_name=app_name,
-        simple_args=simple_args,
-        options_args=options_args,
-    )
+        res = render_template(
+            "configure_app.html",
+            app_name=app_name,
+            simple_args=simple_args,
+            options_args=options_args,
+        )
     return res
 
 

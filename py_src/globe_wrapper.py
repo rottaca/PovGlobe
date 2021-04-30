@@ -41,20 +41,20 @@ all_images = {
 }
 
 arg_projection = dict(
-    type="proj",
+    type="options",
     name="Projection Type",
     desc="",
-    options={"EquirectangularProjection": proj},
+    options={"Equirectangular Projection": proj},
 )
 
 arg_interpolation = dict(
-    type="interp",
+    type="options",
     name="Interpolation Type",
     desc="",
-    options={"NearestNeighbourPixelInterpolation": interp},
+    options={"NearestNeighbour Interpolation": interp},
 )
 
-arg_images = dict(type="img_path", name="Image Path", desc="", options=all_images)
+arg_images = dict(type="options", name="Image Source", desc="", options=all_images)
 
 all_apps = [
     dict(
@@ -79,6 +79,18 @@ all_apps = [
         name="ClockApp",
         type=ClockApp.ClockApp,
         args=[],
+    ),
+    dict(
+        name="TileServerApp",
+        type=tile_server_api.TileServerApp,
+        args=[
+            dict(
+                type="options",
+                name="Tile Servers",
+                desc="",
+                options=tile_server_api.tile_map_urls,
+            )
+        ],
     ),
 ]
 
