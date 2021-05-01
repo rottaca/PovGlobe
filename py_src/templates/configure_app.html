@@ -10,13 +10,11 @@
 
 <body class="">
     <div class="container">
-        <h1 class="text-center">{{app_name}}</h1>
-        <p>{{app['desc']}}</p>
-    </div>
-
-    <div class="container">
         <form action="/launch_app" method='get'>
-
+            <h1 class="text-center display-1">{{app_name}}</h1>
+            <div class="input-group mb-3 row">
+            <p>{{app['desc']}}</p>
+            </div>
             <input class="form-check-input" style="display: none;" type="text" name="name" value="{{app_name}}">
 
             {% for arg in options_args %}
@@ -39,9 +37,11 @@
             <div>Not implemented</div>
             {% endif %}
             {% endfor %}
+            <div class="input-group mb-3 row">
             <button type="submit" class="btn btn-primary">Launch App</button>
+            </div>
         </form>
-    </div>
+    </div>  
 </body>
 
 </html>
