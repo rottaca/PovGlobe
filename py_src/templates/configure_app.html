@@ -11,6 +11,7 @@
 <body class="">
     <div class="container">
         <h1 class="text-center">{{app_name}}</h1>
+        <p>{{app['desc']}}</p>
     </div>
 
     <div class="container">
@@ -20,21 +21,22 @@
 
             {% for arg in options_args %}
             {% if arg["options"]|length > 1 %}
-            <div class="input-group mb-3">
-                <span class="input-group-text">{{arg['name']}}</span>
-                <select class="form-select" id="arg_{{arg['name']}}" name="{{arg['name']}}">
+            <div class="input-group mb-3 row">
+                <div class="input-group-text col-4"  data-bs-toggle="tooltip" data-bs-placement="top" title="{{arg['desc']}}">{{arg["name"]}}</div>
+                <select class="form-select col" id="arg_{{arg['name']}}" name="{{arg['name']}}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{arg['desc']}}">
                     {% for option_name in arg["options"] %}
                     <option selected>{{option_name}}</option>
                     {% endfor %}
                 </select>
             </div>
             {% elif arg["options"]|length == 1 %}
-            <div class="input-group mb-3">
-                <span class="input-group-text">{{arg['name']}}</span>
-                <input class="form-control" id="arg_{{arg['name']}}" type="text" value="{{arg['options'] | first}}"
+            <div class="input-group mb-3 row">
+                <span class="input-group-text col-4"  data-bs-toggle="tooltip" data-bs-placement="top" title="{{arg['desc']}}">{{arg['name']}}</span>
+                <input class="form-control col" id="arg_{{arg['name']}}" type="text" value="{{arg['options'] | first}}"  data-bs-toggle="tooltip" data-bs-placement="top" title="{{arg['desc']}}"
                     name="{{arg['name']}}" aria-label="" readonly>
             </div>
-
+            {% else %}
+            <div>Not implemented</div>
             {% endif %}
             {% endfor %}
             <button type="submit" class="btn btn-primary">Launch App</button>

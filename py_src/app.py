@@ -15,7 +15,7 @@ sem = threading.Semaphore()
 def home():
     res = render_template(
         "app_select.html",
-        app_names=globe_wrapper.get_all_apps().keys(),
+        apps=globe_wrapper.get_all_apps(),
         running_app_name=globe_wrapper.running_app_name,
     )
     return res
@@ -81,6 +81,7 @@ def configure_app():
         res = render_template(
             "configure_app.html",
             app_name=app_name,
+            app=app,
             simple_args=simple_args,
             options_args=options_args,
         )

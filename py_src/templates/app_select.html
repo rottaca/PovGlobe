@@ -19,21 +19,24 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th scope="col" class="display-6">#</th>
-                    <th scope="col" class="display-6">Name</th>
-                    <th scope="col" class=""></th>
+                    <th scope="col" class="display-6 text-center">#</th>
+                    <th scope="col" class="display-6 text-center">Name</th>
+                    <th scope="col" class="display-6">Description</th>
+                    <th scope="col" class="display-6 text-center">State</th>
                 </tr>
             </thead>
             <tbody>
-                {% for v in app_names %}
+                {% for app_name in apps %}
                 <tr class="justify-content-center">
-                    <td class="">{{loop.index}}</td>
-                    {% if running_app_name == v %}
-                    <td class="">{{ v }} (running)</td>
+                    <td class="text-center">{{loop.index}}</td>
+                    <td class="text-center">{{ app_name }}</td>
+                    <td class="">{{ apps[app_name]["desc"] }}</td>
+                    
+                    {% if running_app_name == app_name %}
+                    <td class="text-center"><i class="fas fa-running text-success"></i></td>
                     {% else %}
-                    <td class="">{{ v }}</td>
+                    <td class="text-center"><a href="configure_app?name={{ app_name }}"><i class="fas fa-play"></i></a></td>
                     {% endif %}
-                    <td class=""><a href="configure_app?name={{ v }}"><i class="fas fa-play"></i></a></td>
                 </tr>
                 {% endfor %}
             </tbody>
