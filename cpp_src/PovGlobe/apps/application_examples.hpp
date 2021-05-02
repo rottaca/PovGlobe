@@ -16,6 +16,12 @@ public:
 private:
     int m_horizontal_offset;
 };
+class ApplicationTest2 : public ApplicationBase {
+
+public:
+    virtual bool initialize(Globe& globe);
+    virtual void process(Framebuffer& framebuffer, float time);
+};
 
 class ApplicationImageViewer : public ApplicationBase {
 

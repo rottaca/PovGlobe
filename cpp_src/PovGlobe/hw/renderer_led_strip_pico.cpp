@@ -11,6 +11,8 @@
 
 RendererLedStripPico::RendererLedStripPico()
     : m_fd(-1)
+    , m_globe(nullptr)
+    , m_is_synced(false)
 {
 }
 
@@ -23,6 +25,7 @@ RendererLedStripPico::~RendererLedStripPico()
 void RendererLedStripPico::initialize(Globe &globe)
 {
     RendererBase::initialize(globe);
+    m_globe = &globe;
     initSPI(globe);
 }
 
@@ -169,7 +172,8 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
             {
                 std::cout << "Error: Pico failed to recieve the data or it is not sending the correct response. Aborting." << std::endl;
                 std::cout << "Junk " << junk_nr << ", byte nr " << j << " in junk, received: " << rx << std::endl;
-                exit(1);
+                syncWithSlave(*m_globe);
+                return;
             }
         }
 
@@ -182,7 +186,8 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
     if (res != SPI_SLAVE_END_BYTE)
     {
         std::cout << "Error: Pico failed to recieve the data or it is not sending the correct response. Aborting." << std::endl;
-        exit(1);
+        syncWithSlave(*m_globe);
+        return;
     }
     usleep(100);
 

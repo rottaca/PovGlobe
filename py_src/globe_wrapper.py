@@ -59,12 +59,24 @@ arg_interpolation = dict(
     options={"Nearest Neighbour": interpNearest, "Bilinear":interpBilinear},
 )
 
-arg_images = dict(type="options", name="Image Source", desc="Available images. Add more images to the res/img/ folder", options=all_images)
+arg_images = dict(type="options", name="Image Source", desc="Available images. Add more images to the res/img/ folder.", options=all_images)
 
 all_apps = [
     dict(
+        name="TestApp",
+        desc="Shows a simple color test pattern.",
+        type=PyPovGlobe.ApplicationTest1,
+        args=[],
+    ),
+    dict(
+        name="TestApp2",
+        desc="Shows a simple stripe pattern.",
+        type=PyPovGlobe.ApplicationTest2,
+        args=[],
+    ),
+    dict(
         name="ImageViewer",
-        desc="Shows a static image",
+        desc="Shows a static image.",
         type=PyPovGlobe.ApplicationImageViewer,
         args=[
             arg_images,
@@ -90,7 +102,7 @@ all_apps = [
     ),
     dict(
         name="MapTileServer",
-        desc="",
+        desc="Loads map data from the provided tile server and correctly maps it onto the globe.",
         type=tile_server_api.TileServerApp,
         args=[
             dict(

@@ -35,6 +35,7 @@ target_link_libraries(Renderer
         hardware_pio 
         hardware_spi 
         hardware_dma
+        hardware_watchdog
         pico_multicore
         pico_sync
         pico_time

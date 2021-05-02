@@ -70,6 +70,30 @@ void ApplicationTest1::process(Framebuffer& framebuffer, float time)
 }
 
 
+bool ApplicationTest2::initialize(Globe& globe)
+{
+    return true;
+}
+
+void ApplicationTest2::process(Framebuffer& framebuffer, float)
+{
+    const int w = framebuffer.getWidth();
+    const int w_2 = w / 2;
+    const int h = framebuffer.getHeight();
+    const int h_2 = h / 2;
+
+    framebuffer.fill(0);
+
+    for (int j = 0; j < w; j += 10) {
+        for (int i = 0; i < h; i++) {
+            framebuffer(j, i, 0) = (j==0)?0:255;
+            framebuffer(j, i, 1) = 255;
+            framebuffer(j, i, 2) = (j==0)?0:255;
+        }
+    }
+}
+
+
 ApplicationImageViewer::ApplicationImageViewer(const char* path,
     const ProjectionFunction& projection,
     const InterpolationFunction& pixelInterpolation
@@ -108,7 +132,7 @@ bool ApplicationImageViewer::initialize(Globe& globe) {
     return true;
 }
 
-void ApplicationImageViewer::process(Framebuffer& framebuffer, float time)
+void ApplicationImageViewer::process(Framebuffer& framebuffer, float)
 {
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {

@@ -70,6 +70,9 @@ void SpiDataReader::processData(LEDController &ledController)
 {
     uint8_t end_value = 0;
     const size_t num_junks = ceil((float)N_BUFFER_SIZE / SPI_DATA_JUNK_SIZE);
+    
+    // Lets reboot if we don't recieve data for 3 seconds
+    watchdog_enable(3000, 1);
 
     while(true){
         uint8_t *input_buffer = ledController.getInputBuffer();
@@ -85,7 +88,7 @@ void SpiDataReader::processData(LEDController &ledController)
         const int bytes_read = spi_write_read_blocking(SPI_DEV, input_buffer, input_buffer, N_BUFFER_SIZE);
 
         if (bytes_read != N_BUFFER_SIZE){
-            printf("Invalid number of bytes read: %d, expected %d\n", bytes_read, N_BUFFER_SIZE);
+            //printf("Invalid number of bytes read: %d, expected %d\n", bytes_read, N_BUFFER_SIZE);
         }
         
         spi_read_blocking(SPI_DEV, SPI_SLAVE_END_BYTE, &end_value, 1);
@@ -95,7 +98,9 @@ void SpiDataReader::processData(LEDController &ledController)
         }
         else
         {
-            printf("Invalid data %d\n", (int)end_value);
+            //printf("Invalid data %d\n", (int)end_value);
         }
+        // We recieved some data -> Reset the watchdog
+        watchdog_update();
     }
 }

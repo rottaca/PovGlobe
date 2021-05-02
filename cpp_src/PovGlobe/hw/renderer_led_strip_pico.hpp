@@ -22,6 +22,8 @@ unsigned char led_lut[256] = {
     177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213,
     215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255};
 
+class Globe;
+
 class RendererLedStripPico : public RendererBase
 {
 public:
@@ -33,6 +35,8 @@ public:
 
 protected:
     int m_fd;
+    bool m_is_synced;
+    Globe *m_globe;
     std::vector<unsigned char> m_led_data;
 
     void syncWithSlave(const Globe &globe);

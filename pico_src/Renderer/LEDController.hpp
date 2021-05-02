@@ -21,7 +21,7 @@ private:
     static uint sm;
     static uint8_t pixel_buffer[2U][N_BUFFER_SIZE];
     static uint8_t render_buffer_idx;
-    static critical_section_t crit;
+    static mutex_t mutex;
 
     LEDController();
 
@@ -37,6 +37,22 @@ public:
     void swapBuffers();
     uint8_t* getRenderBuffer();
     uint8_t* getInputBuffer();
-    critical_section_t* getCriticalSection();
 
 };
+
+
+inline uint8_t *LEDController::getRenderBuffer()
+{
+    return pixel_buffer[render_buffer_idx];
+}
+inline uint8_t *LEDController::getInputBuffer()
+{
+    return pixel_buffer[(render_buffer_idx + 1) % 2];
+}
+
+inline void LEDController::swapBuffers()
+{
+    mutex_enter_blocking(&mutex);          
+    render_buffer_idx = (render_buffer_idx + 1) % 2;
+    mutex_exit(&mutex);
+}

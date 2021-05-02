@@ -7,6 +7,7 @@
 #include "hardware/irq.h"
 #include "hardware/dma.h"
 #include "hardware/spi.h"
+#include "hardware/watchdog.h"
 
 #include "LEDController.hpp"
 
