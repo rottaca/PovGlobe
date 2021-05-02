@@ -11,7 +11,6 @@
 #define PIN_HALL_SENSOR 5
 #define N_MAGNETS 8
 
-
 #define SPI_DEV spi0
 #define SPI_PIN_CS 17U
 #define SPI_PIN_SCK 18U

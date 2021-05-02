@@ -24,6 +24,8 @@ public:
     int getVerticalNumPixelsWithLeds() const;
     int getTotalVerticalNumPixels() const;
     int getHorizontalNumPixels() const;
+    int getHorizontalOffset() const;
+    void setHorizontalOffset(int offset);
 
     float getRadius() const;
     float getHalfCircumference() const;
@@ -46,6 +48,8 @@ public:
 protected:
     int m_vertical_num_leds;
     int m_horizontal_num_pixels;
+
+    std::atomic<int> m_horizontal_offset;
 
     int m_total_height_num_leds;
     int m_spacing_top_num_leds;
@@ -73,8 +77,6 @@ protected:
 
     std::thread m_applicationThread;
     std::atomic_bool m_applicationThread_running;
-
-
 
     void runApplication(ApplicationBase& app);
 };

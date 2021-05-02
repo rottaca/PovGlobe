@@ -40,5 +40,5 @@ protected:
     std::vector<unsigned char> m_led_data;
 
     void syncWithSlave(const Globe &globe);
-    virtual void render(const Framebuffer &);
+    virtual void render(const Framebuffer &, int32_t horizontal_offset);
 };

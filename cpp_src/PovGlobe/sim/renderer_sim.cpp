@@ -100,7 +100,7 @@ void RendererSim::initialize(Globe& globe)
     m_visu_buffer = CImg<unsigned char>(globe.getHorizontalNumPixels(), globe.getVerticalNumPixelsWithLeds(), 1, 3);
 }
 
-void RendererSim::render(const Framebuffer& buffer)
+void RendererSim::render(const Framebuffer& buffer, int32_t horizontal_offset)
 {
     // Render flat frambuffer
     if (!m_draw_display.is_closed()) {
@@ -108,9 +108,10 @@ void RendererSim::render(const Framebuffer& buffer)
         {
             for (size_t j = 0; j < buffer.getWidth(); j++)
             {
+                const size_t j_offsetted = (j + horizontal_offset) %  buffer.getWidth();
                 for (size_t c = 0; c < buffer.getChannels(); c++)
                 {
-                    m_visu_buffer(j, i, 0, c) = buffer(j, i, c);
+                    m_visu_buffer(j, i, 0, c) = buffer(j_offsetted, i, c);
                 }
             }
         }

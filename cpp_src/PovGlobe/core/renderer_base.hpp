@@ -24,6 +24,6 @@ protected:
     std::atomic_bool m_renderThread_running;
 
     virtual void initialize(Globe& globe);
-    virtual void render(const Framebuffer&) = 0;
+    virtual void render(const Framebuffer&, int32_t horizontal_offset) = 0;
 
 };

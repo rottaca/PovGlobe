@@ -50,9 +50,7 @@ uint32_t RTTMeasure::getCurrentColumn(){
 
     const int32_t dt_since_hall_sensor_event = absolute_time_diff_us(last_hall_sensor_event, get_absolute_time());
     uint32_t columns_since_segment_start = dt_since_hall_sensor_event*N_COLUMNS_PER_SEGMENT/avg_time_per_segment;
-    if(columns_since_segment_start > N_COLUMNS_PER_SEGMENT){
-        columns_since_segment_start = N_COLUMNS_PER_SEGMENT;
-    }
+    
     const uint32_t column = (columns_since_segment_start + column_offset_for_segment_start) % N_HORIZONTAL_RESOLUTION;
     return column;
 }

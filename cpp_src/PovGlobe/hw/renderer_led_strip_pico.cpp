@@ -138,18 +138,19 @@ void RendererLedStripPico::syncWithSlave(const Globe &globe){
     }
 }
 
-void RendererLedStripPico::render(const Framebuffer &framebuffer)
+void RendererLedStripPico::render(const Framebuffer &framebuffer, int32_t horizontal_offset)
 {
     // Only RGB framebuffer supported
     assert(framebuffer.getChannels() == 3U);
     int buff_idx = 0;
     for (size_t j = 0; j < framebuffer.getWidth(); j++)
     {
+        const size_t j_offsetted = (j + horizontal_offset) %  framebuffer.getWidth();
         for (size_t i = 0; i < framebuffer.getHeight(); i++)
         {
-            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 0) / 2];
-            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 1) / 2];
-            m_led_data[buff_idx++] = led_lut[framebuffer(j, i, 2) / 2];
+            m_led_data[buff_idx++] = led_lut[framebuffer(j_offsetted, i, 0) / 2];
+            m_led_data[buff_idx++] = led_lut[framebuffer(j_offsetted, i, 1) / 2];
+            m_led_data[buff_idx++] = led_lut[framebuffer(j_offsetted, i, 2) / 2];
         }
     }
 
@@ -180,7 +181,7 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
         bytes_sent += junk_size;
         junk_nr++;
     }
-    usleep(1000);
+    usleep(100);
 
     int res = bcm2835_spi_transfer(SPI_MASTER_END_BYTE);
     if (res != SPI_SLAVE_END_BYTE)
@@ -189,7 +190,7 @@ void RendererLedStripPico::render(const Framebuffer &framebuffer)
         syncWithSlave(*m_globe);
         return;
     }
-    usleep(100);
+    usleep(1000);
 
     //syncWithSlave();
 }

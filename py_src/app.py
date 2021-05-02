@@ -16,10 +16,16 @@ def home():
     res = render_template(
         "app_select.html",
         apps=globe_wrapper.get_all_apps(),
-        running_app_name=globe_wrapper.running_app_name,
+        running_app_name=globe_wrapper.running_app_name
     )
     return res
 
+@app.route("/add_horizontal_offset", methods=["GET", "POST"])
+def add_horizontal_offset():
+    offset = request.args.get("offset", default=None, type=int)
+
+    globe_wrapper.set_horizontal_offset(globe_wrapper.get_horizontal_offset() + offset)
+    return redirect("/", code=302)
 
 @app.route("/launch_app", methods=["GET", "POST"])
 def launch_app():

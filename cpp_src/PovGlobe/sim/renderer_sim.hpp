@@ -23,6 +23,6 @@ protected:
     cimg_library::CImgList<unsigned int> m_sphere_primitives;
     cimg_library::CImgList<unsigned char> m_sphere_colors;
 
-    virtual void render(const Framebuffer&);
+    virtual void render(const Framebuffer&, int32_t horizontal_offset);
 
 };

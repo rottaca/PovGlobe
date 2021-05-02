@@ -65,7 +65,7 @@ void RendererBase::run(Globe& globe)
     while (m_renderThread_running)
     {
         const Framebuffer& framebuffer = globe.getRenderFrameBuffer();
-        render(framebuffer);
+        render(framebuffer, globe.getHorizontalOffset());
         t.loopDone();
         {
 #if defined(__unix__) || defined(__unix) 

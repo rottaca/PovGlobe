@@ -15,6 +15,7 @@ Globe::Globe(int vertical_num_leds,
     , m_buffer_indices({ 0, 1 })
     , m_half_circumference_cm(pi* radius_cm)
     , m_doublesidedRendering(doublesidedRendering)
+    , m_horizontal_offset(0)
 {
     m_spacing_top_ratio = m_spacing_top_cm / m_half_circumference_cm;
     m_spacing_bottom_ratio = m_spacing_bottom_cm / m_half_circumference_cm;
@@ -177,4 +178,15 @@ std::mutex& Globe::getDoubleBufferMutex()
 void Globe::swapFramebuffers() {
     const auto tmp = m_buffer_indices.load();
     m_buffer_indices.store({ tmp.app_buffer_idx , tmp.render_buffer_idx });
+}
+
+int Globe::getHorizontalOffset() const{
+    return m_horizontal_offset.load();
+}
+void Globe::setHorizontalOffset(int offset){
+    if (offset < 0){
+        m_horizontal_offset.store((offset + m_horizontal_num_pixels) % m_horizontal_num_pixels);
+    }else{
+        m_horizontal_offset.store(offset % m_horizontal_num_pixels);
+    }
 }

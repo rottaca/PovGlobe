@@ -142,6 +142,12 @@ class GlobeWrapper:
     def get_all_apps(self):
         return all_apps
 
+    def set_horizontal_offset(self, offset: int):
+        self.globe.setHorizontalOffset(offset)
+
+    def get_horizontal_offset(self) ->int:
+        return self.globe.getHorizontalOffset()
+
     def app_by_name(self, name, args):
         if name not in all_apps:
             return False
