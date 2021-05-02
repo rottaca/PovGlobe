@@ -99,9 +99,15 @@ void RendererLedStripPico::syncWithSlave(const Globe &globe){
     const int rpi_horizontal_res = globe.getHorizontalNumPixels();
     const int num_channels = 3U;
 
-    while(bcm2835_spi_transfer(0) != SPI_COM_START_BYTE){
+    int num_start_bytes = 0;
+    while(num_start_bytes < 3){
         std::cout << "Waiting for pico..." << std::endl;
         usleep(1000000);
+        if(bcm2835_spi_transfer(0) != SPI_COM_START_BYTE){
+            num_start_bytes = 0;
+        }else{
+            num_start_bytes ++;
+        }
     }
 
     const int pico_vertical_res = bcm2835_spi_transfer(rpi_vertical_res);

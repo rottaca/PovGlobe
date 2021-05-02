@@ -49,7 +49,8 @@
                         <td class="" style="word-break:break-word;">{{ apps[app_name]["desc"] }}</td>
 
                         {% if running_app_name == app_name %}
-                        <td class="text-center"><i class="fas fa-running text-success"></i></td>
+                        <td class="text-center"><a href="configure_app?name={{ app_name }}"><i
+                                    class="fas fa-running text-success"></i></a></td>
                         {% else %}
                         <td class="text-center"><a href="configure_app?name={{ app_name }}"><i
                                     class="fas fa-play"></i></a>

@@ -43,17 +43,19 @@ SpiDataReader &SpiDataReader::getInstance()
 }
 
 void SpiDataReader::syncWithMaster(){
-    uint8_t values[6];
+    uint8_t values[8];
     
     values[0] = SPI_COM_START_BYTE;
-    values[1] = N_VERTICAL_RESOLUTION;
-    values[2] = N_HORIZONTAL_RESOLUTION;
-    values[3] = N_CHANNELS_PER_PIXEL;
-    values[4] = (uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff;   // high
-    values[5] = (uint8_t)(SPI_DATA_JUNK_SIZE & 0xff);          // low
+    values[1] = SPI_COM_START_BYTE;
+    values[2] = SPI_COM_START_BYTE;
+    values[3] = N_VERTICAL_RESOLUTION;
+    values[4] = N_HORIZONTAL_RESOLUTION;
+    values[5] = N_CHANNELS_PER_PIXEL;
+    values[6] = (uint8_t)((SPI_DATA_JUNK_SIZE) >> 8) & 0xff;   // high
+    values[7] = (uint8_t)(SPI_DATA_JUNK_SIZE & 0xff);          // low
 
     printf("Syncing with master...\n");
-    spi_write_read_blocking(SPI_DEV, values, values, 6);
+    spi_write_read_blocking(SPI_DEV, values, values, 8);
 
     if (values[1] != N_VERTICAL_RESOLUTION){
         printf("Vertical resolution does not match.\n");

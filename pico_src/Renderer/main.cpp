@@ -129,7 +129,7 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
       }
     }else{
       /// End rendering of init frames
-      printf("Init done.\n");
+      //printf("Init done.\n");
       return false;
     }
     
@@ -150,9 +150,8 @@ int main() {
     uint8_t * pixels = ledController.getRenderBuffer();
     memset(pixels,0, N_BUFFER_SIZE);
 
-
-    // uint32_t frameIdx = 0;
-    // while(showNextInitFrame(frameIdx++, pixels));
+    //uint32_t frameIdx = 0;                              
+    //while(showNextInitFrame(frameIdx++, pixels)); 
   
     SpiDataReader& reader = SpiDataReader::getInstance();
     reader.syncWithMaster();

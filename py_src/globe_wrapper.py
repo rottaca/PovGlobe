@@ -56,7 +56,7 @@ arg_interpolation = dict(
     type="options",
     name="Interpolation Type",
     desc="Interpolation type for down/up scaling images.",
-    options={"Nearest Neighbour": interpNearest, "Bilinear":interpBilinear},
+    options={"Bilinear":interpBilinear, "Nearest Neighbour": interpNearest},
 )
 
 arg_images = dict(type="options", name="Image Source", desc="Available images. Add more images to the res/img/ folder.", options=all_images)
