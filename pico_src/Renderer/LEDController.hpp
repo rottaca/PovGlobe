@@ -11,8 +11,6 @@
 
 #include "constants.hpp"
 
-// Global brightness value 0->31
-#define BRIGHTNESS 31
 
 class LEDController
 {

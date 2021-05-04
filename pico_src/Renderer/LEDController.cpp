@@ -66,9 +66,9 @@ void LEDController::core1_write_pixels()
             ledController.put_start_frame(pio, sm);
 
             mutex_enter_blocking(&mutex);
+            const uint8_t *render_buff = ledController.getRenderBuffer();
+            const uint32_t column = rttMeasure.getCurrentColumn();
             {
-                const uint8_t *render_buff = ledController.getRenderBuffer();
-                const uint32_t column = rttMeasure.getCurrentColumn();
                 const uint8_t *pixel_buffer_column = render_buff + column * N_VERTICAL_RESOLUTION * N_CHANNELS_PER_PIXEL;
                 for (int i = 0; i < N_VERTICAL_RESOLUTION * N_CHANNELS_PER_PIXEL; i += N_CHANNELS_PER_PIXEL)
                 {
@@ -78,12 +78,8 @@ void LEDController::core1_write_pixels()
                                                 pixel_buffer_column[i + 2]);
                 }
             }
-            mutex_exit(&mutex);
-            mutex_enter_blocking(&mutex);
             {
                 // Double sided globe
-                const uint8_t *render_buff = ledController.getRenderBuffer();
-                const uint32_t column = rttMeasure.getCurrentColumn();
                 const uint32_t opposite_column = (column + N_HORIZONTAL_RESOLUTION / 2) % N_HORIZONTAL_RESOLUTION;
                 const uint8_t *pixel_buffer_opposite_column = render_buff + opposite_column * N_VERTICAL_RESOLUTION * N_CHANNELS_PER_PIXEL;
                 for (int i = (N_VERTICAL_RESOLUTION - 1) *N_CHANNELS_PER_PIXEL; i >= 0; i -= N_CHANNELS_PER_PIXEL)

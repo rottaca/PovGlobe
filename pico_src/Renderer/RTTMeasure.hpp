@@ -20,7 +20,6 @@ private:
     static absolute_time_t m_measured_intervals[N_TIME_MEASURES];
     static int8_t m_curr_segment_index;
     static absolute_time_t m_last_hall_sensor_event;
-    static int32_t m_time_for_one_rotation;
 
     RTTMeasure();
     void init();
