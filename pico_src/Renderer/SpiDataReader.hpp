@@ -16,6 +16,12 @@ class SpiDataReader
 private:    
     SpiDataReader();
     bool checkPreamble();
+
+    uint dma_tx;
+    uint dma_rx;
+
+    dma_channel_config dma_c_tx;
+    dma_channel_config dma_c_rx;
 public:
     ~SpiDataReader();
 
