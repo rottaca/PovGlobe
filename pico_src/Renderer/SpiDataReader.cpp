@@ -70,14 +70,14 @@ void SpiDataReader::syncWithMaster(){
     printf("Syncing with master...\n");
     spi_write_read_blocking(SPI_DEV, values, values, 8);
 
-    if (values[1] != N_VERTICAL_RESOLUTION){
-        printf("Vertical resolution does not match: %d vs %d\n", values[1], N_VERTICAL_RESOLUTION);
+    if (values[3] != N_VERTICAL_RESOLUTION){
+        printf("Vertical resolution does not match: %d vs %d\n", values[3], N_VERTICAL_RESOLUTION);
     }
-    if (values[2] != N_HORIZONTAL_RESOLUTION){
-        printf("Horizontal resolution does not match: %d vs %d\n", values[2], N_HORIZONTAL_RESOLUTION);
+    if (values[4] != N_HORIZONTAL_RESOLUTION){
+        printf("Horizontal resolution does not match: %d vs %d\n", values[4], N_HORIZONTAL_RESOLUTION);
     }
-    if (values[3] != N_CHANNELS_PER_PIXEL){
-        printf("Number of channels per pixel does not match: %d vs %d\n", values[3], N_CHANNELS_PER_PIXEL);
+    if (values[5] != N_CHANNELS_PER_PIXEL){
+        printf("Number of channels per pixel does not match: %d vs %d\n", values[5], N_CHANNELS_PER_PIXEL);
     }
 }
 

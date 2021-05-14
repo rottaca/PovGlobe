@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cmath>
 
 #include "RTTMeasure.hpp"
 
@@ -35,17 +36,23 @@ RTTMeasure& RTTMeasure::getInstance() {
 }
 
 void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
+    const absolute_time_t curr_time = get_absolute_time();
     if (gpio != PIN_HALL_SENSOR)
         return;
     
-    const absolute_time_t curr_time = get_absolute_time();
-
+    uint32_t old_dt = m_measured_intervals[m_curr_segment_index];
+    uint32_t new_dt = 0;
     critical_section_enter_blocking(&critical_section);
     if (!is_nil_time(m_last_hall_sensor_event)){
-        m_measured_intervals[m_curr_segment_index] = (8 * m_measured_intervals[m_curr_segment_index] +
-                                                      2 * absolute_time_diff_us(m_last_hall_sensor_event, curr_time)) / 10;
+        new_dt = absolute_time_diff_us(m_last_hall_sensor_event, curr_time);
+        // error = (int32_t)old_dt - new_dt;
+        m_measured_intervals[m_curr_segment_index] = 0.2* new_dt + 0.8*old_dt;
     }
     m_last_hall_sensor_event = curr_time;
     m_curr_segment_index = (m_curr_segment_index + 1U) % N_MAGNETS;
     critical_section_exit(&critical_section);
+
+    // if (abs(error) > 1000){
+    //     printf("%d %u %u\n", error, old_dt, new_dt);
+    // }
 }

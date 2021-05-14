@@ -48,7 +48,13 @@ def launch_app():
                 arg_val = arg["options"][arg_val]
             else:
                 return "Failed: Invalid option for arg {}".format(arg_name)
-
+        elif "type" in arg and arg["type"] == "str":
+            arg_val = request.args.get(f"{arg_name}", default=None, type=str)
+        elif "type" in arg and arg["type"] == "int":
+            arg_val = request.args.get(f"{arg_name}", default=None, type=int)
+        elif "type" in arg and arg["type"] == "float":
+            arg_val = request.args.get(f"{arg_name}", default=None, type=float)
+            
         args.append(arg_val)
 
     sem.acquire()
@@ -81,6 +87,8 @@ def configure_app():
         for arg in app["args"]:
             if arg["type"] == "options":
                 options_args.append(arg)
+            elif arg["type"] == "str":
+                simple_args.append(arg)
             else:
                 raise NotImplementedError()
 

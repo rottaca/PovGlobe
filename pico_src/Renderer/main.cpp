@@ -138,22 +138,27 @@ bool showNextInitFrame(uint32_t frameNumber, uint8_t * pixels){
 }
 
 int main() {
-    const uint LED_PIN = PICO_DEFAULT_LED_PIN;
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
-    gpio_put(LED_PIN, 1);
+    // const uint LED_PIN = PICO_DEFAULT_LED_PIN;
+    // gpio_init(LED_PIN);
+    // gpio_set_dir(LED_PIN, GPIO_OUT);
+    // gpio_put(LED_PIN, 1);
 
     stdio_init_all();
     //sleep_ms(5000);
 
     LEDController& ledController = LEDController::getInstance();
+    SpiDataReader& reader = SpiDataReader::getInstance();
+
     uint8_t * pixels = ledController.getRenderBuffer();
     memset(pixels,0, N_BUFFER_SIZE);
 
-    //uint32_t frameIdx = 0;                              
-    //while(showNextInitFrame(frameIdx++, pixels)); 
+    if (!watchdog_caused_reboot()){
+      uint32_t frameIdx = 0;                              
+      while(showNextInitFrame(frameIdx++, pixels)); 
+    }
   
-    SpiDataReader& reader = SpiDataReader::getInstance();
     reader.syncWithMaster();
     reader.processData(ledController);
+
+    // while(true);
 }

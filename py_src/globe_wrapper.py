@@ -26,7 +26,8 @@ sys.path.append(
 
 import PyPovGlobe
 import tile_server_api
-import ClockApp
+import clock_app
+import text_printer_app
 
 num_leds_per_side = 55
 radius = 13.25
@@ -97,8 +98,20 @@ all_apps = [
     dict(
         name="ClockApp",
         desc="A simple app which renders a digial clock.",
-        type=ClockApp.ClockApp,
+        type=clock_app.ClockApp,
         args=[],
+    ),
+    dict(
+        name="TextPrinterApp",
+        desc="A simple app which renders text.",
+        type=text_printer_app.TextPrinterApp,
+        args=[
+            dict(
+                type="str",
+                name="Text",
+                desc="Text to be printed"
+            )
+        ],
     ),
     dict(
         name="MapTileServer",
@@ -118,6 +131,10 @@ all_apps = [
 
 all_apps = {a["name"]: a for a in all_apps}
 
+import socket
+import fcntl
+import struct
+
 
 class GlobeWrapper:
     def __init__(self):
@@ -134,10 +151,23 @@ class GlobeWrapper:
             double_sided,
             self.renderer,
         )
-        self.running_app_args = None
-        self.running_app = None
-        self.running_app_name = None
+        
+        ip_address = self.get_ip_address("wlan0")
+
+        self.running_app_args = []
+        self.running_app = text_printer_app.TextPrinterApp(f"{ip_address}:5000", True)
+        self.running_app_name = "TextPrinterApp"
         self.globe.runRendererAsync()
+
+        self.globe.runApplicationAsync(self.running_app)
+
+    def get_ip_address(self, ifname):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        return socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,  # SIOCGIFADDR
+            struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+        )[20:24])
 
     def get_all_apps(self):
         return all_apps

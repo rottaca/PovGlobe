@@ -30,6 +30,36 @@
             <div class="form-group">
                 <input class="form-check-input" style="display: none;" type="text" name="name" value="{{app_name}}">
 
+                {% for arg in simple_args %}
+                {% if arg["type"] == "str" %}
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-5" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}">{{arg['name']}}</span>
+                    <input class="form-control col" id="arg_{{arg['name']}}" type="text"
+                        value="{{arg['options'] | first}}" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}" name="{{arg['name']}}" aria-label="">
+                </div>
+                {% elif arg["type"] == "int" %}
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-5" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}">{{arg['name']}}</span>
+                    <input class="form-control col" id="arg_{{arg['name']}}" type="number"
+                        value="{{arg['options'] | first}}" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}" name="{{arg['name']}}" aria-label="">
+                </div>
+                {% elif arg["type"] == "float" %}
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-5" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}">{{arg['name']}}</span>
+                    <input class="form-control col" id="arg_{{arg['name']}}" type="number" step="0.01"
+                        value="{{arg['options'] | first}}" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{arg['desc']}}" name="{{arg['name']}}" aria-label="">
+                </div>
+                {% else %}
+                <div>Not implemented</div>
+                {% endif %}
+                {% endfor %}
+
                 {% for arg in options_args %}
                 {% if arg["options"]|length > 1 %}
                 <div class="input-group mb-3">
