@@ -26,3 +26,8 @@ On linux:
 Pip: 
 - Flask
 - requests
+
+
+
+Crontab:
+@reboot sleep 20 && sudo -E python3 /home/pi/PovGlobe/py_src/app.py > /home/pi/PovGlobe/log.txt
