@@ -27,16 +27,12 @@ spherical images from appliations, written in c++ or python.
 ### Screenshots from the Web Ui
 <table>
   <tr>
-    <td> <img src="doc/img/webui.png" width = 100%></td>
-    <td><table>
-        <tr>
-            <td> <img src="doc/img/webui_img_viewer.png" width = 100%></td>
-        </tr> 
-        <tr>
-            <td> <img src="doc/img/webui_tile_server.png" width = 100%></td>
-        </tr> 
-    </table></td>
+    <td rowspan=2> <img src="doc/img/webui.png" width = 100%></td>
+    <td> <img src="doc/img/webui_img_viewer.png" width = 100%></td>
    </tr> 
+    <tr>
+        <td> <img src="doc/img/webui_tile_server.png" width = 100%></td>
+    </tr>
 </table>
 
 ### Screenshots from the Simulation Framework
