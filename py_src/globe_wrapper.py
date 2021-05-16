@@ -4,24 +4,13 @@ import time
 import glob
 from pathlib import Path
 
-# build_config="x64-Debug (default)"
-build_config = "x64-Release"
-sys.path.append(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        "out",
-        "build",
-        build_config,
-        "cpp_src",
-        "PyPovGlobe",
-    )
-)
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "build", "cpp_src", "PyPovGlobe")
 )
 sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "build", "cpp_src", "PyPovGlobe", "Release")
+    os.path.join(
+        os.path.dirname(__file__), "..", "build", "cpp_src", "PyPovGlobe", "Release"
+    )
 )
 
 import PyPovGlobe
@@ -34,7 +23,9 @@ radius = 13.25
 spacing_top = 1.5
 spacing_bottom = 2.0
 double_sided = True
-usw_hw = os.name != "nt"
+
+running_windows = os.name == "nt"
+usw_hw = not running_windows
 
 projEquirect = PyPovGlobe.EquirectangularProjection()
 projMercator = PyPovGlobe.MercatorProjection()
@@ -57,10 +48,15 @@ arg_interpolation = dict(
     type="options",
     name="Interpolation Type",
     desc="Interpolation type for down/up scaling images.",
-    options={"Bilinear":interpBilinear, "Nearest Neighbour": interpNearest},
+    options={"Bilinear": interpBilinear, "Nearest Neighbour": interpNearest},
 )
 
-arg_images = dict(type="options", name="Image Source", desc="Available images. Add more images to the res/img/ folder.", options=all_images)
+arg_images = dict(
+    type="options",
+    name="Image Source",
+    desc="Available images. Add more images to the res/img/ folder.",
+    options=all_images,
+)
 
 all_apps = [
     dict(
@@ -105,13 +101,7 @@ all_apps = [
         name="TextPrinterApp",
         desc="A simple app which renders text.",
         type=text_printer_app.TextPrinterApp,
-        args=[
-            dict(
-                type="str",
-                name="Text",
-                desc="Text to be printed"
-            )
-        ],
+        args=[dict(type="str", name="Text", desc="Text to be printed")],
     ),
     dict(
         name="MapTileServer",
@@ -131,10 +121,6 @@ all_apps = [
 
 all_apps = {a["name"]: a for a in all_apps}
 
-import socket
-import fcntl
-import struct
-
 
 class GlobeWrapper:
     def __init__(self):
@@ -151,7 +137,7 @@ class GlobeWrapper:
             double_sided,
             self.renderer,
         )
-        
+
         ip_address = self.get_ip_address("wlan0")
 
         self.running_app_args = []
@@ -162,12 +148,22 @@ class GlobeWrapper:
         self.globe.runApplicationAsync(self.running_app)
 
     def get_ip_address(self, ifname):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        return socket.inet_ntoa(fcntl.ioctl(
-            s.fileno(),
-            0x8915,  # SIOCGIFADDR
-            struct.pack('256s', bytes(ifname[:15], 'utf-8'))
-        )[20:24])
+
+        if not running_windows:
+            import socket
+            import fcntl
+            import struct
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            return socket.inet_ntoa(
+                fcntl.ioctl(
+                    s.fileno(),
+                    0x8915,  # SIOCGIFADDR
+                    struct.pack("256s", bytes(ifname[:15], "utf-8")),
+                )[20:24]
+            )
+        else:
+            return "localhost"
 
     def get_all_apps(self):
         return all_apps
@@ -175,7 +171,7 @@ class GlobeWrapper:
     def set_horizontal_offset(self, offset: int):
         self.globe.setHorizontalOffset(offset)
 
-    def get_horizontal_offset(self) ->int:
+    def get_horizontal_offset(self) -> int:
         return self.globe.getHorizontalOffset()
 
     def app_by_name(self, name, args):
