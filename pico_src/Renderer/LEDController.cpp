@@ -73,7 +73,7 @@ void LEDController::core1_write_pixels()
     while (true)
     {
         const absolute_time_t curr_time = get_absolute_time();
-        float ratio = rttMeasure.getCurrentColumn(curr_time, column, opposite_column);  
+        rttMeasure.getCurrentColumn(curr_time, column, opposite_column);  
         if (column != last_column){
             mutex_enter_blocking(&mutex);
             const uint8_t *render_buff = ledController.getRenderBuffer();
@@ -98,23 +98,16 @@ void LEDController::core1_write_pixels()
             ledController.put_end_frame(pio, sm);
             mutex_exit(&mutex);
             
-            if (last_column + 1 < column){
-                // printf("Skipped columns: %d -> %d\n", last_column, column);
-                printf("S");
-            }
             last_column = column;
+            sleep_us(100);
         }
-        // else{
-        //     ledController.put_start_frame(pio, sm);
-        //     for (int i = 0; i < 2*N_BUFFER_SIZE_PER_COLUMN; i += N_CHANNELS_PER_PIXEL)
-        //     {
-        //         ledController.put_rgb888(pio, sm,
-        //                                     0,  //render_buff[column * N_BUFFER_SIZE_PER_COLUMN + i],
-        //                                     0,//render_buff[column * N_BUFFER_SIZE_PER_COLUMN + i + 1],
-        //                                     0//render_buff[column * N_BUFFER_SIZE_PER_COLUMN + i + 2]
-        //                                 );
-        //     }
-        //     ledController.put_end_frame(pio, sm);
-        // }
+        else if (SHOW_DOT_MATRIX_STYLE) {
+            ledController.put_start_frame(pio, sm);
+            for (int i = 0; i < 2*N_BUFFER_SIZE_PER_COLUMN; i += N_CHANNELS_PER_PIXEL)
+            {
+                ledController.put_rgb888(pio, sm, 0, 0, 0);
+            }
+            ledController.put_end_frame(pio, sm);
+        }
     }
 }

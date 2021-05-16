@@ -5,7 +5,8 @@
 #define LED_SERIAL_FREQ (19 * 1000 * 1000)
 // Global brightness value 0-31
 // Limit to 50% as we don't have enough power
-#define BRIGHTNESS 10
+#define BRIGHTNESS 16
+#define SHOW_DOT_MATRIX_STYLE 1
 
 #define N_VERTICAL_RESOLUTION 55
 #define N_HORIZONTAL_RESOLUTION 120

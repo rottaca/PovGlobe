@@ -40,19 +40,13 @@ void RTTMeasure::gpio_hall_sensor_callback(uint gpio, uint32_t events) {
     if (gpio != PIN_HALL_SENSOR)
         return;
     
-    uint32_t old_dt = m_measured_intervals[m_curr_segment_index];
-    uint32_t new_dt = 0;
+    const uint32_t old_dt = m_measured_intervals[m_curr_segment_index];
     critical_section_enter_blocking(&critical_section);
     if (!is_nil_time(m_last_hall_sensor_event)){
-        new_dt = absolute_time_diff_us(m_last_hall_sensor_event, curr_time);
-        // error = (int32_t)old_dt - new_dt;
-        m_measured_intervals[m_curr_segment_index] = 0.2* new_dt + 0.8*old_dt;
+        const uint32_t new_dt = absolute_time_diff_us(m_last_hall_sensor_event, curr_time);
+        m_measured_intervals[m_curr_segment_index] = 0.5* new_dt + 0.5*old_dt;
     }
     m_last_hall_sensor_event = curr_time;
     m_curr_segment_index = (m_curr_segment_index + 1U) % N_MAGNETS;
     critical_section_exit(&critical_section);
-
-    // if (abs(error) > 1000){
-    //     printf("%d %u %u\n", error, old_dt, new_dt);
-    // }
 }
