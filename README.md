@@ -1,12 +1,11 @@
 # PovGlobe
 # **This is work in progress !**
-This project consists of a 3d printed persistence of vision (POV) globe which is able to render arbitrary 
-spherical images from appliations, written in c++ or python.
+This project consists of a 3d printed persistence of vision (POV) globe which is able to render arbitrary spherical images from appliations, written in c++ or python.
 
 
 
 ## Other Pages
-[Setup Instructions](doc/setup.md)
+- [Setup Instructions](doc/setup.md)
 
 ## Images
 
@@ -23,8 +22,6 @@ spherical images from appliations, written in c++ or python.
     <td> <img src="doc/img/IMG_20210504_174701.jpg" width = 100%></td>
    </tr> 
 </table>
-
-
 
 ### Screenshots from the Web Ui
 <table>
