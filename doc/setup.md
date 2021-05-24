@@ -48,7 +48,25 @@ On Windows:
 py -3 pip -m install flask requests
 ```
 
-
+## Configure Globe
+The software has a set of configurable parameters in order to work with arbitrary globes (e.g. different number of LEDs). These settings have to be configured in two files (one for the rpi software and a second time for the pico).
+- Raspberry Pi Software
+  - The framework has two entrypoints. One for the c++ implementation and one for the python wrapper.
+  - ~~For the c++ implementation, the settings are set in `cpp_src\PovGlobe\main.cpp` lines 24-27.~~
+  - For the python implementation, which includes the webserver, the same settings are hard-coded in `py_src\globe_wrapper.py` line 21-25.
+  - Adjust the settings according to you needs. Here is a short description
+    - leds = 55 -> 55 Pixels per side
+    - radius = 13.25 -> Radius of the globe in centimeters
+    - spacing_top = 1.5 -> How much is the last LED at the top away from the rotation axis. 1.5 cm by default.
+    - spacing_bottom = 2.0 -> How much is the last LED at the bottom away from the rotation axis. 2 cm by default.
+- The Pico Firmware
+  - For the pico, the settings can be configured here: `pico_src\Renderer\constants.hpp` 
+  - It has a lot more properties but most of them should stay unchanged unless you know what you are doing
+  - Important parameters are:
+    - N_VERTICAL_RESOLUTION -> Number of leds on one half of the globe (55 by default).
+    - N_HORIZONTAL_RESOLUTION -> Number of "pixels" along the horizontal axis. This has to match the configuration of the rpi. The rpi software will determine this value, based on the given phisical dimensions of the globe. When running the rpi software, a summary of these calculated parameters will be printed. This can be used to configure the pico correctly. Picking the wrong value will not damage your pi or pico, but both components will detect the missmatch and no image gets displayed.
+    - N_MAGNETS: Number of magnets, used for motion detection (8 by default and changing this might require adapting the code too)
+    - The other settings include the pin layout of the pico which is used to communiate with the Rpi and to control its sensors and LEDs.
 
 ## Build Instructions
 ### Windows (powershell)
@@ -68,12 +86,12 @@ cd build
 cmake ..
 make -j4
 ```
-Now, we have to flash the rpi pico firmware in order to get the globe running. This can be done by this script: `pico_src/flash.py`. Run it like this.
+Now, we have to flash the rpi pico firmware in order to get the globe running. This can be done by this script: `pico_src/flash.py`. Run it like this:
 
 ```bash
 sudo py -3 pico_ src/flash.py <path-to-uf2-file-in-build>
 ```
-This should mount the pico, upload the firmware and unmount the pico again. After that, the firmware should be flashed.
+The script will mount the pico, upload the firmware and unmount the pico again. After that, the firmware should be flashed.
 
 
 ## First Test
