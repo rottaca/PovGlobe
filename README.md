@@ -2,7 +2,8 @@
 
 This project consists of a 3d printed persistence of vision (POV) globe which is able to render arbitrary spherical images from appliations, written in c++ or python.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/E4yqSw38R_Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+**The Youtube video can be found here:** https://www.youtube.com/embed/E4yqSw38R_Q
+
 
 ## Other Pages
 - [Setup Instructions](doc/setup.md)
