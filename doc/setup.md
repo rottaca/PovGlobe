@@ -1,16 +1,30 @@
 # Introduction
-These setup instructions should enable you to build your own globe
+These setup instructions should enable you to build your own globe.
+
+Please be adviced that signifficant knowledge about electronics is necessary in order to build this globe.
+Also a good understanding of software development is necessary to implement new algorithms/visualizations.
+
+Due to my limited time (:smile:), only basic documenation is available and you probably have to figure out some things on you own (mostly hardware related). If you worked on a similar project before, this should not be an issue for you!
 
 
 ## Part List
+Several crutial parts are necessary to build this globe. Here is a list of the most important parts:
 - Raspberry Pi 3 B+ or newer (with Prememt RT kernel patch, documented below)
 - DC motor, ~ 1200 RPM under load (results in up to 20 rotations per second, 20 FPS refresh rate)
+  - I was not able to achieve these high rotation speeds because of vibrations and had to slow down the motor
+  - Therefore I used an adjustable step-down converter to manually control the motor speed
 - High density LED Strip with 144 LEDs/m
-  - with APA102 chips, no WS28xx - their update rate is too slow!
+  - with APA102 chips, **no WS28xx - their update rate is too slow!**
   - e.g. Adafruit Dotstar
 - Powersupply 24V (50-60W) depends on the number of LEDs and the motor
-- Carbon brushes to transfer electric power to the spinning globe
-- 3D printed parts (from thingiverse **TODO**)
+  - High voltage is necessary for power transfer with carbon brushes
+- Carbon brushes to transfer electric power to the spinning globe 
+  - have to fit the 3d printed housing, or you build your own
+- 8 Neodym Magnets (10 x 2 mm)
+-  LM2596 DC-DC Buck Converter for converting the 24V into 5V for LEDs + RPi + Pico
+- 3D printed parts 
+  - Download it from thingiverse
+  - https://www.thingiverse.com/thing:4871230
 - Transparent showcase with solid base (used as a housing for the globe)
 
 
@@ -95,7 +109,12 @@ The script will mount the pico, upload the firmware and unmount the pico again. 
 
 
 ## First Test
-TBD
+
+A real test-mode needs to be implemented. Currenlty no stand-alone test software is available.
+
+A first test is to run the Pico firmware by itself. Only connect the pico to the LED strip and the hall sensor and rotate the globe. On boot up, the Pico will draw a few simple visualizations and then waits for the Raspberry Pi to take over control.
+
+If this test is successful, you can continue setting up the Raspberry Pi.
 
 ## Crontab
 After building the source code, install a job in crontab to auto-start the app when the RPI boots up.
