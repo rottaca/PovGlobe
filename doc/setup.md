@@ -112,9 +112,121 @@ The script will mount the pico, upload the firmware and unmount the pico again. 
 
 A real test-mode needs to be implemented. Currenlty no stand-alone test software is available.
 
+### Simulation
+To make sure that the build was suceesfull, lets start with the simulation environment which renders the globe onto a window
+on your monitor instead of using your hardware.
+
+Executing the following command will launch two windows which show the globe surface as a 2D image and as a 3d sphere.
+Running the command without arguments will use the compiled parameters, defined in main.cpp. They can be overwritten by 
+the commandline arguments, listed below.
+#### Linux
+```bash
+build/cpp_src/PovGlobe/Release/PovGlobe
+```
+#### Windows
+```bash
+.\build\cpp_src\PovGlobe\Release\PovGlobe.exe
+```
+
+You should see something like this:
+```
+--------------------- Globe Initialized --------------------
+Globe Radius:                     13.25cm                                                                              
+Num LEDs per side:                55                                                                                    
+Num Pixels for half circle:       60                                                                                    
+Num Pixels horizontal:            120                                                                                   
+Leds are attached on both sides:  no                                                                                    
+Spacing top    (cm / ratio in %): 1.5 cm (3.60351 %)                                                                    
+Spacing bottom (cm / ratio in %): 2 cm (4.80468 %)                                                                      
+No algo specified. Running default algo ApplicationTest1.                                                               
+Initialize Renderer...                                                                                                  
+Waiting for app to stop...                                                                                              
+App stopped.                                                                                                            
+Initialize Application...                                                                                               
+[Render Thread]: Loop Time is avg 8.60606 ms, max 23 ms).                                                               
+[Application Processing]: Loop Time is avg 9.88889 ms, max 50 ms).                                                      
+[Render Thread]: Loop Time is avg 7.14141 ms, max 30 ms).                                                               
+[Application Processing]: Loop Time is avg 19.9798 ms, max 50 ms).                                                      
+[Render Thread]: Loop Time is avg 6.36364 ms, max 13 ms).                                                               
+[Application Processing]: Loop Time is avg 30.1212 ms, max 52 ms).   
+```
+
+| Argument | Description |
+|-----------|------------|
+| -a \<ALGO> | Specify the name of the algorithm you want to execute. The list is hardcoded in main.cpp. If not specified, the default test-app is launched. | 
+| -f \<PATH> | Optional argument for some apps to specify a file path (e.g. which image to load). | 
+| -h \<HEIGHT> | Number of pixels/LEDs used for the vertical dimension | 
+| -r \<RADIUS> | Radius of the globe in centimeters, used in combination with -t and -b. This is used to correctly visualize which part of the globe is covered with LEDs. If you don't care, leave it unchanged during simulation but make sure its correct when using the hardware in order to avoid image distortions. | 
+| -t \<SPACING> | Spacing from the upper end of the veritcal axis to the first led in centimeters, used in combination with -r and -b. | 
+| -b \<SPACING> | Spacing from the bottom end of the veritcal axis to the first led in centimeters, used in combination with -r and -t. | 
+| -d | Your globe has LEDs on BOTH sides of the rotator. Only relevant for hardware rendering. | 
+| -k | If specified, the globe is using the hardware instead of the simulation environment. | 
+--------
+
+For example you can simulate a high-resolution globe, visualizing a custom image by executing:
+```bash
+PovGlobe -h 512 -a ImageViewer -f my_img.png
+```
+
+### Hardware-Test
 A first test is to run the Pico firmware by itself. Only connect the pico to the LED strip and the hall sensor and rotate the globe. On boot up, the Pico will draw a few simple visualizations and then waits for the Raspberry Pi to take over control.
 
-If this test is successful, you can continue setting up the Raspberry Pi.
+If this test is successful, we can continue using the Raspberry Pi. Make sure you were able to succesfully build the software by following the steps above, labeled "Build Instructions".
+
+To make things easy, you can start by executing the core framework itself (without the python wrapper and the webserver). Take a look at the instrictions in the "Simulation" section above.
+By passing "-k" to the PovGlobe executable, the globe will use the available hardware to visualize the image. In order to access the hardware we need sudo rights:
+#### Linux (no hw support on windows)
+```bash
+sudo build/cpp_src/PovGlobe/Release/PovGlobe -h <NUM_LEDS> -k
+```
+
+### Webserver
+If that is successful, you can give the webserver a try. It is located in **\<ROOT>/py_src/**.
+Open the file globe_wrapper.py and adjust the settings if needed (starting from line 20):
+```python
+num_leds_per_side = 55
+radius = 13.25
+spacing_top = 1.5
+spacing_bottom = 2.0
+double_sided = True
+```
+
+By default, the webserver will start with hardware support when it detects a linux operating system.
+This can be overwritten by modifying this line:
+```python
+usw_hw = not running_windows
+```
+After you are done with configuration, we can start the webserver by executing:
+```python
+sudo -E python3 /home/pi/PovGlobe/py_src/app.py
+```
+You should see something like this:
+```
+--------------------- Globe Initialized --------------------
+Globe Radius:                     13.25 cm
+Num LEDs per side:                55
+Num Pixels for half circle:       60
+Num Pixels horizontal:            120
+Leds are attached on both sides:  yes
+Spacing top    (cm / ratio in %): 1.5 cm (3.60351 %)
+Spacing bottom (cm / ratio in %): 2 cm (4.80468 %)
+Initialize Renderer...
+Waiting for app to stop...
+App stopped.
+Initialize Application...
+ * Serving Flask app "app" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+[Render Thread]: Loop Time is avg 6.53535 ms, max 16 ms).
+[Application Processing]: Loop Time is avg 9.74747 ms, max 46 ms).
+[Render Thread]: Loop Time is avg 9.76768 ms, max 21 ms).
+[Application Processing]: Loop Time is avg 20.0202 ms, max 49 ms).  
+```
+Check if you are able to open the webinterface by using a browser to navigate to *http://localhost:5000*. 
+Replace "localhost" with the ip adress of your host if you open the browser on a different machine.
 
 ## Crontab
 After building the source code, install a job in crontab to auto-start the app when the RPI boots up.
