@@ -9,23 +9,34 @@ Due to my limited time (:smile:), only basic documenation is available and you p
 
 ## Part List
 Several crutial parts are necessary to build this globe. Here is a list of the most important parts:
-- Raspberry Pi 3 B+ or newer (with Prememt RT kernel patch, documented below)
+- Raspberry Pi 3 B+ or newer with standard os (e.g. ubuntu, no GUI required)
 - DC motor, ~ 1200 RPM under load (results in up to 20 rotations per second, 20 FPS refresh rate)
+  - I used this motor: www.amazon.de/gp/product/B0768DVMYN
   - I was not able to achieve these high rotation speeds because of vibrations and had to slow down the motor
   - Therefore I used an adjustable step-down converter to manually control the motor speed
 - High density LED Strip with 144 LEDs/m
-  - with APA102 chips, **no WS28xx - their update rate is too slow!**
-  - e.g. Adafruit Dotstar
+  - with APA102/SK9822 chips, **no WS28xx - their update rate is too slow!**
+  - I used these: www.amazon.de/BTF-LIGHTING-ähnlich-Individuell-adressierbar-Nicht-wasserdichtes/dp/B07BPQV7FW
+  - 
 - Powersupply 24V (50-60W) depends on the number of LEDs and the motor
   - High voltage is necessary for power transfer with carbon brushes
+  - I used something similar to this (mabye a bit overpowered): www.amazon.de/Docooler-100V-Spannungswandler-Schalter-Spg-Versorgungsteil/dp/B01LAVDD8S
 - Carbon brushes to transfer electric power to the spinning globe 
-  - have to fit the 3d printed housing, or you build your own
+  - I had some old ones laying around
+  - The have to fit the 3d printed housing or you build your own
+  - 5mm wide x 8mm high and 12mm long
+  - Similar to this one www.amazon.de/vhbw-Kohle-Bürste-Motorkohle-Schleifkohle-Elektrowerkzeug/dp/B0799PMH36
 - 8 Neodym Magnets (10 x 2 mm)
+  -  www.amazon.de/gp/product/B06X977K8L
 -  LM2596 DC-DC Buck Converter for converting the 24V into 5V for LEDs + RPi + Pico
+   -  www.amazon.de/LAOMAO-Step-up-Converter-Raspberry-DIY-Projects-1-St%C3%BCck/dp/B00HV59922
 - 3D printed parts 
   - Download it from thingiverse
-  - https://www.thingiverse.com/thing:4871230
+  - www.thingiverse.com/thing:4871230
 - Transparent showcase with solid base (used as a housing for the globe)
+  - 300 mm square base, >= 320mm height
+  - I build my own base (140mm high) to hide the motor
+  - The case I used is no longer available. This one is similar but too small: www.amazon.de/HMF-Vitrine-Schaukasten-Modellautos-Transparent/dp/B08GQ5JS6B
 
 
 # Software Setup
